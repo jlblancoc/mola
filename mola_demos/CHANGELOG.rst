@@ -2,6 +2,13 @@
 Changelog for package mola_demos
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Clean up yaml files.
+* PF localization demo for Mulran dataset
+* renamed ros launch files for clear autocompletion with ros2 launch
+* Contributors: Jose Luis Blanco-Claraco
+
 1.0.0 (2024-03-19)
 ------------------
 * Add use_fixed_sensor_pose flag

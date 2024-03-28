@@ -3,6 +3,9 @@ Changelog for package mola_input_paris_luco_dataset
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
+Forthcoming
+-----------
+
 1.0.0 (2024-03-19)
 ------------------
 * Refactor initialize()

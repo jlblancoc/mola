@@ -2,6 +2,9 @@
 Changelog for package mola_imu_preintegration
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 1.0.0 (2024-03-19)
 ------------------
 * API changes for new package mola_navstate_fuse

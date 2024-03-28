@@ -2,6 +2,9 @@
 Changelog for package mola_pose_list
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 1.0.0 (2024-03-19)
 ------------------
 * Refactor SearchablePoseList into its own package

@@ -2,6 +2,9 @@
 Changelog for package mola
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 1.0.0 (2024-03-19)
 ------------------
 * add metapackage mola

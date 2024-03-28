@@ -2,6 +2,9 @@
 Changelog for package mola_imu_preintegration
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 1.0.0 (2024-03-19)
 ------------------
 * use odometry

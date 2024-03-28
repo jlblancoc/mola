@@ -2,6 +2,9 @@
 Changelog for package mola_input_kitti_dataset
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 1.0.0 (2024-03-19)
 ------------------
 * Refactor initialize()

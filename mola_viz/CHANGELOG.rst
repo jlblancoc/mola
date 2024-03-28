@@ -2,6 +2,9 @@
 Changelog for package mola_viz
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 1.0.0 (2024-03-19)
 ------------------
 * ROS2 launch demos

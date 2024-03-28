@@ -2,6 +2,9 @@
 Changelog for package mola_metric_maps
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 1.0.0 (2024-03-19)
 ------------------
 * implement cached conversion to pointcloud

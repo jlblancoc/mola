@@ -2,6 +2,11 @@
 Changelog for package mola_kernel
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Remove now-useless build dependencies and includes for mola-kernel
+* Contributors: Jose Luis Blanco-Claraco
+
 1.0.0 (2024-03-19)
 ------------------
 * add methods to query for subscribers

@@ -2,6 +2,9 @@
 Changelog for package mola_input_euroc_dataset
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 1.0.0 (2024-03-19)
 ------------------
 * New option to shutdown automatically mola-cli after dataset ends

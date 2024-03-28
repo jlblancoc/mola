@@ -2,6 +2,11 @@
 Changelog for package mola_launcher
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* code clean up.
+* Contributors: Jose Luis Blanco-Claraco
+
 1.0.0 (2024-03-19)
 ------------------
 * ROS2 launch demos
