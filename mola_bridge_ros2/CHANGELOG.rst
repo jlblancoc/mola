@@ -3,8 +3,8 @@ Changelog for package mola_bridge_ros2
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
-Forthcoming
------------
+1.0.1 (2024-03-28)
+------------------
 * BridgeROS2: do not quit on temporary /tf timeout
 * mola_bridge_ros2: option to publish /tf_static for base_footprint
 * mola_bridge_ros2: implement missing MOLA->ROS2 conversion for GNNS observations

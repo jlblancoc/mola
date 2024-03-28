@@ -2,8 +2,8 @@
 Changelog for package mola_demos
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.0.1 (2024-03-28)
+------------------
 * Clean up yaml files.
 * PF localization demo for Mulran dataset
 * renamed ros launch files for clear autocompletion with ros2 launch

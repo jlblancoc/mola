@@ -3,8 +3,8 @@ Changelog for package mola_input_rosbag2
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
-Forthcoming
------------
+1.0.1 (2024-03-28)
+------------------
 * BUGFIX: Inverted value of "use_fixed_sensor_pose" was used
 * Contributors: Jose Luis Blanco-Claraco
 
