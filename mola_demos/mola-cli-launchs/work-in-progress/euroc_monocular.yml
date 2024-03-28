@@ -39,7 +39,6 @@ modules:
     params:
     # None required
 # Offline or online sensory data sources =====================
-# TODO: Create a YAML !include
   - name: euroc_input
     type: mola::EurocDataset
     execution_rate: 50 # Hz

@@ -114,8 +114,6 @@ class MolaLauncherApp : public mrpt::system::COutputLogger
     /** @name SLAM system control & monitoring
      * @{ */
 
-    // TODO: set SLAM / localization mode?
-
     /** @} */
 
     /** Scans and loads MOLA module libraries. This is automatically called

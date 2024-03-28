@@ -31,9 +31,7 @@ mola_add_library(
 		mrpt::obs
 		mrpt::gui
 		mola::mola_yaml
-	PRIVATE_LINK_LIBRARIES
-		mrpt::gui   #TODO: remove after mapviz!
-		mrpt::maps  #TODO: remove after mapviz!
+#	PRIVATE_LINK_LIBRARIES
 	CMAKE_DEPENDENCIES
 		mrpt-obs
 		mrpt-gui

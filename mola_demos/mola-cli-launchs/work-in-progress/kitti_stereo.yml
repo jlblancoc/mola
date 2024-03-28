@@ -62,7 +62,6 @@ modules:
       stereo_rectify_alpha: -1
       # ----------
 # Offline or online sensory data sources =====================
-# TODO: Create a YAML !include
   - name: dataset_input
     type: mola::KittiOdometryDataset
     execution_rate: 25 # Hz

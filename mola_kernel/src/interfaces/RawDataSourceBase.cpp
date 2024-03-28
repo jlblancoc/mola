@@ -14,12 +14,8 @@
 #include <mola_kernel/interfaces/VizInterface.h>
 #include <mola_yaml/yaml_helpers.h>
 #include <mrpt/containers/yaml.h>
-#include <mrpt/maps/CPointsMapXYZI.h>
 #include <mrpt/obs/CObservation2DRangeScan.h>
 #include <mrpt/obs/CObservationVelodyneScan.h>
-#include <mrpt/opengl/CGridPlaneXY.h>
-#include <mrpt/opengl/CPlanarLaserScan.h>
-#include <mrpt/opengl/stock_objects.h>
 #include <mrpt/serialization/CArchive.h>
 
 #include <iostream>
