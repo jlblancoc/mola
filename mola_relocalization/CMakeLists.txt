@@ -21,6 +21,8 @@ find_package(mrpt-obs REQUIRED)
 find_package(mrpt-maps REQUIRED)
 find_package(mp2p_icp REQUIRED)
 
+find_package(mola_test_datasets) # optional
+
 # -----------------------
 # define lib:
 file(GLOB_RECURSE LIB_SRCS src/*.cpp src/*.h)
