@@ -101,7 +101,10 @@ MolaLauncherApp::MolaLauncherApp()
     // Add paths from environment variable:
     from_env_var_to_list("MOLA_MODULES_LIB_PATH", lib_search_paths_);
     from_env_var_to_list("MOLA_MODULES_SHARED_PATH", shared_search_paths_);
-    from_env_var_to_list("LD_LIBRARY_PATH", lib_search_paths_, "mola");
+
+    // do not filter these ones by *directory* name, since *filenames* will be
+    // filtered later on:
+    from_env_var_to_list("LD_LIBRARY_PATH", lib_search_paths_);
 }
 
 MolaLauncherApp::~MolaLauncherApp()
@@ -370,7 +373,8 @@ void MolaLauncherApp::spin()
         std::multimap<int, std::string> lst;
         std::transform(
             running_threads_.begin(), running_threads_.end(),
-            std::inserter(lst, lst.begin()), [](auto& ds) {
+            std::inserter(lst, lst.begin()),
+            [](auto& ds) {
                 return std::make_pair(
                     ds.second.launch_priority, ds.second.name);
             });
@@ -389,9 +393,9 @@ void MolaLauncherApp::spin()
             {
                 std::unique_lock<std::mutex> lock(thread_launch_init_mtx_);
                 thread_launch_condition_.wait_for(
-                    lock, std::chrono::milliseconds(5), [&ds, this] {
-                        return !threads_must_end_ && ds.initialization_done;
-                    });
+                    lock, std::chrono::milliseconds(5),
+                    [&ds, this]
+                    { return !threads_must_end_ && ds.initialization_done; });
             }
         }
     }
