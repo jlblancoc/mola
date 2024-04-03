@@ -41,6 +41,48 @@ namespace mola
  * Otherwise (default), they are published as mrpt::obs::CObservationPointCloud
  * with X,Y,Z,I channels.
  *
+ * The sequence to load is determined by the `sequence` parameter (e.g. via
+ * config yaml file), from these possible values:
+ *
+ * \code
+ * sequence: 00|01|02|...|20|21
+ * \endcode
+ *
+ * Expected contents under `base_dir` directory:
+ *
+ * \code
+ * KITTI/
+ * ├── poses        # ground truth poses
+ * │  ├── 00.txt
+ * │  ├── 01.txt
+ * │   ...
+ * │  ├── 09.txt
+ * │  └── 10.txt
+ * │
+ * ├── sequences
+ * │   ├ 00
+ * │   │ ├── calib.txt
+ * │   │ ├── times.txt
+ * │   │ ├── image_0
+ * │   │ |   ├── 000000.png
+ * │   │ |   ├── 000001.png
+ * │   │ |   ...
+ * │   │ ├── image_1
+ * │   │ |   ├── 000000.png
+ * │   │ |   ├── 000001.png
+ * │   │ |   ...
+ * │   │ └── velodyne
+ * │   │     ├── 000000.bin
+ * │   │     ├── 000001.bin
+ * ... ...    ...
+ * │   ├ 01
+ * │   │ ├── calib.txt
+ * ... ...    ...
+ * \endcode
+ *
+ * - Example `base_dir`: `/mnt/storage/KITTI/` (normally read from
+ *   environment variable `KITTI_BASE_DIR` in mola-cli launch files).
+ *
  * \ingroup mola_input_kitti_dataset_grp */
 class KittiOdometryDataset : public RawDataSourceBase,
                              public OfflineDatasetSource,
