@@ -2,6 +2,9 @@
 Changelog for package mola_kernel
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 1.0.1 (2024-03-28)
 ------------------
 * Remove now-useless build dependencies and includes for mola-kernel

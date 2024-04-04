@@ -2,6 +2,11 @@
 Changelog for package mola_launcher
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* BUGFIX: mola_launcher will not autoregister .so modules if installed via apt
+* Contributors: Jose Luis Blanco-Claraco
+
 1.0.1 (2024-03-28)
 ------------------
 * code clean up.

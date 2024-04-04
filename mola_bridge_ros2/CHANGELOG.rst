@@ -3,6 +3,11 @@ Changelog for package mola_bridge_ros2
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
+Forthcoming
+-----------
+* update docs
+* Contributors: Jose Luis Blanco-Claraco
+
 1.0.1 (2024-03-28)
 ------------------
 * BridgeROS2: do not quit on temporary /tf timeout

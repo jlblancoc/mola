@@ -2,6 +2,11 @@
 Changelog for package mola
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Add new mola_relocalization as dependency of the metapackage mola
+* Contributors: Jose Luis Blanco-Claraco
+
 1.0.1 (2024-03-28)
 ------------------
 
