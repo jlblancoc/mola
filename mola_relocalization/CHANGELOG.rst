@@ -3,8 +3,8 @@ Changelog for package mola_relocalization
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
-Forthcoming
------------
+1.0.2 (2024-04-04)
+------------------
 * Implement SE(2) relocalization grid method
 * New package mola_relocalization
 * Contributors: Jose Luis Blanco-Claraco

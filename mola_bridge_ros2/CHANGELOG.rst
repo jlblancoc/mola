@@ -3,8 +3,8 @@ Changelog for package mola_bridge_ros2
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
-Forthcoming
------------
+1.0.2 (2024-04-04)
+------------------
 * update docs
 * Contributors: Jose Luis Blanco-Claraco
 
