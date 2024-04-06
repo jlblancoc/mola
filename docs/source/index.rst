@@ -1,6 +1,8 @@
 .. MOLA documentation master file, created by
    sphinx-quickstart on Sat May  4 17:03:47 2019.
 
+.. _index:
+
 ============
 MOLA
 ============
@@ -10,9 +12,11 @@ MOLA
   :hidden:
   :caption: Quickstart
 
+  Home <index.html#http://>
   installing
   solutions
   use-cases
+  mola_lidar_odometry
 
 .. toctree::
   :maxdepth: 2
@@ -24,6 +28,7 @@ MOLA
   supported-sensors
   modules
   doxygen-index
+  bibliography
 
 
 .. rst-class:: fa fa-github
@@ -31,12 +36,14 @@ MOLA
   `MOLA`_ is a Modular system for Localization and Mapping.
 
 Get started:
- - See :ref:`concepts` for an overview of the system.
- - See :ref:`demos` for real examples of how to launch and run SLAM systems.
- - See :ref:`tutorials` to get a better insight into how MOLA modules work, how to write your own modules, etc.
+ - See :ref:`mola_lidar_odometry` for documentation of the LiDAR odometry module.
+ - See :ref:`use-cases` for examples of use.
+ - See :ref:`concepts` for an overview of the MOLA modular system.
  - See `videos`_ on YouTube.
 
-.. image:: mola-slam-representations.png
+.. .. image:: mola-slam-representations.png
+
+.. image:: https://mrpt.github.io/imgs/mola-slam-kitti-demo.gif
 
 
 .. _MOLA: https://github.com/MOLAorg/mola
@@ -46,7 +53,11 @@ Get started:
 How to cite us
 ==============
 
-The following paper introduced the basics of the MOLA framework:
+The mola_lidar_odometry system was presented in... (TBD 2024-Q2!).
+
+
+
+The basics of the MOLA framework were introduced in :cite:`blanco2019modular`.
 
   J.L. Blanco,
   `A Modular Optimization Framework for Localization and Mapping`_, in
