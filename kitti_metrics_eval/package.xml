@@ -11,7 +11,7 @@
   <author     email="joseluisblancoc@gmail.com">Jose-Luis Blanco-Claraco</author>
   <maintainer email="joseluisblancoc@gmail.com">Jose-Luis Blanco-Claraco</maintainer>
 
-  <url type="website">https://github.com/MOLAorg/</url>
+  <url type="website">https://github.com/MOLAorg/mola/tree/develop/kitti_metrics_eval</url>
 
   <license file="LICENSE">BSD</license>
 
