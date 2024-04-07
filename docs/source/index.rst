@@ -16,14 +16,32 @@ MOLA
   installing
   solutions
   use-cases
+
+.. toctree::
+  :maxdepth: 2
+  :hidden:
+  :caption: 3D LiDAR
+
   mola_lidar_odometry
+
+.. toctree::
+  :maxdepth: 2
+  :hidden:
+  :caption: mp2p_icp
+
+  module-mp2p-icp
+  mp2p_icp_installing
+  mp2p_icp_basics
+  mp2p_icp_optimal-transformations
+  mp2p_icp_applications
+  mp2p_icp_demos
 
 .. toctree::
   :maxdepth: 2
   :hidden:
   :caption: Details
 
-  concepts
+  mola_architecture
   tutorials
   supported-sensors
   modules

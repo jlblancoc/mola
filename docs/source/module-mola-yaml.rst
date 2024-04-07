@@ -1,3 +1,9 @@
-:github_url: https://github.com/MOLAorg/mola-yaml/blob/master/docs/module-mola-yaml.rst
+.. _mola-yaml:
 
-.. include:: ../../modules/mola-yaml/docs/module-mola-yaml.rst
+====================
+Module: mola-yaml
+====================
+
+YAML helper C++ library common to all MOLA modules, released under BSD-3-Clause.
+
+This module implements the YAML extensions explained in: :ref:`yaml_slam_cfg_file`.

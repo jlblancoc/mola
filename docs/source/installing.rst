@@ -4,6 +4,8 @@
 Installing
 ======================
 
+How to install all MOLA modules:
+
 .. dropdown:: From ROS 2 repositories
     :open:
     :icon: download
