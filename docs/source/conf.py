@@ -11,6 +11,8 @@
 from datetime import datetime
 import os
 import sys
+import xml.etree.ElementTree as ET
+
 sys.path.insert(0, os.path.abspath('_ext'))
 
 # sys.path.insert(1, os.path.abspath('/PATH/TO/doxyrest_b/doxyrest/sphinx'))
@@ -22,10 +24,13 @@ sys.path.insert(0, os.path.abspath('_ext'))
 project = u'MOLA'
 copyright = u'{year} The MOLA Authors.'.format(year=datetime.now().year)
 
+xmlTree = ET.parse('../../mola/package.xml')
+MOLA_VERSION = xmlTree.findtext('version')
+
 # The short X.Y version
-version = u'v0.1'
+version = f'v{MOLA_VERSION}'
 # The full version, including alpha/beta/rc tags
-release = u'v0.1'
+release = f'v{MOLA_VERSION}'
 
 # -- General configuration ---------------------------------------------------
 
