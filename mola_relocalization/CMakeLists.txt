@@ -20,6 +20,7 @@ find_package(mola_common REQUIRED)
 find_package(mrpt-obs REQUIRED)
 find_package(mrpt-maps REQUIRED)
 find_package(mp2p_icp REQUIRED)
+find_package(mola_pose_list REQUIRED)
 
 find_package(mola_test_datasets) # optional
 
@@ -35,11 +36,13 @@ mola_add_library(
 		mrpt::obs
 		mrpt::maps
 		mola::mp2p_icp
+		mola::mola_pose_list
 #	PRIVATE_LINK_LIBRARIES
 #		mrpt::obs
 	CMAKE_DEPENDENCIES
 		mola_common
 		mp2p_icp
+		mola_pose_list
 )
 
 # -----------------------

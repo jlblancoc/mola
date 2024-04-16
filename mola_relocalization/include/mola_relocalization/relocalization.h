@@ -25,6 +25,9 @@
  */
 #pragma once
 
+#include <mola_pose_list/HashedSetSE3.h>
+#include <mp2p_icp/ICP.h>
+#include <mp2p_icp/Parameters.h>
 #include <mp2p_icp/metricmap.h>
 #include <mrpt/math/TPose2D.h>
 #include <mrpt/obs/CSensoryFrame.h>
@@ -51,7 +54,7 @@ namespace mola
  *
  * \ingroup mola_relocalization_grp
  */
-struct Relocalization_SE2
+struct RelocalizationLikelihood_SE2
 {
     struct Input
     {
@@ -77,10 +80,62 @@ struct Relocalization_SE2
     static Output run(const Input& in);
 };
 
+/** Takes a global and a local metric map, a SE(2) ROI, and tries to match
+ *  the local map in the global map by running ICP from all initial guesses
+ *  defined by a regular SE(2) lattice, returning the result as a SE(3) hashed
+ *  lattice.
+ *
+ * This method is based on mp2p_icp ICP pipelines, refer to the project
+ * documentation.
+ *
+ * \ingroup mola_relocalization_grp
+ */
+struct RelocalizationICP_SE2
+{
+    struct Input
+    {
+        mp2p_icp::metric_map_t reference_map;
+        mp2p_icp::metric_map_t local_map;
+        
+        mp2p_icp::ICP::Ptr   icp_pipeline;
+        mp2p_icp::Parameters icp_parameters;
+        double               icp_minimum_quality = 0.50;
+
+        struct InputLattice
+        {
+            mrpt::math::TPose2D corner_min, corner_max;
+            double              resolution_xy  = 1.0;
+            double              resolution_phi = mrpt::DEG2RAD(40.0);
+        };
+        InputLattice initial_guess_lattice;
+
+        struct OutputLattice
+        {
+            double resolution_xyz   = 0.10;
+            double resolution_yaw   = mrpt::DEG2RAD(5.0);
+            double resolution_pitch = mrpt::DEG2RAD(5.0);
+            double resolution_roll  = mrpt::DEG2RAD(5.0);
+        };
+        OutputLattice output_lattice;
+
+        Input() = default;
+    };
+
+    struct Output
+    {
+        mola::HashedSetSE3 found_poses;
+        double             time_cost = .0;  //!< [s]
+
+        Output() = default;
+    };
+
+    static Output run(const Input& in);
+};
+
 /** Finds the SE(2) poses with the top given percentile likelihood, and returns
  *  them sorted by likelihood (higher values are better matches).
  *
- *  \param grid To be used with the output of Relocalization_SE2
+ *  \param grid To be used with the output of RelocalizationLikelihood_SE2
  *  \param percentile If set to 0.99, only those poses with a likelihood >=99%
  *         of the whole pdf will be returned.
  *

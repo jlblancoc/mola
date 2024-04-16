@@ -34,9 +34,11 @@
  * Algorithms for localization starting with large uncertainty.
  */
 
-mola::Relocalization_SE2::Output mola::Relocalization_SE2::run(const Input& in)
+// METHOD: likelihood
+mola::RelocalizationLikelihood_SE2::Output
+    mola::RelocalizationLikelihood_SE2::run(const Input& in)
 {
-    mola::Relocalization_SE2::Output result;
+    mola::RelocalizationLikelihood_SE2::Output result;
 
     const double t0 = mrpt::Clock::nowDouble();
 
@@ -171,4 +173,61 @@ std::map<double, mrpt::math::TPose2D> mola::find_best_poses_se2(
     }
 #endif
     return best;
+}
+
+// METHOD: ICP
+mola::RelocalizationICP_SE2::Output mola::RelocalizationICP_SE2::run(
+    const Input& in)
+{
+    mola::RelocalizationICP_SE2::Output result;
+    const double                        t0 = mrpt::Clock::nowDouble();
+
+    ASSERT_(!in.reference_map.layers.empty());
+
+    const auto& igl = in.initial_guess_lattice;  // shortcut
+
+    // Build the grid for all the initial guesses poses:
+    const auto grid = mrpt::poses::CPosePDFGrid(
+        igl.corner_min.x, igl.corner_max.x, igl.corner_min.y, igl.corner_max.y,
+        igl.resolution_xy, igl.resolution_phi, igl.corner_min.phi,
+        igl.corner_max.phi);
+
+    const size_t nX   = grid.getSizeX();
+    const size_t nY   = grid.getSizeY();
+    const size_t nPhi = grid.getSizePhi();
+
+    const size_t nCells = nX * nY * nPhi;
+    ASSERT_(nCells > 0);
+
+    // evaluate over the grid:
+    for (size_t iX = 0, iGlobal = 0; iX < nX; iX++, iGlobal++)
+    {
+        const double x = grid.idx2x(iX);
+        for (size_t iY = 0; iY < nY; iY++)
+        {
+            const double y = grid.idx2y(iY);
+            for (size_t iPhi = 0; iPhi < nPhi; iPhi++)
+            {
+                const double phi = grid.idx2phi(iPhi);
+
+                const auto initGuessPose =
+                    mrpt::math::TPose3D(x, y, 0, phi, 0, 0);
+
+                mp2p_icp::Results icpResult;
+
+                in.icp_pipeline->align(
+                    in.local_map, in.reference_map, initGuessPose,
+                    in.icp_parameters, icpResult);
+
+                if (icpResult.quality < in.icp_minimum_quality) continue;
+
+                // accept result:
+                result.found_poses.insertPose(
+                    icpResult.optimal_tf.mean.asTPose());
+            }
+        }
+    }
+    result.time_cost = mrpt::Clock::nowDouble() - t0;
+
+    return result;
 }

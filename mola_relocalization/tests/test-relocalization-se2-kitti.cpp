@@ -73,7 +73,7 @@ static void test1()
     querySf.insert(obs2);
 
     // relocalization:
-    mola::Relocalization_SE2::Input in;
+    mola::RelocalizationLikelihood_SE2::Input in;
     in.corner_min     = {-2.0, -1.0, -30.0_deg};
     in.corner_max     = {+5.0, +1.0, +30.0_deg};
     in.observations   = querySf;
@@ -81,7 +81,7 @@ static void test1()
     in.resolution_xy  = 0.25;
     in.resolution_phi = mrpt::DEG2RAD(10.0);
 
-    const auto out = mola::Relocalization_SE2::run(in);
+    const auto out = mola::RelocalizationLikelihood_SE2::run(in);
 
     std::cout << "time_cost: " << out.time_cost << std::endl;
     std::cout << "max_log_likelihood: " << out.max_log_likelihood << std::endl;
