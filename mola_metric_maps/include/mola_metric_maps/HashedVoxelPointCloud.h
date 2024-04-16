@@ -39,7 +39,8 @@
 #include <array>
 #include <functional>
 #include <optional>
-#include <unordered_map>
+
+//#define HASHED_VOXEL_POINT_CLOUD_WITH_CACHED_ACCESS
 
 namespace mola
 {
@@ -181,7 +182,6 @@ class HashedVoxelPointCloud : public mrpt::maps::CMetricMap,
         uint32_t       nPoints_ = 0;
     };
 
-    // std::unordered_map
     using grids_map_t =
         tsl::robin_map<global_index3d_t, VoxelData, index3d_hash<int32_t>>;
 
@@ -204,7 +204,7 @@ class HashedVoxelPointCloud : public mrpt::maps::CMetricMap,
         // 1) Insert into decimation voxel map:
         VoxelData* voxel = nullptr;
 
-#if 0
+#if defined(HASHED_VOXEL_POINT_CLOUD_WITH_CACHED_ACCESS)
         for (int i = 0; i < CachedData::NUM_CACHED_IDXS; i++)
         {
             if (cached_.lastAccessVoxel[i] && cached_.lastAccessIdx[i] == idx)
@@ -223,23 +223,24 @@ class HashedVoxelPointCloud : public mrpt::maps::CMetricMap,
         {
 #endif
 #ifdef USE_DEBUG_PROFILER
-        mrpt::system::CTimeLoggerEntry tle(profiler, "insertPoint.cache_misss");
+            mrpt::system::CTimeLoggerEntry tle(
+                profiler, "insertPoint.cache_misss");
 #endif
 
-        auto it = voxels_.find(idx);
-        if (it == voxels_.end())
-        {
-            if (!createIfNew)
-                return nullptr;
+            auto it = voxels_.find(idx);
+            if (it == voxels_.end())
+            {
+                if (!createIfNew)
+                    return nullptr;
+                else
+                    voxel = &voxels_[idx];  // Create it
+            }
             else
-                voxel = &voxels_[idx];  // Create it
-        }
-        else
-        {
-            // Use the found grid
-            voxel = const_cast<VoxelData*>(&it->second);
-        }
-#if 0
+            {
+                // Use the found grid
+                voxel = const_cast<VoxelData*>(&it->second);
+            }
+#if defined(HASHED_VOXEL_POINT_CLOUD_WITH_CACHED_ACCESS)
             // Add to cache:
             cached_.lastAccessIdx[cached_.lastAccessNextWrite]   = idx;
             cached_.lastAccessVoxel[cached_.lastAccessNextWrite] = voxel;
@@ -485,7 +486,7 @@ class HashedVoxelPointCloud : public mrpt::maps::CMetricMap,
 
         mutable std::optional<mrpt::math::TBoundingBoxf> boundingBox_;
 
-#if 1
+#if defined(HASHED_VOXEL_POINT_CLOUD_WITH_CACHED_ACCESS)
         // 2 bits seems to be the optimum for typical cases:
         constexpr static int CBITS               = 2;
         constexpr static int NUM_CACHED_IDXS     = 1 << CBITS;
