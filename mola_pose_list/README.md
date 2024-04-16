@@ -1,7 +1,9 @@
 # mola_pose_list
-Data structures and algorithms to search for nearby SE(3) poses.
+Data structures and algorithms related to SE(3) poses.
 
-This repository provides the C++ class `SearchablePoseList`.
+This repository provides the C++ classes:
+- `SearchablePoseList`
+- `HashedSetSE3`
 
 ## Build and install
 Refer to the [root MOLA repository](https://github.com/MOLAorg/mola).
