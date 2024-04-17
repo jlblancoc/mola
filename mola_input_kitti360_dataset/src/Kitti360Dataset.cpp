@@ -242,12 +242,12 @@ void Kitti360Dataset::initialize_rds(const Yaml& c)
 
     lstLidarTimestamps_ = parseKitti360Timestamps(filLidarTimes);
 
-    const auto N = lstLidarTimestamps_.size();
+    const auto nLidarStamps = lstLidarTimestamps_.size();
 
     lst_velodyne_basedir_ = mrpt::system::pathJoin({lidar_dir, "data"});
     build_list_files(lst_velodyne_basedir_, "bin", lst_velodyne_);
     if (!lst_velodyne_.empty())
-        ASSERTMSG_(lst_velodyne_.size() == N, "Velodyne: invalid file count");
+        ASSERT_EQUAL_(lst_velodyne_.size(), nLidarStamps);
 
     MRPT_LOG_INFO_STREAM(
         "Velodyne pointclouds: "
@@ -261,9 +261,7 @@ void Kitti360Dataset::initialize_rds(const Yaml& c)
             mrpt::system::pathJoin({images_dirs[i], "data_rect"});
         build_list_files(lst_image_basedir_[i], "png", lst_image_[i]);
         if (!lst_image_[i].empty())
-            ASSERTMSG_(
-                lst_image_[i].size() == N,
-                mrpt::format("image_%u: invalid file count", i));
+            ASSERT_EQUAL_(lst_image_[i].size(), nLidarStamps);
 
         MRPT_LOG_INFO_STREAM(
             "Camera channel `image_"
