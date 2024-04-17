@@ -48,7 +48,7 @@ How to install all MOLA modules:
     ~~~~~~~~~~~~~~~~~
     MOLA uses ``colcon`` so you need to `install it first <https://colcon.readthedocs.io/en/released/user/installation.html>`_.
 
-    Note that despite ROS 2 integration, ROS 2 or ament are not **required** dependencies, only ``colcon``.
+    Note that despite ROS 2 integration, a full ROS 2 installation is actually not **required** for MOLA, only ``colcon`` and ``ament``.
 
 
     Get the sources

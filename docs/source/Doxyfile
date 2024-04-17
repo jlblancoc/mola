@@ -782,10 +782,11 @@ WARN_LOGFILE           =
 # Note: If this tag is empty the current directory is searched.
 
 INPUT                  = \
-    ../../modules/  \
+    ../../  \
     ../../../mp2p_icp/mp2p_icp \
     ../../../mp2p_icp/mp2p_icp_filters \
-    ../../../mp2p_icp/mp2p_icp_map
+    ../../../mp2p_icp/mp2p_icp_map \
+    ../../../mola_lidar_odometry/module/include \
 
 # This tag can be used to specify the character encoding of the source files
 # that doxygen parses. Internally doxygen uses the UTF-8 encoding. Doxygen uses
