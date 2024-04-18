@@ -143,7 +143,8 @@ class BridgeROS2 : public RawDataSourceBase, public mola::RawDataConsumer
     // Yaml is NOT a reference on purpose.
     void ros_node_thread_main(Yaml cfg);
 
-    std::shared_ptr<tf2_ros::Buffer>            tf_buffer_;
+    // std::shared_ptr<tf2_ros::Buffer>            tf_buffer_;
+    std::shared_ptr<tf2::BufferCore>            tf_buffer_;
     std::shared_ptr<tf2_ros::TransformListener> tf_listener_;
 
     std::shared_ptr<tf2_ros::TransformBroadcaster>       tf_bc_;
@@ -199,8 +200,7 @@ class BridgeROS2 : public RawDataSourceBase, public mola::RawDataConsumer
 
     bool waitForTransform(
         mrpt::poses::CPose3D& des, const std::string& target_frame,
-        const std::string& source_frame, const rclcpp::Time& time,
-        const int timeoutMilliseconds, bool printErrors);
+        const std::string& source_frame, bool printErrors);
 
     void publishOdometry();
 

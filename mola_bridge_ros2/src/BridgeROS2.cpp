@@ -95,8 +95,8 @@ void BridgeROS2::ros_node_thread_main(Yaml cfg)
         }
 
         // TF buffer:
-        tf_buffer_ = std::make_shared<tf2_ros::Buffer>(ros_clock_);
-        tf_buffer_->setUsingDedicatedThread(true);
+        tf_buffer_ = std::make_shared<tf2::BufferCore>();  // ros_clock_
+        // tf_buffer_->setUsingDedicatedThread(true);
         tf_listener_ =
             std::make_shared<tf2_ros::TransformListener>(*tf_buffer_);
 
@@ -116,10 +116,7 @@ void BridgeROS2::ros_node_thread_main(Yaml cfg)
                 "No ROS2 topic found for subscription under YAML entry "
                 "`subscribe`.");
         }
-        else
-        {
-            internalAnalyzeTopicsToSubscribe(ds_subscribe);
-        }
+        else { internalAnalyzeTopicsToSubscribe(ds_subscribe); }
 
         auto timerLoc = rosNode_->create_wall_timer(
             std::chrono::microseconds(static_cast<unsigned int>(
@@ -272,7 +269,6 @@ void BridgeROS2::callbackOnPointCloud2(
         // Get pose from tf:
         bool ok = waitForTransform(
             obs_pc->sensorPose, o.header.frame_id, params_.base_link_frame,
-            o.header.stamp, params_.wait_for_tf_timeout_milliseconds,
             true /*print errors*/);
 
         if (!ok)
@@ -294,16 +290,12 @@ void BridgeROS2::callbackOnPointCloud2(
 
 bool BridgeROS2::waitForTransform(
     mrpt::poses::CPose3D& des, const std::string& frame,
-    const std::string& referenceFrame, const rclcpp::Time& time,
-    const int timeoutMilliseconds, bool printErrors)
+    const std::string& referenceFrame, bool printErrors)
 {
-    const rclcpp::Duration timeout(0, 1000 * timeoutMilliseconds);
     try
     {
         geometry_msgs::msg::TransformStamped ref_to_trgFrame =
-            tf_buffer_->lookupTransform(
-                referenceFrame, frame, time,
-                tf2::durationFromSec(timeout.seconds()));
+            tf_buffer_->lookupTransform(referenceFrame, frame, {});
 
         tf2::Transform tf;
         tf2::fromMsg(ref_to_trgFrame.transform, tf);
@@ -358,23 +350,20 @@ void BridgeROS2::publishOdometry()
     // Get pose from tf:
     mrpt::poses::CPose3D odomPose;
 
-    // ros_clock_->now();
-    const auto now = rclcpp::Time();  // last one.
-
     bool odom_tf_ok = waitForTransform(
-        odomPose, params_.base_link_frame, params_.odom_frame, now,
-        params_.wait_for_tf_timeout_milliseconds, false /*dont print errors*/);
+        odomPose, params_.base_link_frame, params_.odom_frame,
+        false /*dont print errors*/);
     if (!odom_tf_ok)
     {
         MRPT_LOG_THROTTLE_WARN_FMT(
             5.0,
             "forward_ros_tf_as_mola_odometry_observations=true, but could not "
-            "resolve /tf for "
-            "odometry: "
-            "'%s'->'%s'",
+            "resolve /tf for odometry: '%s'->'%s'",
             params_.base_link_frame.c_str(), params_.odom_frame.c_str());
         return;
     }
+
+    const auto now = rclcpp::Time();  // last one.
 
     auto obs         = mrpt::obs::CObservationOdometry::Create();
     obs->sensorLabel = "odom";
@@ -403,7 +392,6 @@ void BridgeROS2::callbackOnLaserScan(
         // Get pose from tf:
         bool ok = waitForTransform(
             sensorPose, o.header.frame_id, params_.base_link_frame,
-            o.header.stamp, params_.wait_for_tf_timeout_milliseconds,
             true /*print errors*/);
 
         if (!ok)
@@ -447,7 +435,6 @@ void BridgeROS2::callbackOnImu(
         // Get pose from tf:
         bool ok = waitForTransform(
             sensorPose, o.header.frame_id, params_.base_link_frame,
-            o.header.stamp, params_.wait_for_tf_timeout_milliseconds,
             true /*print errors*/);
         if (!ok)
         {
@@ -491,7 +478,6 @@ void BridgeROS2::callbackOnNavSatFix(
         // Get pose from tf:
         bool ok = waitForTransform(
             sensorPose, o.header.frame_id, params_.base_link_frame,
-            o.header.stamp, params_.wait_for_tf_timeout_milliseconds,
             true /*print errors*/);
         if (!ok)
         {
@@ -923,8 +909,8 @@ void BridgeROS2::doLookForNewMolaSubs()
 
             // a new one:
             molaSubs_.locSources.insert(loc);
-            loc->subscribeToLocalizationUpdates(
-                [this](const auto& l) { onNewLocalization(l); });
+            loc->subscribeToLocalizationUpdates([this](const auto& l)
+                                                { onNewLocalization(l); });
         }
     }
 
@@ -1165,9 +1151,8 @@ void BridgeROS2::internalAnalyzeTopicsToSubscribe(
                 rosNode_->create_subscription<nav_msgs::msg::Odometry>(
                     topic_name, qos,
                     [this,
-                     output_sensor_label](const nav_msgs::msg::Odometry& o) {
-                        this->callbackOnOdometry(o, output_sensor_label);
-                    }));
+                     output_sensor_label](const nav_msgs::msg::Odometry& o)
+                    { this->callbackOnOdometry(o, output_sensor_label); }));
         }
         else
         {
