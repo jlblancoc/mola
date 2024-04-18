@@ -23,7 +23,7 @@ modules:
     execution_rate: 20 # Hz
     #verbosity_level: INFO
     gui_preview_sensors:
-      - raw_sensor_label: lidar_points
+      - raw_sensor_label: lidar
         decimation: 1
         win_pos: 5 5 400 400
     params:
@@ -34,13 +34,13 @@ modules:
       forward_ros_tf_as_mola_odometry_observations: false
 
       subscribe:
-        - topic: /ouster/points
-          type: PointCloud2
-          output_sensor_label: lidar_points
+        - topic: ${MOLA_LIDAR_TOPIC|/ouster/points}
+          msg_type: PointCloud2
+          output_sensor_label: ${MOLA_LIDAR_NAME|lidar}
           # If present, this will override whatever /tf tells about the sensor pose:
-          fixed_sensor_pose: "0 0 0 0 0 0"  # 'x y z yaw_deg pitch_deg roll_deg'
+          fixed_sensor_pose: "0 0 0 0 0 0"  # 'x y z yaw_deg pitch_deg roll_deg''
           use_fixed_sensor_pose: ${MOLA_USE_FIXED_LIDAR_POSE|false}
 
         - topic: /odom
-          type: Odometry
+          msg_type: Odometry
           output_sensor_label: odom

@@ -9,7 +9,7 @@
 #       mola-cli src/mola/mola_demos/mola-cli-launchs/rosbag2_pointcloud_just_view.yaml
 #
 # - RACECAR_DATA dataset:
-#     POINTCLOUD_TOPIC=/vehicle_8/luminar_front_points \
+#     MOLA_LIDAR_TOPIC=/vehicle_8/luminar_front_points \
 #     ROSBAG2_FILE=/mnt/storage/RACECAR_DATA/M-MULTI-SLOW-KAIST.db3 \
 #       mola-cli src/mola/mola_demos/mola-cli-launchs/rosbag2_pointcloud_just_view.yaml
 #
@@ -37,7 +37,7 @@ modules:
     
     # Optional visualization of raw sensor streams in the MolaViz GUI
     gui_preview_sensors:
-      - raw_sensor_label: ${POINTCLOUD_TOPIC|'/ouster/points'}
+      - raw_sensor_label: ${MOLA_LIDAR_TOPIC|'/ouster/points'}
         decimation: 1
         win_pos: 5 5 400 400
         
@@ -64,7 +64,7 @@ modules:
       # (or if you do not have /tf), it is mandatory to define 'sensors' and
       # define 'fixed_sensor_pose' for each sensor here:
       sensors:
-        - topic: ${POINTCLOUD_TOPIC|'/ouster/points'}
+        - topic: ${MOLA_LIDAR_TOPIC|'/ouster/points'}
           type: CObservationPointCloud
           # If present, this will override whatever /tf tells about the sensor pose:
           fixed_sensor_pose: "0 0 0 0 0 0"  # 'x y z yaw_deg pitch_deg roll_deg'
