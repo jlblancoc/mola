@@ -210,13 +210,11 @@ void Rosbag2Dataset::initialize_rds(const Yaml& c)
 
     // Start creating topic observers for /tf and all sensors:
     lookup_["/tf"].emplace_back(
-        [=](const rosbag2_storage::SerializedBagMessage& rosmsg) {
-            return toTf<false>(rosmsg);
-        });
+        [=](const rosbag2_storage::SerializedBagMessage& rosmsg)
+        { return toTf<false>(rosmsg); });
     lookup_["/tf_static"].emplace_back(
-        [=](const rosbag2_storage::SerializedBagMessage& rosmsg) {
-            return toTf<true>(rosmsg);
-        });
+        [=](const rosbag2_storage::SerializedBagMessage& rosmsg)
+        { return toTf<true>(rosmsg); });
 
     for (auto& sensorNode : sensorsYaml.asSequence())
     {
@@ -265,12 +263,12 @@ void Rosbag2Dataset::initialize_rds(const Yaml& c)
 
         if (sensorType == "CObservationPointCloud")
         {
-            auto callback =
-                [=](const rosbag2_storage::SerializedBagMessage& m) {
-                    return catchExceptions([=]() {
-                        return toPointCloud2(sensorLabel, m, fixedSensorPose);
-                    });
-                };
+            auto callback = [=](const rosbag2_storage::SerializedBagMessage& m)
+            {
+                return catchExceptions(
+                    [=]()
+                    { return toPointCloud2(sensorLabel, m, fixedSensorPose); });
+            };
             lookup_[topic].emplace_back(callback);
         }
 #if 0
@@ -287,62 +285,60 @@ void Rosbag2Dataset::initialize_rds(const Yaml& c)
 #endif
         else if (sensorType == "CObservationImage")
         {
-            auto callback =
-                [=](const rosbag2_storage::SerializedBagMessage& m) {
-                    return catchExceptions([=]() {
-                        return toImage(sensorLabel, m, fixedSensorPose);
-                    });
-                };
+            auto callback = [=](const rosbag2_storage::SerializedBagMessage& m)
+            {
+                return catchExceptions(
+                    [=]() { return toImage(sensorLabel, m, fixedSensorPose); });
+            };
             lookup_[topic].emplace_back(callback);
         }
         else if (sensorType == "CObservation2DRangeScan")
         {
-            auto callback =
-                [=](const rosbag2_storage::SerializedBagMessage& m) {
-                    return catchExceptions([=]() {
-                        return toLidar2D(sensorLabel, m, fixedSensorPose);
-                    });
-                };
+            auto callback = [=](const rosbag2_storage::SerializedBagMessage& m)
+            {
+                return catchExceptions(
+                    [=]()
+                    { return toLidar2D(sensorLabel, m, fixedSensorPose); });
+            };
 
             lookup_[topic].emplace_back(callback);
         }
         else if (sensorType == "CObservationRotatingScan")
         {
-            auto callback =
-                [=](const rosbag2_storage::SerializedBagMessage& m) {
-                    return catchExceptions([=]() {
+            auto callback = [=](const rosbag2_storage::SerializedBagMessage& m)
+            {
+                return catchExceptions(
+                    [=]() {
                         return toRotatingScan(sensorLabel, m, fixedSensorPose);
                     });
-                };
+            };
             lookup_[topic].emplace_back(callback);
         }
         else if (sensorType == "CObservationIMU")
         {
-            auto callback =
-                [=](const rosbag2_storage::SerializedBagMessage& m) {
-                    return catchExceptions([=]() {
-                        return toIMU(sensorLabel, m, fixedSensorPose);
-                    });
-                };
+            auto callback = [=](const rosbag2_storage::SerializedBagMessage& m)
+            {
+                return catchExceptions(
+                    [=]() { return toIMU(sensorLabel, m, fixedSensorPose); });
+            };
             lookup_[topic].emplace_back(callback);
         }
         else if (sensorType == "CObservationGPS")
         {
-            auto callback =
-                [=](const rosbag2_storage::SerializedBagMessage& m) {
-                    return catchExceptions([=]() {
-                        return toGPS(sensorLabel, m, fixedSensorPose);
-                    });
-                };
+            auto callback = [=](const rosbag2_storage::SerializedBagMessage& m)
+            {
+                return catchExceptions(
+                    [=]() { return toGPS(sensorLabel, m, fixedSensorPose); });
+            };
             lookup_[topic].emplace_back(callback);
         }
         else if (sensorType == "CObservationOdometry")
         {
-            auto callback =
-                [=](const rosbag2_storage::SerializedBagMessage& m) {
-                    return catchExceptions(
-                        [=]() { return toOdometry(sensorLabel, m); });
-                };
+            auto callback = [=](const rosbag2_storage::SerializedBagMessage& m)
+            {
+                return catchExceptions([=]()
+                                       { return toOdometry(sensorLabel, m); });
+            };
             lookup_[topic].emplace_back(callback);
         }
 
@@ -535,10 +531,7 @@ void Rosbag2Dataset::doReadAhead(
         else
             endIdx = *requestedIndex + read_ahead_length_;
     }
-    else
-    {
-        endIdx = rosbag_next_idx_ + read_ahead_length_;
-    }
+    else { endIdx = rosbag_next_idx_ + read_ahead_length_; }
 
     mrpt::saturate<size_t>(endIdx, 0, read_ahead_.size() - 1);
 
@@ -598,8 +591,8 @@ mrpt::obs::CSensoryFrame::Ptr Rosbag2Dataset::datasetGetObservations(
 }
 
 bool Rosbag2Dataset::findOutSensorPose(
-    mrpt::poses::CPose3D& des, const std::string& target_frame,
-    const std::string&                         source_frame,
+    mrpt::poses::CPose3D& des, const std::string& frame,
+    const std::string&                         referenceFrame,
     const std::optional<mrpt::poses::CPose3D>& fixedSensorPose)
 {
     if (fixedSensorPose)
@@ -612,15 +605,15 @@ bool Rosbag2Dataset::findOutSensorPose(
     {
         geometry_msgs::msg::TransformStamped ref_to_trgFrame =
             tfBuffer_->lookupTransform(
-                source_frame, target_frame, {} /*latest value*/);
+                referenceFrame, frame, {} /*latest value*/);
 
         tf2::Transform tf;
         tf2::fromMsg(ref_to_trgFrame.transform, tf);
         des = mrpt::ros2bridge::fromROS(tf);
 
         MRPT_LOG_DEBUG_FMT(
-            "[findOutSensorPose] Found pose %s -> %s: %s", source_frame.c_str(),
-            target_frame.c_str(), des.asString().c_str());
+            "[findOutSensorPose] Found pose %s -> %s: %s",
+            referenceFrame.c_str(), frame.c_str(), des.asString().c_str());
 
         return true;
     }

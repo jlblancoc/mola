@@ -293,8 +293,8 @@ void BridgeROS2::callbackOnPointCloud2(
 }
 
 bool BridgeROS2::waitForTransform(
-    mrpt::poses::CPose3D& des, const std::string& target_frame,
-    const std::string& source_frame, const rclcpp::Time& time,
+    mrpt::poses::CPose3D& des, const std::string& frame,
+    const std::string& referenceFrame, const rclcpp::Time& time,
     const int timeoutMilliseconds, bool printErrors)
 {
     const rclcpp::Duration timeout(0, 1000 * timeoutMilliseconds);
@@ -302,7 +302,7 @@ bool BridgeROS2::waitForTransform(
     {
         geometry_msgs::msg::TransformStamped ref_to_trgFrame =
             tf_buffer_->lookupTransform(
-                source_frame, target_frame, time,
+                referenceFrame, frame, time,
                 tf2::durationFromSec(timeout.seconds()));
 
         tf2::Transform tf;
@@ -310,8 +310,8 @@ bool BridgeROS2::waitForTransform(
         des = mrpt::ros2bridge::fromROS(tf);
 
         MRPT_LOG_DEBUG_FMT(
-            "[waitForTransform] Found pose %s -> %s: %s", source_frame.c_str(),
-            target_frame.c_str(), des.asString().c_str());
+            "[waitForTransform] Found pose %s -> %s: %s",
+            referenceFrame.c_str(), frame.c_str(), des.asString().c_str());
 
         return true;
     }
