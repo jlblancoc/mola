@@ -40,7 +40,10 @@ MRPT_INITIALIZER(do_register_KittiOdometryDataset)
     MOLA_REGISTER_MODULE(KittiOdometryDataset);
 }
 
-KittiOdometryDataset::KittiOdometryDataset() = default;
+KittiOdometryDataset::KittiOdometryDataset()
+{
+    this->mrpt::system::COutputLogger::setLoggerName("KittiOdometryDataset");
+}
 
 static void build_list_files(
     const std::string& dir, const std::string& file_extension,
