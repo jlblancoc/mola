@@ -26,6 +26,7 @@
 
 #include <mola_relocalization/relocalization.h>
 #include <mrpt/core/Clock.h>
+#include <mrpt/core/WorkerThreadsPool.h>
 #include <mrpt/version.h>
 
 #include <optional>
@@ -61,13 +62,13 @@ mola::RelocalizationLikelihood_SE2::Output
     // evaluate over the grid:
     std::optional<double> minW, maxW;
 
-    for (size_t iX = 0, iGlobal = 0; iX < nX; iX++, iGlobal++)
+    for (size_t iX = 0, iGlobal = 0; iX < nX; iX++)
     {
         const double x = grid.idx2x(iX);
         for (size_t iY = 0; iY < nY; iY++)
         {
             const double y = grid.idx2y(iY);
-            for (size_t iPhi = 0; iPhi < nPhi; iPhi++)
+            for (size_t iPhi = 0; iPhi < nPhi; iPhi++, iGlobal++)
             {
                 const double phi = grid.idx2phi(iPhi);
 
@@ -197,36 +198,77 @@ mola::RelocalizationICP_SE2::Output mola::RelocalizationICP_SE2::run(
     const size_t nPhi = grid.getSizePhi();
 
     const size_t nCells = nX * nY * nPhi;
+
     ASSERT_(nCells > 0);
 
+    ASSERT_(!in.icp_pipeline.empty());
+
+    const size_t nPipelines = in.icp_pipeline.size();
+
+    mrpt::WorkerThreadsPool pool(
+        nPipelines, mrpt::WorkerThreadsPool::POLICY_FIFO,
+        "RelocalizationICP_SE2"  // threads name
+    );
+    std::vector<std::mutex>        pipelineMtx(nPipelines);
+    std::mutex                     resultMtx;
+    std::vector<std::future<void>> futs;
+
     // evaluate over the grid:
-    for (size_t iX = 0, iGlobal = 0; iX < nX; iX++, iGlobal++)
+    for (size_t iX = 0, iGlobal = 0; iX < nX; iX++)
     {
         const double x = grid.idx2x(iX);
         for (size_t iY = 0; iY < nY; iY++)
         {
             const double y = grid.idx2y(iY);
-            for (size_t iPhi = 0; iPhi < nPhi; iPhi++)
+            for (size_t iPhi = 0; iPhi < nPhi; iPhi++, iGlobal++)
             {
                 const double phi = grid.idx2phi(iPhi);
 
                 const auto initGuessPose =
                     mrpt::math::TPose3D(x, y, 0, phi, 0, 0);
 
-                mp2p_icp::Results icpResult;
+                auto f = pool.enqueue(
+                    [initGuessPose, iGlobal, nCells, nPipelines, &in,
+                     &resultMtx, &result, &pipelineMtx]()
+                    {
+                        size_t threadIdx = iGlobal % nPipelines;
 
-                in.icp_pipeline->align(
-                    in.local_map, in.reference_map, initGuessPose,
-                    in.icp_parameters, icpResult);
+                        auto lck1 = mrpt::lockHelper(pipelineMtx.at(threadIdx));
 
-                if (icpResult.quality < in.icp_minimum_quality) continue;
+                        mp2p_icp::Results icpResult;
 
-                // accept result:
-                result.found_poses.insertPose(
-                    icpResult.optimal_tf.mean.asTPose());
+                        in.icp_pipeline.at(threadIdx)->align(
+                            in.local_map, in.reference_map, initGuessPose,
+                            in.icp_parameters, icpResult);
+
+                        // report progress to the user, if enabled:
+                        if (in.on_progress_callback)
+                        {
+                            ProgressFeedback p;
+                            p.cell_init_guess      = initGuessPose;
+                            p.current_cell         = iGlobal;
+                            p.total_cells          = nCells;
+                            p.obtained_icp_quality = icpResult.quality;
+
+                            in.on_progress_callback(p);
+                        }
+
+                        if (icpResult.quality < in.icp_minimum_quality) return;
+
+                        // accept result:
+                        auto lck2 = mrpt::lockHelper(resultMtx);
+                        result.found_poses.insertPose(
+                            icpResult.optimal_tf.mean.asTPose());
+                    });
+
+                futs.emplace_back(std::move(f));
             }
         }
     }
+
+    // wait for all of them to end:
+    for (auto& f : futs) f.get();
+
     result.time_cost = mrpt::Clock::nowDouble() - t0;
 
     return result;

@@ -92,14 +92,27 @@ struct RelocalizationLikelihood_SE2
  */
 struct RelocalizationICP_SE2
 {
+    struct ProgressFeedback
+    {
+        ProgressFeedback() = default;
+
+        size_t              current_cell = 0;
+        size_t              total_cells  = 0;
+        mrpt::math::TPose3D cell_init_guess;
+        double              obtained_icp_quality = .0;
+    };
+
     struct Input
     {
         mp2p_icp::metric_map_t reference_map;
         mp2p_icp::metric_map_t local_map;
-        
-        mp2p_icp::ICP::Ptr   icp_pipeline;
-        mp2p_icp::Parameters icp_parameters;
-        double               icp_minimum_quality = 0.50;
+
+        /** If provided more than one, several ICP runs will be triggered in
+         * parallel threads.
+         */
+        std::vector<mp2p_icp::ICP::Ptr> icp_pipeline;
+        mp2p_icp::Parameters            icp_parameters;
+        double                          icp_minimum_quality = 0.50;
 
         struct InputLattice
         {
@@ -117,6 +130,8 @@ struct RelocalizationICP_SE2
             double resolution_roll  = mrpt::DEG2RAD(5.0);
         };
         OutputLattice output_lattice;
+
+        std::function<void(const ProgressFeedback&)> on_progress_callback;
 
         Input() = default;
     };
