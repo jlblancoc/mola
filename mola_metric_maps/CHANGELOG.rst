@@ -2,6 +2,12 @@
 Changelog for package mola_metric_maps
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Add macro HASHED_VOXEL_POINT_CLOUD_WITH_CACHED_ACCESS
+* Fix package.xml website URL
+* Contributors: Jose Luis Blanco-Claraco
+
 1.0.2 (2024-04-04)
 ------------------
 

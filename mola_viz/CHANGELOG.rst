@@ -2,6 +2,11 @@
 Changelog for package mola_viz
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Fix package.xml website URL
+* Contributors: Jose Luis Blanco-Claraco
+
 1.0.2 (2024-04-04)
 ------------------
 

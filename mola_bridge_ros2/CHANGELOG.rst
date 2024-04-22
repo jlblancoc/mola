@@ -3,6 +3,14 @@ Changelog for package mola_bridge_ros2
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
+Forthcoming
+-----------
+* BridgeROS2: more robust /tf find_transform by using tf2::BufferCore
+* FIXBUG: inverse sensor poses in rosbag2 reader.
+  Also: unify notation in C++ calls to lookupTransform()
+* Fix package.xml website URL
+* Contributors: Jose Luis Blanco-Claraco
+
 1.0.2 (2024-04-04)
 ------------------
 * update docs

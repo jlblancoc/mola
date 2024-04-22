@@ -3,6 +3,13 @@ Changelog for package mola_relocalization
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
+Forthcoming
+-----------
+* RelocalizationICP_SE2: work in multiple threads and provides a feedback functor
+* Add new ICP-based relocalization method
+* Fix package.xml website URL
+* Contributors: Jose Luis Blanco-Claraco
+
 1.0.2 (2024-04-04)
 ------------------
 * Implement SE(2) relocalization grid method
