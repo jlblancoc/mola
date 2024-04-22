@@ -2,8 +2,8 @@
 Changelog for package mola_input_kitti_dataset
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.0.3 (2024-04-22)
+------------------
 * kitti dataset module: show correct module name in log messages
 * Fix package.xml website URL
 * Contributors: Jose Luis Blanco-Claraco

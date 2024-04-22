@@ -3,8 +3,8 @@ Changelog for package mola_input_rosbag2
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
-Forthcoming
------------
+1.0.3 (2024-04-22)
+------------------
 * FIXBUG: inverse sensor poses in rosbag2 reader.
   Also: unify notation in C++ calls to lookupTransform()
 * Fix package.xml website URL

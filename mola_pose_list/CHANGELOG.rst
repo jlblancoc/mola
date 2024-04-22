@@ -2,8 +2,8 @@
 Changelog for package mola_pose_list
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.0.3 (2024-04-22)
+------------------
 * Add new HashedSetSE3 data structure
 * Fix package.xml website URL
 * Contributors: Jose Luis Blanco-Claraco

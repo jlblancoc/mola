@@ -3,8 +3,8 @@ Changelog for package kitti_metrics_eval
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
-Forthcoming
------------
+1.0.3 (2024-04-22)
+------------------
 * Fix package.xml website URL
 * Contributors: Jose Luis Blanco-Claraco
 

@@ -3,8 +3,8 @@ Changelog for package mola_relocalization
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
-Forthcoming
------------
+1.0.3 (2024-04-22)
+------------------
 * RelocalizationICP_SE2: work in multiple threads and provides a feedback functor
 * Add new ICP-based relocalization method
 * Fix package.xml website URL
