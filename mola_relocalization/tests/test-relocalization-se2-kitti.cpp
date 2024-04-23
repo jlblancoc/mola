@@ -20,7 +20,7 @@
 
 /**
  * @file   test-relocalization-se2-kitti.cpp
- * @brief  Unit tests for mola_relolization
+ * @brief  Unit tests for mola_relocalization
  * @author Jose Luis Blanco Claraco
  * @date   Apr 2, 2024
  */

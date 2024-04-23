@@ -13,3 +13,11 @@ mola_add_test(
 )
 target_compile_definitions(test-relocalization-se2-kitti PRIVATE TEST_DATASETS_ROOT=\"${TEST_DATASETS_ROOT}\")
 endif()
+
+
+mola_add_test(
+  TARGET  test-relocalization-align-bev
+  SOURCES test-relocalization-align-bev.cpp
+  LINK_LIBRARIES
+    mola::mola_relocalization
+)

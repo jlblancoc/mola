@@ -147,6 +147,37 @@ struct RelocalizationICP_SE2
     static Output run(const Input& in);
 };
 
+/** Takes a global and a local point cloud maps, and builds a point cloud
+ *  density "grid map image" from a bird-eye-view (BEV), then applies the
+ *  grid-map align algorithm in mrpt::maps.
+ *
+ * \ingroup mola_relocalization_grp
+ */
+struct AlignBEV
+{
+    struct Input
+    {
+        mp2p_icp::metric_map_t   reference_map;
+        std::vector<std::string> ref_map_layers;  //!< empty=all
+        mp2p_icp::metric_map_t   local_map;
+        std::vector<std::string> local_map_layers;  //!< empty=all
+
+        double resolution_xy = 0.35;
+
+        Input() = default;
+    };
+
+    struct Output
+    {
+        mola::HashedSetSE3 found_poses;
+        double             time_cost = .0;  //!< [s]
+
+        Output() = default;
+    };
+
+    static Output run(const Input& in);
+};
+
 /** Finds the SE(2) poses with the top given percentile likelihood, and returns
  *  them sorted by likelihood (higher values are better matches).
  *
