@@ -142,12 +142,22 @@ mola::AlignBEV::Output mola::AlignBEV::run(const Input& in)
 #if 1
     gOccGrid->saveAsBitmapFile("og_reference.png");
     lOccGrid->saveAsBitmapFile("og_local.png");
+
 #endif
 
     mrpt::slam::CGridMapAligner ga;
     ga.options.dumpToTextStream(std::cout);
 
-    ga.options.feature_descriptor   = mrpt::vision::descORB;
+    ga.options.feature_detector_options.featsType = mrpt::vision::featORB;
+    ga.options.feature_descriptor                 = mrpt::vision::descAny;
+    ga.options.ransac_minSetSizeRatio             = 0.02;
+    ga.options.feature_detector_options.ORBOptions.n_levels = 1;
+
+    ga.options.threshold_max   = 100;  // for ORB
+    ga.options.threshold_delta = 20;
+
+    ga.options.methodSelection = mrpt::slam::CGridMapAligner::amModifiedRANSAC;
+
     ga.options.debug_save_map_pairs = true;
 
     auto resPose = ga.Align(gOccGrid.get(), lOccGrid.get(), {});

@@ -162,7 +162,7 @@ struct AlignBEV
         mp2p_icp::metric_map_t   local_map;
         std::vector<std::string> local_map_layers;  //!< empty=all
 
-        double resolution_xy = 0.35;
+        double resolution_xy = 0.40;
 
         Input() = default;
     };
