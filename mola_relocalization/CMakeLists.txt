@@ -31,7 +31,6 @@ mola_add_library(
 	TARGET ${PROJECT_NAME}
 	SOURCES 
 		src/find_best_poses_se2.cpp
-		src/AlignBEV.cpp
 		src/RelocalizationICP_SE2.cpp
 		src/RelocalizationLikelihood_SE2.cpp
 		include/mola_relocalization/relocalization.h

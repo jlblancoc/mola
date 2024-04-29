@@ -3,7 +3,29 @@ C++ library with algorithms for relocalization, global localization, or pose est
 
 Note that particle filtering is implemented in its own repository under [mrpt_navigation](https://github.com/mrpt-ros-pkg/mrpt_navigation).
 
-Example result for the `mola::Relocalization_SE2` method (from a unit test, see [the code](https://github.com/MOLAorg/mola/blob/develop/mola_relocalization/tests/test-relocalization-se2-kitti.cpp) for details):
+## Method #1: mola::RelocalizationICP_SE2
+
+Takes a global and a local metric map, a SE(2) ROI, and tries to match
+the local map in the global map by running ICP from all initial guesses
+defined by a regular SE(2) lattice, returning the result as a SE(3) hashed
+lattice.
+
+This method is based on [mp2p_icp ICP pipelines](https://docs.mola-slam.org/latest/module-mp2p-icp.html).
+
+## Method #2: mola::RelocalizationLikelihood_SE2
+
+Takes a global metric map, an observation, and a SE(2) ROI, and evaluates
+the likelihood of the observation in a regular SE(2) lattice.
+
+This is based on mrpt maps observationLikelihood() evaluation, so the main
+parameters that determine the way likelihood is computed must be defined
+on before hand within each of the metric map layers of the input reference
+map.
+At present this algorithm is useful for these sensor/map types:
+- observations: pointclouds/2d_scan, reference_map: 2D gridmap
+- observations: pointclouds, reference_map: pointclouds
+
+Example result for the `mola::RelocalizationLikelihood_SE2` method (from a unit test, see [the code](https://github.com/MOLAorg/mola/blob/develop/mola_relocalization/tests/test-relocalization-se2-kitti.cpp) for details):
 
 ![mola_relocalize_figs](https://github.com/MOLAorg/mola/assets/5497818/6622739f-95ca-4e39-a770-d5f15c01adb3)
 
