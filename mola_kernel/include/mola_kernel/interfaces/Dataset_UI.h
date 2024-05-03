@@ -12,7 +12,6 @@
 #pragma once
 
 #include <cstdlib>
-#include <memory>
 
 namespace mola
 {
@@ -21,8 +20,8 @@ namespace mola
 class Dataset_UI
 {
    public:
-    Dataset_UI()          = default;
-    virtual ~Dataset_UI() = default;
+    Dataset_UI();
+    virtual ~Dataset_UI();
 
     /** @name Virtual interface of Dataset_UI
      *{ */
