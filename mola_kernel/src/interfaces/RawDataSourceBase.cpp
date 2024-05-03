@@ -38,12 +38,21 @@ RawDataSourceBase::RawDataSourceBase() = default;
 
 RawDataSourceBase::~RawDataSourceBase()
 {
-    if (!gui_updater_threadpool_.pendingTasks()) return;
-
-    MRPT_LOG_INFO_STREAM(
-        "Dtor called while gui_updater_threadpool_ still has "
-        << gui_updater_threadpool_.pendingTasks() << " tasks. Aborting them.");
-    gui_updater_threadpool_.clear();
+    if (gui_updater_threadpool_.pendingTasks())
+    {
+        MRPT_LOG_INFO_STREAM(
+            "Dtor called while gui_updater_threadpool_ still has "
+            << gui_updater_threadpool_.pendingTasks()
+            << " tasks. Aborting them.");
+        gui_updater_threadpool_.clear();
+    }
+    while (worker_pool_export_rawlog_.pendingTasks())
+    {
+        MRPT_LOG_THROTTLE_INFO_STREAM(
+            1.0, "Dtor called while worker_pool_export_rawlog_ still has "
+                     << worker_pool_export_rawlog_.pendingTasks()
+                     << " tasks. Waiting for them...");
+    }
 }
 
 void RawDataSourceBase::initialize(const Yaml& cfg)
@@ -134,7 +143,7 @@ void RawDataSourceBase::sendObservationsToFrontEnds(
     if (export_to_rawlog_out_.is_open())
     {
         auto fut = worker_pool_export_rawlog_.enqueue(
-            [this](const mrpt::obs::CObservation::Ptr& o) {
+            [this](mrpt::obs::CObservation::Ptr o) {
                 if (!o) return;
                 auto a = mrpt::serialization::archiveFrom(
                     this->export_to_rawlog_out_);
@@ -166,7 +175,6 @@ void RawDataSourceBase::sendObservationsToFrontEnds(
                 ASSERTMSG_(
                     !vizMods.empty(),
                     "Could not find a running MolaViz module");
-
                 auto viz =
                     std::dynamic_pointer_cast<VizInterface>(vizMods.at(0));
 

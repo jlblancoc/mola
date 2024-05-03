@@ -491,9 +491,17 @@ void MolaLauncherApp::executor_thread(InfoPerRunningThread& rds)
             << mrpt::exception_to_str(e));
         threads_must_end_ = true;
     }
-    // using namespace std::chrono_literals;
-    // Give time for all threads to end:
-    // std::this_thread::sleep_for(25ms);
+
+    // make sure dtor is called now:
+    if (rds.impl)
+    {
+        MRPT_LOG_DEBUG_STREAM(
+            "About to destruct module '" << rds.name << "', shared_ptr with "
+                                         << rds.impl.use_count()
+                                         << " references.");
+        rds.impl.reset();
+        MRPT_LOG_DEBUG_STREAM("Done with dtor of module '" << rds.name << "'");
+    }
 }
 
 ExecutableBase::Ptr MolaLauncherApp::nameServerImpl(const std::string& name)

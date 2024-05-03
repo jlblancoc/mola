@@ -20,7 +20,6 @@
 #include <mrpt/system/filesystem.h>
 
 #include <csignal>  // sigaction
-#include <cstdlib>
 #include <iostream>
 #include <string>
 
@@ -30,80 +29,129 @@
 // TODO(jlbc): win32: add SetConsoleCtrlHandler
 
 // Declare supported cli switches ===========
-static TCLAP::CmdLine                        cmd("mola-cli");
-static TCLAP::UnlabeledValueArg<std::string> arg_yaml_cfg(
-    "config", "Input YAML config file (required) (*.yaml)", false, "",
-    "mola-system.yaml", cmd);
+struct Cli
+{
+    TCLAP::CmdLine                        cmd{"mola-cli"};
+    TCLAP::UnlabeledValueArg<std::string> arg_yaml_cfg{
+        "config",
+        "Input YAML config file (required) (*.yaml)",
+        false,
+        "",
+        "mola-system.yaml",
+        cmd};
 
-static TCLAP::ValueArg<std::string> arg_verbosity_level(
-    "v", "verbosity", "Verbosity level: ERROR|WARN|INFO|DEBUG (Default: INFO)",
-    false, "", "INFO", cmd);
+    TCLAP::ValueArg<std::string> arg_verbosity_level{
+        "v",
+        "verbosity",
+        "Verbosity level: ERROR|WARN|INFO|DEBUG (Default: INFO)",
+        false,
+        "",
+        "INFO",
+        cmd};
 
-static TCLAP::SwitchArg arg_enable_profiler(
-    "p", "profiler",
-    "Enable time profiler by default in all modules (Default: NO)", cmd);
+    TCLAP::SwitchArg arg_enable_profiler{
+        "p", "profiler",
+        "Enable time profiler by default in all modules (Default: NO)", cmd};
 
-static TCLAP::SwitchArg arg_enable_profiler_whole(
-    "", "profiler-whole",
-    "Enable whole-history time profiler in all modules (Default: NO). **DO "
-    "NOT** use in production, only to benchmark short runs (unbounded memory "
-    "usage)",
-    cmd);
+    TCLAP::SwitchArg arg_enable_profiler_whole{
+        "", "profiler-whole",
+        "Enable whole-history time profiler in all modules (Default: NO). **DO "
+        "NOT** use in production, only to benchmark short runs (unbounded "
+        "memory "
+        "usage)",
+        cmd};
 
-static TCLAP::SwitchArg arg_rtti_list_all(
-    "", "rtti-list-all",
-    "Loads all MOLA modules, then list all classes registered via mrpt::rtti, "
-    "and exits.",
-    cmd);
+    TCLAP::SwitchArg arg_rtti_list_all{
+        "", "rtti-list-all",
+        "Loads all MOLA modules, then list all classes registered via "
+        "mrpt::rtti, "
+        "and exits.",
+        cmd};
 
-static TCLAP::ValueArg<std::string> arg_rtti_list_children(
-    "", "rtti-children-of",
-    "Loads all MOLA modules, then list all known classes that inherit from the "
-    "given one, and exits.",
-    false, "", "mp2p_icp::ICP_Base", cmd);
+    TCLAP::ValueArg<std::string> arg_rtti_list_children{
+        "",
+        "rtti-children-of",
+        "Loads all MOLA modules, then list all known classes that inherit from "
+        "the "
+        "given one, and exits.",
+        false,
+        "",
+        "mp2p_icp::ICP_Base",
+        cmd};
 
-static TCLAP::SwitchArg arg_list_modules(
-    "", "list-modules",
-    "Loads all MOLA modules, then list them. It also shows the list of paths "
-    "in which the program looks for module dynamic libraries, then exits.",
-    cmd);
+    TCLAP::SwitchArg arg_list_modules{
+        "", "list-modules",
+        "Loads all MOLA modules, then list them. It also shows the list of "
+        "paths "
+        "in which the program looks for module dynamic libraries, then exits.",
+        cmd};
 
-static TCLAP::SwitchArg arg_list_module_shared_dirs(
-    "", "list-module-shared-dirs",
-    "Finds all MOLA module source/shared directories, then list them. Paths "
-    "can be added with the environment variable MOLA_MODULES_SHARED_PATH.",
-    cmd);
+    TCLAP::SwitchArg arg_list_module_shared_dirs{
+        "", "list-module-shared-dirs",
+        "Finds all MOLA module source/shared directories, then list them. "
+        "Paths "
+        "can be added with the environment variable MOLA_MODULES_SHARED_PATH.",
+        cmd};
 
-static TCLAP::SwitchArg arg_ros_args(
-    "", "ros-args",
-    "Dummy flag, defined just to allow the program invocation from ROS 2 "
-    "launch files.",
-    cmd);
+    TCLAP::SwitchArg arg_ros_args{
+        "", "ros-args",
+        "Dummy flag, defined just to allow the program invocation from ROS 2 "
+        "launch files.",
+        cmd};
+};
 
-void mola_signal_handler(int s);
-void mola_install_signal_handler();
+namespace
+{
+mola::MolaLauncherApp* theApp = nullptr;
 
-static mola::MolaLauncherApp app;
+void mola_signal_handler(int s)
+{
+    std::cerr << "Caught signal " << s << ". Shutting down..." << std::endl;
+    if (theApp) theApp->shutdown();
+    // exit(0);
+}
+
+void mola_install_signal_handler()
+{
+    struct sigaction sigIntHandler;
+
+    sigIntHandler.sa_handler = &mola_signal_handler;
+    sigemptyset(&sigIntHandler.sa_mask);
+    sigIntHandler.sa_flags = 0;
+
+    sigaction(SIGINT, &sigIntHandler, nullptr);
+}
 
 // Default task for mola-cli: launching a SLAM system
 // -----------------------------------------------------
-static int mola_cli_launch_slam()
+int mola_cli_launch_slam(Cli& cli)
 {
     // Load YAML config file:
-    if (!arg_yaml_cfg.isSet())
+    if (!cli.arg_yaml_cfg.isSet())
     {
         TCLAP::ArgException e(
             "mola-system.yaml is required to launch a SLAM system.");
-        cmd.getOutput()->failure(cmd, e);
+        cli.cmd.getOutput()->failure(cli.cmd, e);
         return 1;
     }
-    const auto file_yml = arg_yaml_cfg.getValue();
+    const auto file_yml = cli.arg_yaml_cfg.getValue();
 
     auto cfg = mola::load_yaml_file(file_yml);
 
+    mola::MolaLauncherApp app;
+    theApp = &app;  // for the signal handler
+
+    if (cli.arg_verbosity_level.isSet())
+    {
+        using vl     = mrpt::typemeta::TEnumType<mrpt::system::VerbosityLevel>;
+        const auto v = vl::name2value(cli.arg_verbosity_level.getValue());
+        app.setVerbosityLevel(v);
+    }
+
     app.profiler_.enable(
-        arg_enable_profiler.isSet() || arg_enable_profiler_whole.isSet());
-    app.profiler_.enableKeepWholeHistory(arg_enable_profiler_whole.isSet());
+        cli.arg_enable_profiler.isSet() ||
+        cli.arg_enable_profiler_whole.isSet());
+    app.profiler_.enableKeepWholeHistory(cli.arg_enable_profiler_whole.isSet());
 
     // Create SLAM system:
     app.setup(cfg, mrpt::system::extractFileDirectory(file_yml));
@@ -118,6 +166,9 @@ static int mola_cli_launch_slam()
 // -----------------------------------------------------
 int mola_cli_rtti_list_all()
 {
+    mola::MolaLauncherApp app;
+    theApp = &app;  // for the signal handler
+
     app.scanAndLoadLibraries();
 
     std::vector<const mrpt::rtti::TRuntimeClassId*> lst =
@@ -130,11 +181,14 @@ int mola_cli_rtti_list_all()
 
 // list children of a given class:
 // -----------------------------------------------------
-int mola_cli_rtti_list_child()
+int mola_cli_rtti_list_child(Cli& cli)
 {
+    mola::MolaLauncherApp app;
+    theApp = &app;  // for the signal handler
+
     app.scanAndLoadLibraries();
 
-    const auto parentName = arg_rtti_list_children.getValue();
+    const auto parentName = cli.arg_rtti_list_children.getValue();
 
     std::cout << "Listing children of class: " << parentName << "\n";
 
@@ -154,6 +208,9 @@ int mola_cli_rtti_list_child()
 
 int mola_cli_list_modules()
 {
+    mola::MolaLauncherApp app;
+    theApp = &app;  // for the signal handler
+
     // show paths:
     std::vector<std::string> lst = app.getModuleLibPaths();
     std::cout << "MOLA_MODULES_LIB_PATH has " << lst.size()
@@ -174,6 +231,9 @@ int mola_cli_list_modules()
 
 int mola_cli_list_module_shared_dirs()
 {
+    mola::MolaLauncherApp app;
+    theApp = &app;  // for the signal handler
+
     const auto mod2path_lst = app.scanForModuleSharedDirectories();
 
     int longestName = 1;
@@ -187,33 +247,34 @@ int mola_cli_list_module_shared_dirs()
     return 0;
 }
 
+}  // namespace
+
 int main(int argc, char** argv)
 {
     try
     {
+        Cli cli;
+
         // Parse arguments:
-        if (!cmd.parse(argc, argv)) return 1;  // should exit.
+        if (!cli.cmd.parse(argc, argv)) return 1;  // should exit.
 
         mola_install_signal_handler();
 
-        // Define the verbosity level here so it affects all possible commands
-        // of mola-cli:
-        if (arg_verbosity_level.isSet())
-        {
-            using vl = mrpt::typemeta::TEnumType<mrpt::system::VerbosityLevel>;
-            const auto v = vl::name2value(arg_verbosity_level.getValue());
-            app.setVerbosityLevel(v);
-        }
-
         // Different tasks that can be dine with mola-cli:
-        if (arg_rtti_list_all.isSet()) return mola_cli_rtti_list_all();
-        if (arg_rtti_list_children.isSet()) return mola_cli_rtti_list_child();
-        if (arg_list_modules.isSet()) return mola_cli_list_modules();
-        if (arg_list_module_shared_dirs.isSet())
+        if (cli.arg_rtti_list_all.isSet())  //
+            return mola_cli_rtti_list_all();
+
+        if (cli.arg_rtti_list_children.isSet())
+            return mola_cli_rtti_list_child(cli);
+
+        if (cli.arg_list_modules.isSet())  //
+            return mola_cli_list_modules();
+
+        if (cli.arg_list_module_shared_dirs.isSet())
             return mola_cli_list_module_shared_dirs();
 
         // Default task:
-        return mola_cli_launch_slam();
+        return mola_cli_launch_slam(cli);
 
         return 0;
     }
@@ -222,22 +283,4 @@ int main(int argc, char** argv)
         mola::pretty_print_exception(e, "[mola-cli] Exit due to exception:");
         return 1;
     }
-}
-
-void mola_signal_handler(int s)
-{
-    std::cerr << "Caught signal " << s << ". Shutting down..." << std::endl;
-    app.shutdown();
-    exit(0);
-}
-
-void mola_install_signal_handler()
-{
-    struct sigaction sigIntHandler;
-
-    sigIntHandler.sa_handler = &mola_signal_handler;
-    sigemptyset(&sigIntHandler.sa_mask);
-    sigIntHandler.sa_flags = 0;
-
-    sigaction(SIGINT, &sigIntHandler, nullptr);
 }
