@@ -100,9 +100,8 @@ void gui_handler_show_common_sensor_info(
     fp.vfont_scale  = 9;
 
     // Computes the "y" coordinate of a text line by index
-    const auto line_y = [&fp](const int line) {
-        return 2 + line * (2 + fp.vfont_scale);
-    };
+    const auto line_y = [&fp](const int line)
+    { return 2 + line * (2 + fp.vfont_scale); };
 
     glView->addTextMessage(
         2, line_y(TXT_ID_TIMESTAMP),
@@ -377,10 +376,7 @@ void gui_handler_point_cloud(
                 glPc->loadFromPointsMap(pointMapCol.get());
                 recolorizeAtEnd = false;
             }
-            else
-            {
-                obj3D->unprojectInto(*glPc, pp);
-            }
+            else { obj3D->unprojectInto(*glPc, pp); }
         }
         gui_handler_show_common_sensor_info(*obj3D, w);
     }
@@ -584,13 +580,16 @@ void MolaViz::spinOnce()
 void MolaViz::dataset_ui_check_new_modules()
 {
     auto datasetUIs = findService<Dataset_UI>();
+
     for (auto& module : datasetUIs)
     {
         const auto modUI = std::dynamic_pointer_cast<Dataset_UI>(module);
         ASSERT_(modUI);
 
         auto& e = datasetUIs_[module->getModuleInstanceName()];
-        if (e.module) continue;  // an already known one
+        if (!e.first_time_seen) continue;  // an already known one
+
+        e.first_time_seen = false;
 
         e.module = modUI;
 
@@ -610,15 +609,22 @@ void MolaViz::dataset_ui_check_new_modules()
         e.cbPaused = e.ui->add<nanogui::CheckBox>("Paused");
         e.cbPaused->setChecked(modUI->datasetUI_paused());
         e.cbPaused->setCallback(
-            [modUI](bool checked) { modUI->datasetUI_paused(checked); });
+            [e](bool checked)
+            {
+                auto mod = e.module.lock();
+                if (mod) mod->datasetUI_paused(checked);
+            });
 
         e.lbPlaybackPosition = e.ui->add<nanogui::Label>("Progress: ");
         e.lbPlaybackPosition->setFixedWidth(100);
         e.slider = e.ui->add<nanogui::Slider>();
         e.slider->setFixedWidth(300);
-        e.slider->setCallback([modUI](float pos) {
-            modUI->datasetUI_teleport(static_cast<size_t>(pos));
-        });
+        e.slider->setCallback(
+            [e](float pos)
+            {
+                auto mod = e.module.lock();
+                if (mod) mod->datasetUI_teleport(static_cast<size_t>(pos));
+            });
 
         e.ui->add<nanogui::Label>("Playback rate:");
         e.cmRate                       = e.ui->add<nanogui::ComboBox>();
@@ -636,10 +642,13 @@ void MolaViz::dataset_ui_check_new_modules()
                 break;
             }
         e.cmRate->setSelectedIndex(selIdx);
-        e.cmRate->setCallback([rates, modUI](int idx) {
-            const double rate = rates.at(idx);
-            modUI->datasetUI_playback_speed(rate);
-        });
+        e.cmRate->setCallback(
+            [rates, e](int idx)
+            {
+                const double rate = rates.at(idx);
+                auto         mod  = e.module.lock();
+                mod->datasetUI_playback_speed(rate);
+            });
 
         markWindowForReLayout(DEFAULT_WINDOW_NAME);
     }
@@ -649,19 +658,26 @@ void MolaViz::dataset_ui_update()
 {
     for (auto& kv : datasetUIs_)
     {
-        this->enqueue_custom_nanogui_code([&kv]() {
-            auto& e = kv.second;  // lambda capture structured bind is >C++20
-            if (!e.module) return;
+        this->enqueue_custom_nanogui_code(
+            [&kv]()
+            {
+                auto& e =
+                    kv.second;  // lambda capture structured bind is >C++20
+                if (e.module.expired()) return;
 
-            const size_t pos = e.module->datasetUI_lastQueriedTimestep();
-            const size_t N   = e.module->datasetUI_size();
+                auto mod = e.module.lock();
+                if (!mod) return;
 
-            e.lbPlaybackPosition->setCaption(mrpt::format("%zu / %zu", pos, N));
-            e.slider->setRange(std::make_pair<float>(0, N));
-            e.slider->setValue(pos);
-            e.slider->setHighlightedRange(
-                std::make_pair<float>(0.f, pos * 1.0f / (N)));
-        });
+                const size_t pos = mod->datasetUI_lastQueriedTimestep();
+                const size_t N   = mod->datasetUI_size();
+
+                e.lbPlaybackPosition->setCaption(
+                    mrpt::format("%zu / %zu", pos, N));
+                e.slider->setRange(std::make_pair<float>(0, N));
+                e.slider->setValue(pos);
+                e.slider->setHighlightedRange(
+                    std::make_pair<float>(0.f, pos * 1.0f / (N)));
+            });
     }
 }
 
@@ -720,39 +736,41 @@ void MolaViz::gui_thread()
     auto w = create_and_add_window(DEFAULT_WINDOW_NAME);
 
     // Tasks pending to be run before each refresh:
-    w->setLoopCallback([this]() {
-        ProfilerEntry pe(profiler_, "loopCallback lambda");
-
-        // Get a copy of the tasks:
-        task_queue_t tasks;
-        auto         lck       = mrpt::lockHelper(guiThreadPendingTasksMtx_);
-        tasks                  = std::move(guiThreadPendingTasks_);
-        guiThreadPendingTasks_ = task_queue_t();
-        auto winsToReLayout    = guiThreadMustReLayoutTheseWindows_;
-        guiThreadMustReLayoutTheseWindows_.clear();
-        lck.unlock();
-
-        // Run them:
-        auto& hc          = HandlersContainer::Instance();
-        auto  lckHandlers = mrpt::lockHelper(hc.guiHandlersMtx_);
-        for (auto& t : tasks)
+    w->setLoopCallback(
+        [this]()
         {
-            try
-            {
-                t();
-            }
-            catch (const std::exception& e)
-            {
-                MRPT_LOG_ERROR_STREAM(
-                    "Exception in task sent to GUI thread:\n"
-                    << e.what());
-            }
-        }
-        lckHandlers.unlock();
+            ProfilerEntry pe(profiler_, "loopCallback lambda");
 
-        for (const auto& winName : winsToReLayout)
-            windows_.at(winName).win->performLayout();
-    });
+            // Get a copy of the tasks:
+            task_queue_t tasks;
+            auto         lck = mrpt::lockHelper(guiThreadPendingTasksMtx_);
+            tasks            = std::move(guiThreadPendingTasks_);
+            guiThreadPendingTasks_ = task_queue_t();
+            auto winsToReLayout    = guiThreadMustReLayoutTheseWindows_;
+            guiThreadMustReLayoutTheseWindows_.clear();
+            lck.unlock();
+
+            // Run them:
+            auto& hc          = HandlersContainer::Instance();
+            auto  lckHandlers = mrpt::lockHelper(hc.guiHandlersMtx_);
+            for (auto& t : tasks)
+            {
+                try
+                {
+                    t();
+                }
+                catch (const std::exception& e)
+                {
+                    MRPT_LOG_ERROR_STREAM(
+                        "Exception in task sent to GUI thread:\n"
+                        << e.what());
+                }
+            }
+            lckHandlers.unlock();
+
+            for (const auto& winName : winsToReLayout)
+                windows_.at(winName).win->performLayout();
+        });
 
     // A call to "nanogui::leave()" is required to end the infinite loop
     // in mainloop:
@@ -775,7 +793,8 @@ std::future<bool> MolaViz::subwindow_update_visualization(
     using return_type = bool;
 
     auto task = std::make_shared<std::packaged_task<return_type()>>(
-        [this, obj, subWindowTitle, parentWindow]() {
+        [this, obj, subWindowTitle, parentWindow]()
+        {
             try
             {
                 const char* objClassName = obj->GetRuntimeClass()->className;
@@ -850,7 +869,8 @@ std::future<nanogui::Window*> MolaViz::create_subwindow(
     using return_type = nanogui::Window*;
 
     auto task = std::make_shared<std::packaged_task<return_type()>>(
-        [this, subWindowTitle, parentWindow]() {
+        [this, subWindowTitle, parentWindow]()
+        {
             MRPT_LOG_DEBUG_STREAM(
                 "create_subwindow() title='"
                 << subWindowTitle << "' inside toplevel '" << parentWindow
@@ -871,39 +891,43 @@ std::future<nanogui::Window*> MolaViz::create_subwindow(
             // Reduce size button:
             subw->buttonPanel()
                 ->add<nanogui::Button>("", ENTYPO_ICON_RESIZE_100_PERCENT)
-                ->setCallback([subw, topWin]() {
-                    if (auto glControl =
-                            dynamic_cast<mrpt::gui::MRPT2NanoguiGLCanvas*>(
-                                subw->children().at(1));
-                        glControl)
+                ->setCallback(
+                    [subw, topWin]()
                     {
-                        auto s = glControl->size();
-                        s.x() *= 0.75;
-                        s.y() *= 0.75;
-                        glControl->setSize(s);
-                        glControl->setFixedSize(s);
-                    }
-                    topWin->performLayout();
-                });
+                        if (auto glControl =
+                                dynamic_cast<mrpt::gui::MRPT2NanoguiGLCanvas*>(
+                                    subw->children().at(1));
+                            glControl)
+                        {
+                            auto s = glControl->size();
+                            s.x() *= 0.75;
+                            s.y() *= 0.75;
+                            glControl->setSize(s);
+                            glControl->setFixedSize(s);
+                        }
+                        topWin->performLayout();
+                    });
 
             // Enlarge button:
             subw->buttonPanel()
                 ->add<nanogui::Button>("", ENTYPO_ICON_RESIZE_FULL_SCREEN)
-                ->setCallback([subw, topWin]() {
-                    if (auto glControl =
-                            dynamic_cast<mrpt::gui::MRPT2NanoguiGLCanvas*>(
-                                subw->children().at(1));
-                        glControl)
+                ->setCallback(
+                    [subw, topWin]()
                     {
-                        auto s = glControl->size();
-                        s.x() *= 1.25;
-                        s.y() *= 1.25;
-                        glControl->setSize(s);
-                        glControl->setFixedSize(s);
-                    }
+                        if (auto glControl =
+                                dynamic_cast<mrpt::gui::MRPT2NanoguiGLCanvas*>(
+                                    subw->children().at(1));
+                            glControl)
+                        {
+                            auto s = glControl->size();
+                            s.x() *= 1.25;
+                            s.y() *= 1.25;
+                            glControl->setSize(s);
+                            glControl->setFixedSize(s);
+                        }
 
-                    topWin->performLayout();
-                });
+                        topWin->performLayout();
+                    });
 
             return subw;
         });
@@ -922,7 +946,8 @@ std::future<bool> MolaViz::update_3d_object(
     using return_type = bool;
 
     auto task = std::make_shared<std::packaged_task<return_type()>>(
-        [this, objName, obj, viewportName, parentWindow]() {
+        [this, objName, obj, viewportName, parentWindow]()
+        {
             MRPT_LOG_DEBUG_STREAM(
                 "update_3d_object() objName='" << objName << "'");
 
@@ -973,7 +998,8 @@ std::future<bool> MolaViz::update_viewport_look_at(
     using return_type = bool;
 
     auto task = std::make_shared<std::packaged_task<return_type()>>(
-        [this, lookAt, viewportName, parentWindow]() {
+        [this, lookAt, viewportName, parentWindow]()
+        {
             MRPT_LOG_DEBUG_STREAM(
                 "update_viewport_look_at() lookAt=" << lookAt.asString());
 
@@ -1001,7 +1027,8 @@ std::future<bool> MolaViz::output_console_message(
     using return_type = bool;
 
     auto task = std::make_shared<std::packaged_task<return_type()>>(
-        [this, msg, parentWindow]() {
+        [this, msg, parentWindow]()
+        {
             MRPT_LOG_DEBUG_STREAM("output_console_message() msg=" << msg);
 
             ASSERT_(windows_.count(parentWindow));

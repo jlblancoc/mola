@@ -162,8 +162,9 @@ class MolaViz : public ExecutableBase, public VizInterface
     double lastTimeUpdateDatasetUIs_   = 0;
     struct DataPerDatasetUI
     {
-        std::shared_ptr<mola::Dataset_UI> module;
+        std::weak_ptr<mola::Dataset_UI> module;
 
+        bool               first_time_seen    = true;
         nanogui::Window*   ui                 = nullptr;
         nanogui::Label*    lbPlaybackPosition = nullptr;
         nanogui::Slider*   slider             = nullptr;
