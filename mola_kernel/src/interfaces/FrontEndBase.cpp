@@ -14,8 +14,6 @@
 #include <mola_kernel/interfaces/RawDataSourceBase.h>
 #include <mrpt/containers/yaml.h>
 
-#include <iostream>
-
 using namespace mola;
 
 // arguments: class_name, parent_class, class namespace
@@ -36,10 +34,7 @@ void FrontEndBase::initialize(const Yaml& cfg)
             for (const auto& v : cfg.asSequence())
                 front_end_source_names_.insert(v.as<std::string>());
         }
-        else
-        {
-            front_end_source_names_.insert(ds_source.as<std::string>());
-        }
+        else { front_end_source_names_.insert(ds_source.as<std::string>()); }
 
         for (const auto& src_name : front_end_source_names_)
         {

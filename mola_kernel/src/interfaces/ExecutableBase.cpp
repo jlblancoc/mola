@@ -13,8 +13,6 @@
 #include <mola_kernel/interfaces/ExecutableBase.h>
 #include <mrpt/core/lock_helper.h>
 
-#include <mutex>
-
 // arguments: class_name, parent_class, class namespace
 IMPLEMENTS_VIRTUAL_MRPT_OBJECT(ExecutableBase, mrpt::rtti::CObject, mola)
 

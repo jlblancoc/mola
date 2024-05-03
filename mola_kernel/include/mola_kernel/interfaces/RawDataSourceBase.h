@@ -20,9 +20,6 @@
 #include <mrpt/io/CFileGZOutputStream.h>
 #include <mrpt/obs/CObservation.h>
 
-#include <functional>
-#include <memory>
-
 namespace mola
 {
 /** 0-based indices of observations in a dataset */

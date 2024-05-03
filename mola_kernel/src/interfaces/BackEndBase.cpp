@@ -15,8 +15,6 @@
 #include <mola_kernel/interfaces/RawDataSourceBase.h>
 #include <mrpt/containers/yaml.h>
 
-#include <iostream>
-
 using namespace mola;
 
 // arguments: class_name, parent_class, class namespace
