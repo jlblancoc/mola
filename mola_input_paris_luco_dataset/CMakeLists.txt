@@ -8,7 +8,7 @@
 # ------------------------------------------------------------------------------
 
 # Minimum CMake vesion: limited by CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS
-cmake_minimum_required(VERSION 3.4)
+cmake_minimum_required(VERSION 3.5)
 
 # Tell CMake we'll use C++ for use in its tests/flags
 project(mola_input_paris_luco_dataset LANGUAGES CXX)
