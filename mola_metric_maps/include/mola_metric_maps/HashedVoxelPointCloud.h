@@ -238,7 +238,7 @@ class HashedVoxelPointCloud : public mrpt::maps::CMetricMap,
             else
             {
                 // Use the found grid
-                voxel = const_cast<VoxelData*>(&it->second);
+                voxel = &it.value();
             }
 #if defined(HASHED_VOXEL_POINT_CLOUD_WITH_CACHED_ACCESS)
             // Add to cache:

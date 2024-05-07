@@ -277,7 +277,7 @@ class SparseVoxelPointCloud : public mrpt::maps::CMetricMap,
             else
             {
                 // Use the found grid
-                grid = const_cast<InnerGrid*>(&it->second);
+                grid = &it->second;
             }
             // Add to cache:
             cached_.lastAccessIdx[cached_.lastAccessNextWrite]  = oIdx;
