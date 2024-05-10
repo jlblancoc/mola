@@ -67,8 +67,8 @@ void HashedVoxelPointCloud::TMapDefinition::loadFromConfigFile_map_specific(
     const std::string sSectCreation = sectionPrefix + "_creationOpts"s;
     MRPT_LOAD_CONFIG_VAR(voxel_size, float, s, sSectCreation);
 
-    ASSERT_(s.sectionExists(sectionPrefix + "_insertionOpts"s));
-    insertionOpts.loadFromConfigFile(s, sectionPrefix + "_insertionOpts"s);
+    ASSERT_(s.sectionExists(sectionPrefix + "_insertOpts"s));
+    insertionOpts.loadFromConfigFile(s, sectionPrefix + "_insertOpts"s);
 
     if (s.sectionExists(sectionPrefix + "_likelihoodOpts"s))
         likelihoodOpts.loadFromConfigFile(
@@ -301,33 +301,33 @@ bool HashedVoxelPointCloud::internal_insertObservation(
     {
         robotPose2D = mrpt::poses::CPose2D(*robotPose);
         robotPose3D = (*robotPose);
-
-        if (insertionOptions.remove_voxels_farther_than > 0)
-        {
-            const int distInGrid = static_cast<int>(std::ceil(
-                insertionOptions.remove_voxels_farther_than * voxel_size_inv_));
-
-            const auto idxCurObs =
-                coordToGlobalIdx(robotPose3D.translation().cast<float>());
-
-            for (auto it = voxels_.begin(); it != voxels_.end();)
-            {
-                // manhattan distance:
-                const int dist = mrpt::max3(
-                    std::abs(it->first.cx - idxCurObs.cx),
-                    std::abs(it->first.cy - idxCurObs.cy),
-                    std::abs(it->first.cz - idxCurObs.cz));
-
-                if (dist > distInGrid)
-                    it = voxels_.erase(it);
-                else
-                    ++it;
-            }
-        }
     }
     else
     {
         // Default values are (0,0,0)
+    }
+
+    if (insertionOptions.remove_voxels_farther_than > 0)
+    {
+        const int distInGrid = static_cast<int>(std::ceil(
+            insertionOptions.remove_voxels_farther_than * voxel_size_inv_));
+
+        const auto idxCurObs =
+            coordToGlobalIdx(robotPose3D.translation().cast<float>());
+
+        for (auto it = voxels_.begin(); it != voxels_.end();)
+        {
+            // manhattan distance:
+            const int dist = mrpt::max3(
+                std::abs(it->first.cx - idxCurObs.cx),
+                std::abs(it->first.cy - idxCurObs.cy),
+                std::abs(it->first.cz - idxCurObs.cz));
+
+            if (dist > distInGrid)
+                it = voxels_.erase(it);
+            else
+                ++it;
+        }
     }
 
     if (IS_CLASS(obs, CObservation2DRangeScan))

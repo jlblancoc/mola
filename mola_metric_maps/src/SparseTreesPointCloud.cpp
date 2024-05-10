@@ -65,8 +65,8 @@ void SparseTreesPointCloud::TMapDefinition::loadFromConfigFile_map_specific(
     const std::string sSectCreation = sectionPrefix + "_creationOpts"s;
     MRPT_LOAD_CONFIG_VAR(grid_size, float, s, sSectCreation);
 
-    ASSERT_(s.sectionExists(sectionPrefix + "_insertionOpts"s));
-    insertionOpts.loadFromConfigFile(s, sectionPrefix + "_insertionOpts"s);
+    ASSERT_(s.sectionExists(sectionPrefix + "_insertOpts"s));
+    insertionOpts.loadFromConfigFile(s, sectionPrefix + "_insertOpts"s);
 
     ASSERT_(s.sectionExists(sectionPrefix + "_likelihoodOpts"s));
     likelihoodOpts.loadFromConfigFile(s, sectionPrefix + "_likelihoodOpts"s);
