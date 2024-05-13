@@ -1,0 +1,33 @@
+#!/bin/env python3
+
+# Convert NewerCollegeDataset "tum" ground truth files to
+# a format compatible with evo, i.e. merging the two first time columns into one.
+#
+# Usage: ncd-csv2tum /path/to/traj.csv  # Generates: traj.tum
+
+import sys
+
+
+def merge_columns(input_file):
+    # Replace the file extension with .tum
+    output_file = input_file[:-4] + ".tum"
+
+    with open(input_file, 'r') as f:
+        lines = f.readlines()
+
+    with open(output_file, 'w') as f:
+        for line in lines:
+            columns = line.strip().split()
+            result = float(columns[0]) + 1e-9 * float(columns[1])
+            f.write(' '.join(['%.8f' % result] + columns[2:]) + '\n')
+
+    print(f"File saved as {output_file}")
+
+
+if __name__ == "__main__":
+    if len(sys.argv) != 2:
+        print("Usage: " + sys.argv[0] + " <input_file>")
+        sys.exit(1)
+
+    input_file = sys.argv[1]
+    merge_columns(input_file)

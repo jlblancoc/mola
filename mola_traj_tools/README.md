@@ -46,6 +46,16 @@ Usage:
   traj_tf INPUT.tum OUTPUT.tum "[x y z yaw_deg pitch_deg roll_deg]"
 ```
 
+### ncd-csv2tum
+
+Convert NewerCollegeDataset "tum" ground truth files to a format compatible with evo, i.e. merging the two first time columns of "seconds" and "nanoseconds" into one
+and ensuring there are no extra spaces.
+
+Usage: 
+
+```bash
+ncd-csv2tum /path/to/traj.csv  # Generates: traj.tum
+```
 
 ## License
 This package is released under the BSD-3-clause license.

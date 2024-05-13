@@ -42,3 +42,11 @@ mola_add_executable(
 	LINK_LIBRARIES
 		mrpt::poses
 )
+
+# Install "executables" too:
+install(PROGRAMS
+    python/ncd-csv2tum
+  DESTINATION
+    bin
+)
+
