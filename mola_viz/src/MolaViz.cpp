@@ -881,10 +881,6 @@ std::future<nanogui::Window*> MolaViz::create_subwindow(
             ASSERT_(topWin);
 
             auto subw = topWin->createManagedSubWindow(subWindowTitle);
-            subw->setLayout(new nanogui::GridLayout(
-                nanogui::Orientation::Vertical, 1, nanogui::Alignment::Fill, 2,
-                2));
-
             // add to list of subwindows too:
             subWindows_[parentWindow][subWindowTitle] = subw;
 

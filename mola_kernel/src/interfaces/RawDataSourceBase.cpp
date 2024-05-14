@@ -185,6 +185,10 @@ void RawDataSourceBase::sendObservationsToFrontEnds(
                     auto fut = viz->create_subwindow(sv->sensor_label);
                     sv->win  = fut.get();
 
+                    sv->win->setLayout(new nanogui::GridLayout(
+                        nanogui::Orientation::Vertical, 1,
+                        nanogui::Alignment::Fill, 2, 2));
+
                     // Replace and resize, if user provided "win_pos":
                     if (sv->win && !sv->win_pos.empty())
                     {
