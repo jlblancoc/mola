@@ -17,9 +17,17 @@ def merge_columns(input_file):
 
     with open(output_file, 'w') as f:
         for line in lines:
-            columns = line.strip().split()
-            result = float(columns[0]) + 1e-9 * float(columns[1])
-            f.write(' '.join(['%.8f' % result] + columns[2:]) + '\n')
+            columns = [token.strip()
+                       for token in line.replace(',', ' ').split()]
+
+            if len(columns) == 9:
+                result = float(columns[0]) + 1e-9 * float(columns[1])
+                f.write(' '.join(['%.8f' % result] + columns[2:]) + '\n')
+            elif len(columns) == 8:
+                f.write(' '.join(columns[:]) + '\n')
+            else:
+                raise ValueError(
+                    "Input file must have either 8 or 9 columns, but it has " + str(len(columns)))
 
     print(f"File saved as {output_file}")
 
