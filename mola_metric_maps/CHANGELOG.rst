@@ -2,8 +2,8 @@
 Changelog for package mola_metric_maps
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.0.4 (2024-05-14)
+------------------
 * Metric maps: load insertion options from field 'insertOpts' instead of 'insertionOptions' for compatibility with all other MRPT maps
 * disable clang-format in 3rdparty submodules
 * Fix usage of const_cast<> with proper value() method

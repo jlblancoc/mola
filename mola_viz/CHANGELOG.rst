@@ -2,8 +2,8 @@
 Changelog for package mola_viz
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.0.4 (2024-05-14)
+------------------
 * bump cmake_minimum_required to 3.5
 * MolaViz: BUGFIX: shared_ptr were captured by lambdas, delaying proper dtors. Replaced by weak_ptr's
 * Contributors: Jose Luis Blanco-Claraco

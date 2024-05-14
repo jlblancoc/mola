@@ -3,8 +3,8 @@ Changelog for package mola_relocalization
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
-Forthcoming
------------
+1.0.4 (2024-05-14)
+------------------
 * bump cmake_minimum_required to 3.5
 * Move experimental methods to another branch, and update documentation.
 * adjust feature options

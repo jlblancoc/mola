@@ -3,8 +3,8 @@ Changelog for package mola_input_rosbag2
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
-Forthcoming
------------
+1.0.4 (2024-05-14)
+------------------
 * bump cmake_minimum_required to 3.5
 * Contributors: Jose Luis Blanco-Claraco
 
