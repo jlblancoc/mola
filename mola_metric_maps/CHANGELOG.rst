@@ -2,6 +2,14 @@
 Changelog for package mola_metric_maps
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Metric maps: load insertion options from field 'insertOpts' instead of 'insertionOptions' for compatibility with all other MRPT maps
+* disable clang-format in 3rdparty submodules
+* Fix usage of const_cast<> with proper value() method
+* bump cmake_minimum_required to 3.5
+* Contributors: Jose Luis Blanco-Claraco
+
 1.0.3 (2024-04-22)
 ------------------
 * Add macro HASHED_VOXEL_POINT_CLOUD_WITH_CACHED_ACCESS

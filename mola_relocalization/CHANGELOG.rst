@@ -3,6 +3,14 @@ Changelog for package mola_relocalization
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
+Forthcoming
+-----------
+* bump cmake_minimum_required to 3.5
+* Move experimental methods to another branch, and update documentation.
+* adjust feature options
+* Relocalization: refactor in several .cpp files. Add new method from BEV point density
+* Contributors: Jose Luis Blanco-Claraco
+
 1.0.3 (2024-04-22)
 ------------------
 * RelocalizationICP_SE2: work in multiple threads and provides a feedback functor

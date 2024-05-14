@@ -3,6 +3,11 @@ Changelog for package kitti_metrics_eval
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
+Forthcoming
+-----------
+* bump cmake_minimum_required to 3.5
+* Contributors: Jose Luis Blanco-Claraco
+
 1.0.3 (2024-04-22)
 ------------------
 * Fix package.xml website URL

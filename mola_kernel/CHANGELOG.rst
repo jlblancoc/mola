@@ -2,6 +2,14 @@
 Changelog for package mola_kernel
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* bump cmake_minimum_required to 3.5
+* Avoid global static objects
+* remove useless #include's
+* Define Dataset_UI dtor/ctor in a separate translation unit
+* Contributors: Jose Luis Blanco-Claraco
+
 1.0.3 (2024-04-22)
 ------------------
 * Fix package.xml website URL

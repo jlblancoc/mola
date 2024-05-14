@@ -2,6 +2,12 @@
 Changelog for package mola_traj_tools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Add ncd-csv2tum trajectory file tool
+* bump cmake_minimum_required to 3.5
+* Contributors: Jose Luis Blanco-Claraco
+
 1.0.3 (2024-04-22)
 ------------------
 * Fix package.xml website URL

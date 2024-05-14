@@ -2,6 +2,11 @@
 Changelog for package mola_input_kitti_dataset
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* bump cmake_minimum_required to 3.5
+* Contributors: Jose Luis Blanco-Claraco
+
 1.0.3 (2024-04-22)
 ------------------
 * Clearer exception error messages

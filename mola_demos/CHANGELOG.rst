@@ -2,6 +2,11 @@
 Changelog for package mola_demos
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* bump cmake_minimum_required to 3.5
+* Contributors: Jose Luis Blanco-Claraco
+
 1.0.3 (2024-04-22)
 ------------------
 * ROS2 demo yaml files: fix missing entry and unify notation with mola_lidar_odometry
