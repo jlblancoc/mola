@@ -101,6 +101,12 @@ struct Cli
     TCLAP::SwitchArg argSkipFigures{
         "", "no-figures", "Skip generating the error figures", cmd};
 
+    TCLAP::SwitchArg argResultInKittiFormat{
+        "", "result-in-kitti-format",
+        "Use to read solution trajectory files in KITTI (4*3 elements per row) "
+        "format instead of in TUM format",
+        cmd};
+
     std::string kitti_basedir;
 };
 
@@ -873,19 +879,29 @@ bool eval(Cli& cli)  // string result_sha,Mail* mail)
         vector<Matrix> poses_result;
         vector<Matrix> poses_gt;
 
-        if (seq.is_kitti)
+        if (cli.argResultInKittiFormat.isSet())
         {
-            // read ground truth and result poses
+            // for use with real KITTI GT only:
+            ASSERT_(!cli.arg_override_gt_file.isSet());
             poses_gt     = loadPoses(seq.kitti_gt_poses_file);
-            poses_result = loadPoses_tum_format(
-                cli, seq.result_file, seq.kitti_calib_file, false);
+            poses_result = loadPoses(seq.result_file);
         }
         else
         {
-            poses_gt =
-                loadPoses_tum_format(cli, seq.custom_gt_tum_file, {}, false);
-            poses_result =
-                loadPoses_tum_format(cli, seq.result_file, {}, false);
+            if (seq.is_kitti)
+            {
+                // read ground truth and result poses
+                poses_gt     = loadPoses(seq.kitti_gt_poses_file);
+                poses_result = loadPoses_tum_format(
+                    cli, seq.result_file, seq.kitti_calib_file, false);
+            }
+            else
+            {
+                poses_gt = loadPoses_tum_format(
+                    cli, seq.custom_gt_tum_file, {}, false);
+                poses_result =
+                    loadPoses_tum_format(cli, seq.result_file, {}, false);
+            }
         }
 
         // plot status
