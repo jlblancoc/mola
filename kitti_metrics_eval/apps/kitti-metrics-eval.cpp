@@ -32,64 +32,93 @@
 #include <mrpt/system/string_utils.h>  // tokenize()
 
 #include <Eigen/Dense>
-#include <array>
 #include <cstdlib>
 #include <fstream>
 #include <iostream>
 #include <optional>
 
 // Declare supported cli switches ===========
-static TCLAP::CmdLine cmd("kitti-metrics-eval");
+struct Cli
+{
+    TCLAP::CmdLine cmd{"kitti-metrics-eval"};
 
-static TCLAP::ValueArg<std::string> arg_kitti_basedir(
-    "k", "kitti-basedir",
-    "Path to the kitti datasets. Overrides to the default, which is reading "
-    "the env var `KITTI_BASE_DIR`.",
-    false, "", "", cmd);
+    TCLAP::ValueArg<std::string> arg_kitti_basedir{
+        "k",
+        "kitti-basedir",
+        "Path to the kitti datasets. Overrides to the default, which is "
+        "reading "
+        "the env var `KITTI_BASE_DIR`.",
+        false,
+        "",
+        "",
+        cmd};
 
-static TCLAP::ValueArg<std::string> arg_result_path(
-    "r", "result-tum-path", "File to evaluate, in TUM format", true,
-    "result.txt|result_%02i.txt", "result.txt", cmd);
+    TCLAP::ValueArg<std::string> arg_result_path{
+        "r",
+        "result-tum-path",
+        "File to evaluate, in TUM format",
+        true,
+        "result.txt|result_%02i.txt",
+        "result.txt",
+        cmd};
 
-static TCLAP::ValueArg<std::string> argSavePathKittiFormat(
-    "", "save-as-kitti",
-    "If given, will transform the input path from the LIDAR frame to the cam0 "
-    "frame and save the path to a TXT file in the format expected by KITTI dev "
-    "kit.",
-    false, "result.kitti", "result.kitti", cmd);
+    TCLAP::ValueArg<std::string> argSavePathKittiFormat{
+        "",
+        "save-as-kitti",
+        "If given, will transform the input path from the LIDAR frame to the "
+        "cam0 "
+        "frame and save the path to a TXT file in the format expected by KITTI "
+        "dev "
+        "kit.",
+        false,
+        "result.kitti",
+        "result.kitti",
+        cmd};
 
-static TCLAP::MultiArg<int> arg_seq(
-    "s", "sequence",
-    "The sequence number of the path(s) file(s) to evaluate, used to find out "
-    "GT and calibration files for the Kitti dataset.",
-    false, "01", cmd);
+    TCLAP::MultiArg<int> arg_seq{
+        "s",
+        "sequence",
+        "The sequence number of the path{s} file{s} to evaluate, used to find "
+        "out "
+        "GT and calibration files for the Kitti dataset.",
+        false,
+        "01",
+        cmd};
 
-static TCLAP::ValueArg<std::string> arg_override_gt_file(
-    "", "gt-tum-path",
-    "If provided, the --sequence flag will be ignored and this particular file "
-    "in TUM format will be read and used as ground truth to compare against "
-    "the resulting odometry path.",
-    false, "trajectory_gt.txt", "trajectory_gt.txt", cmd);
+    TCLAP::ValueArg<std::string> arg_override_gt_file{
+        "",
+        "gt-tum-path",
+        "If provided, the --sequence flag will be ignored and this particular "
+        "file "
+        "in TUM format will be read and used as ground truth to compare "
+        "against "
+        "the resulting odometry path.",
+        false,
+        "trajectory_gt.txt",
+        "trajectory_gt.txt",
+        cmd};
 
-static TCLAP::SwitchArg argSkipFigures(
-    "", "no-figures", "Skip generating the error figures", cmd);
+    TCLAP::SwitchArg argSkipFigures{
+        "", "no-figures", "Skip generating the error figures", cmd};
 
-static std::string kitti_basedir;
+    std::string kitti_basedir;
+};
+
 // points to CPose3D path from odometry/slam
 
-static bool eval();
+static bool eval(Cli& cli);
 
-static void do_kitti_eval_error()
+static void do_kitti_eval_error(Cli& cli)
 {
     using namespace std::string_literals;
 
     if (const char* s = ::getenv("KITTI_BASE_DIR"); s != nullptr)
-        kitti_basedir = s;
+        cli.kitti_basedir = s;
 
-    if (kitti_basedir.empty())
+    if (cli.kitti_basedir.empty())
     {
-        if (arg_kitti_basedir.isSet())
-            kitti_basedir = arg_kitti_basedir.getValue();
+        if (cli.arg_kitti_basedir.isSet())
+            cli.kitti_basedir = cli.arg_kitti_basedir.getValue();
         else
         {
             throw std::runtime_error(
@@ -97,14 +126,14 @@ static void do_kitti_eval_error()
                 "line argument --kitti-basedir");
         }
     }
-    ASSERT_DIRECTORY_EXISTS_(kitti_basedir);
-    std::cout << "Using kitti datasets basedir: " << kitti_basedir << "\n";
+    ASSERT_DIRECTORY_EXISTS_(cli.kitti_basedir);
+    std::cout << "Using kitti datasets basedir: " << cli.kitti_basedir << "\n";
 
-    if (!arg_override_gt_file.isSet())
-        ASSERT_DIRECTORY_EXISTS_(kitti_basedir + "/poses"s);
+    if (!cli.arg_override_gt_file.isSet())
+        ASSERT_DIRECTORY_EXISTS_(cli.kitti_basedir + "/poses"s);
 
     // Run evaluation
-    eval();
+    eval(cli);
 }
 
 int main(int argc, char** argv)
@@ -112,8 +141,10 @@ int main(int argc, char** argv)
     try
     {
         // Parse arguments:
-        if (!cmd.parse(argc, argv)) return 1;  // should exit.
-        do_kitti_eval_error();
+        Cli cli;
+
+        if (!cli.cmd.parse(argc, argv)) return 1;  // should exit.
+        do_kitti_eval_error(cli);
         return 0;
     }
     catch (std::exception& e)
@@ -144,7 +175,8 @@ static void parse_calib_line(
     MRPT_TRY_END
 }
 std::vector<Matrix> loadPoses_tum_format(
-    const std::string& file_name, const std::string& calib_file, bool isGT)
+    Cli& cli, const std::string& file_name, const std::string& calib_file,
+    bool isGT)
 {
     mrpt::poses::CPose3DInterpolator trajectory;
 
@@ -192,9 +224,9 @@ std::vector<Matrix> loadPoses_tum_format(
 
     std::optional<std::ofstream> fKittiOut;
 
-    if (!isGT && argSavePathKittiFormat.isSet())
+    if (!isGT && cli.argSavePathKittiFormat.isSet())
     {
-        const auto fil = argSavePathKittiFormat.getValue();
+        const auto fil = cli.argSavePathKittiFormat.getValue();
         fKittiOut.emplace();
         fKittiOut->open(fil);
         ASSERT_(*fKittiOut);
@@ -411,10 +443,10 @@ void savePathPlot(
 vector<int32_t> computeRoi(
     vector<Matrix>& poses_gt, vector<Matrix>& poses_result)
 {
-    float x_min = numeric_limits<int32_t>::max();
-    float x_max = numeric_limits<int32_t>::min();
-    float z_min = numeric_limits<int32_t>::max();
-    float z_max = numeric_limits<int32_t>::min();
+    float x_min = static_cast<float>(numeric_limits<int32_t>::max());
+    float x_max = static_cast<float>(numeric_limits<int32_t>::min());
+    float z_min = static_cast<float>(numeric_limits<int32_t>::max());
+    float z_max = static_cast<float>(numeric_limits<int32_t>::min());
 
     for (vector<Matrix>::iterator it = poses_gt.begin(); it != poses_gt.end();
          it++)
@@ -452,7 +484,7 @@ vector<int32_t> computeRoi(
     return roi;
 }
 
-void plotPathPlot(string dir, vector<int32_t>& roi, int32_t idx)
+void plotPathPlot(Cli& cli, string dir, vector<int32_t>& roi, int32_t idx)
 {
     // gnuplot file name
     char command[1024];
@@ -508,7 +540,7 @@ void plotPathPlot(string dir, vector<int32_t>& roi, int32_t idx)
     }
 
     // create pdf and crop
-    if (!argSkipFigures.isSet())
+    if (!cli.argSkipFigures.isSet())
     {
         sprintf(
             command, "cd %s; ps2pdf %02d.eps %02d_large.pdf", dir.c_str(), idx,
@@ -571,8 +603,9 @@ void saveErrorPlots(
     }
 
     // for each driving speed do (in m/s)
-    for (float speed = 2; speed < 25; speed += 2)
+    for (int iSpeed = 2; iSpeed < 25; iSpeed += 2)
     {
+        float speed = iSpeed;
         float t_err = 0;
         float r_err = 0;
         float num   = 0;
@@ -604,7 +637,7 @@ void saveErrorPlots(
     fclose(fp_rs);
 }
 
-void plotErrorPlots(string dir, const char* prefix)
+void plotErrorPlots(Cli& cli, string dir, const char* prefix)
 {
     char command[4096];
 
@@ -698,7 +731,7 @@ void plotErrorPlots(string dir, const char* prefix)
         }
 
         // create pdf and crop
-        if (!argSkipFigures.isSet())
+        if (!cli.argSkipFigures.isSet())
         {
             sprintf(
                 command, "cd %s; ps2pdf %s_%s.eps %s_%s_large.pdf", dir.c_str(),
@@ -721,16 +754,16 @@ void plotErrorPlots(string dir, const char* prefix)
 
 void saveStats(vector<errors> err, string dir)
 {
-    float t_err           = 0;
-    float r_err           = 0;
-    float r_err_per_meter = 0;
+    float t_err = 0;
+    float r_err = 0;
+    // float r_err_per_meter = 0;
 
     // for all errors do => compute sum of t_err, r_err
     for (vector<errors>::iterator it = err.begin(); it != err.end(); it++)
     {
         t_err += it->t_err;
         r_err += it->r_err;
-        r_err_per_meter += it->r_err / it->len;
+        // r_err_per_meter += it->r_err / it->len;
     }
 
     // open file
@@ -744,22 +777,22 @@ void saveStats(vector<errors> err, string dir)
 
     printf(
         "%% Overall error: trans_error(%%)  rot_error(rad/m) "
-        "rot_error(deg/m)\n");
+        "rot_error(deg/100m)\n");
     printf(
         "%f  %f %f\n", 100 * t_err / num, r_err / num,
-        (180.0 / M_PI) * r_err / num);
+        (180.0 / M_PI) * 100 * r_err / num);
 
     // close file
     fclose(fp);
 }
 
-bool eval()  // string result_sha,Mail* mail)
+bool eval(Cli& cli)  // string result_sha,Mail* mail)
 {
     // ground truth and result directories
-    string gt_dir = kitti_basedir + "/poses";
+    string gt_dir = cli.kitti_basedir + "/poses";
 
     string result_dir =
-        mrpt::system::extractFileDirectory(arg_result_path.getValue());
+        mrpt::system::extractFileDirectory(cli.arg_result_path.getValue());
     if (result_dir.empty()) result_dir = ".";
 
     std::cout << "Using as result_dir: " << result_dir << "\n";
@@ -793,14 +826,16 @@ bool eval()  // string result_sha,Mail* mail)
 
     std::vector<InfoPerSeq> seqs;
 
-    if (arg_override_gt_file.isSet())
+    if (cli.arg_override_gt_file.isSet())
     {
         // custom ground truth TUM file(s):
 
         // multiple files?
         std::vector<std::string> gtFiles, resultFiles;
-        mrpt::system::tokenize(arg_override_gt_file.getValue(), ",", gtFiles);
-        mrpt::system::tokenize(arg_result_path.getValue(), ",", resultFiles);
+        mrpt::system::tokenize(
+            cli.arg_override_gt_file.getValue(), ",", gtFiles);
+        mrpt::system::tokenize(
+            cli.arg_result_path.getValue(), ",", resultFiles);
 
         ASSERT_EQUAL_(gtFiles.size(), resultFiles.size());
 
@@ -817,16 +852,17 @@ bool eval()  // string result_sha,Mail* mail)
     else
     {
         // original KITTI dataset GT files:
-        for (int32_t i : arg_seq.getValue())
+        for (int32_t i : cli.arg_seq.getValue())
         {
             auto& s = seqs.emplace_back();
 
             s.is_kitti     = true;
             s.kitti_seq_no = i;
             s.file_name    = mrpt::format("%02d.txt", i);
-            s.result_file = mrpt::format(arg_result_path.getValue().c_str(), i);
+            s.result_file =
+                mrpt::format(cli.arg_result_path.getValue().c_str(), i);
             s.kitti_calib_file = mrpt::format(
-                "%s/sequences/%02i/calib.txt", kitti_basedir.c_str(), i);
+                "%s/sequences/%02i/calib.txt", cli.kitti_basedir.c_str(), i);
             s.kitti_gt_poses_file = gt_dir + "/" + s.file_name;
         }
     }
@@ -842,12 +878,14 @@ bool eval()  // string result_sha,Mail* mail)
             // read ground truth and result poses
             poses_gt     = loadPoses(seq.kitti_gt_poses_file);
             poses_result = loadPoses_tum_format(
-                seq.result_file, seq.kitti_calib_file, false);
+                cli, seq.result_file, seq.kitti_calib_file, false);
         }
         else
         {
-            poses_gt = loadPoses_tum_format(seq.custom_gt_tum_file, {}, false);
-            poses_result = loadPoses_tum_format(seq.result_file, {}, false);
+            poses_gt =
+                loadPoses_tum_format(cli, seq.custom_gt_tum_file, {}, false);
+            poses_result =
+                loadPoses_tum_format(cli, seq.result_file, {}, false);
         }
 
         // plot status
@@ -875,17 +913,17 @@ bool eval()  // string result_sha,Mail* mail)
         total_err.insert(total_err.end(), seq_err.begin(), seq_err.end());
 
         // for first half => plot trajectory and compute individual stats
-        if (/*seq.kitti_seq_no <= 15 && */ !argSkipFigures.isSet())
+        if (/*seq.kitti_seq_no <= 15 && */ !cli.argSkipFigures.isSet())
         {
             // save + plot bird's eye view trajectories
             savePathPlot(
                 poses_gt, poses_result, plot_path_dir + "/" + seq.file_name);
             vector<int32_t> roi = computeRoi(poses_gt, poses_result);
-            plotPathPlot(plot_path_dir, roi, seq.kitti_seq_no);
+            plotPathPlot(cli, plot_path_dir, roi, seq.kitti_seq_no);
 
             // save + plot individual errors
             saveErrorPlots(seq_err, plot_error_dir, seq.file_name.c_str());
-            plotErrorPlots(plot_error_dir, seq.file_name.c_str());
+            plotErrorPlots(cli, plot_error_dir, seq.file_name.c_str());
         }
     }
 
@@ -895,7 +933,7 @@ bool eval()  // string result_sha,Mail* mail)
         char prefix[16];
         sprintf(prefix, "avg");
         saveErrorPlots(total_err, plot_error_dir, prefix);
-        plotErrorPlots(plot_error_dir, prefix);
+        plotErrorPlots(cli, plot_error_dir, prefix);
         saveStats(total_err, result_dir);
     }
 
