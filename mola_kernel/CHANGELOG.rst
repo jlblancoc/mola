@@ -2,6 +2,11 @@
 Changelog for package mola_kernel
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* viz: fix mismatched free/delete inside nanogui layout
+* Contributors: Jose Luis Blanco-Claraco
+
 1.0.4 (2024-05-14)
 ------------------
 * bump cmake_minimum_required to 3.5

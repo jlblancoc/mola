@@ -2,6 +2,11 @@
 Changelog for package mola_traj_tools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* ncd-csv2tum: More robust against comments, commas instead of spaces, etc.
+* Contributors: Jose Luis Blanco-Claraco
+
 1.0.4 (2024-05-14)
 ------------------
 * Add ncd-csv2tum trajectory file tool

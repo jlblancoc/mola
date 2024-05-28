@@ -3,6 +3,12 @@ Changelog for package kitti_metrics_eval
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
+Forthcoming
+-----------
+* Add new flag --result-in-kitti-format to read trajectories in KITTI format too, not only in TUM format.
+* Clean all warnings and clang-tidy recommendations
+* Contributors: Jose Luis Blanco-Claraco
+
 1.0.4 (2024-05-14)
 ------------------
 * bump cmake_minimum_required to 3.5
