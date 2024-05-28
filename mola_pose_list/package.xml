@@ -5,7 +5,7 @@
 -->
 <package format="3">
   <name>mola_pose_list</name>
-  <version>1.0.4</version>
+  <version>1.0.5</version>
   <description>C++ library for searchable pose lists</description>
 
   <author     email="joseluisblancoc@gmail.com">Jose-Luis Blanco-Claraco</author>

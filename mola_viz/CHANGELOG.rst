@@ -2,8 +2,8 @@
 Changelog for package mola_viz
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.0.5 (2024-05-28)
+------------------
 * viz: fix mismatched free/delete inside nanogui layout
 * Contributors: Jose Luis Blanco-Claraco
 

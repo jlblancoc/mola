@@ -2,8 +2,8 @@
 Changelog for package mola_traj_tools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.0.5 (2024-05-28)
+------------------
 * ncd-csv2tum: More robust against comments, commas instead of spaces, etc.
 * Contributors: Jose Luis Blanco-Claraco
 
