@@ -35,15 +35,26 @@ Usage:
   traj_ypr2tum INPUT.ypr OUTPUT.tum
 ```
 
-### traj_tf
+### traj_tf_left
 
 This tool takes an **input** trajectory file in the [TUM format](https://github.com/MichaelGrupp/evo/wiki/Formats#tum---tum-rgb-d-dataset-trajectory-format),
-a SE(3) **transformation**, and applies it to the input, writing the modified trajectory to an **output** file.
+a SE(3) **transformation**, and applies it to the input trajectory **multiplying the trajectory by the left** by the given transformation, writing the modified trajectory to an **output** file.
 
 Usage:
 
 ```bash
-  traj_tf INPUT.tum OUTPUT.tum "[x y z yaw_deg pitch_deg roll_deg]"
+  traj_tf_left INPUT.tum OUTPUT.tum "[x y z yaw_deg pitch_deg roll_deg]"
+```
+
+### traj_tf_right
+
+This tool takes an **input** trajectory file in the [TUM format](https://github.com/MichaelGrupp/evo/wiki/Formats#tum---tum-rgb-d-dataset-trajectory-format),
+a SE(3) **transformation**, and applies it to the input trajectory **multiplying the trajectory by the right** by the given transformation, writing the modified trajectory to an **output** file.
+
+Usage:
+
+```bash
+  traj_tf_right INPUT.tum OUTPUT.tum "[x y z yaw_deg pitch_deg roll_deg]"
 ```
 
 ### ncd-csv2tum

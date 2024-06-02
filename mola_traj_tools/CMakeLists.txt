@@ -30,8 +30,15 @@ mola_add_executable(
 )
 
 mola_add_executable(
-	TARGET  traj_tf
-	SOURCES src/traj_tf.cpp
+	TARGET  traj_tf_left
+	SOURCES src/traj_tf_left.cpp
+	LINK_LIBRARIES
+		mrpt::poses
+)
+
+mola_add_executable(
+	TARGET  traj_tf_right
+	SOURCES src/traj_tf_right.cpp
 	LINK_LIBRARIES
 		mrpt::poses
 )
