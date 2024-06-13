@@ -198,6 +198,8 @@ std::optional<NavState> NavStateFuse::build_and_optimize_fg(
 {
     using namespace std::string_literals;
 
+    delete_too_old_entries();
+
     // Return an empty answer if we don't have data, or we would need to
     // extrapolate too much:
     if (state_.data.empty() || state_.known_frames.empty()) return {};
@@ -300,13 +302,19 @@ std::optional<NavState> NavStateFuse::build_and_optimize_fg(
 
                 fg.addPrior(
                     P(kfId), p.translation(),
-                    gtsam::noiseModel::Gaussian::Covariance(
-                        pCov.block<3, 3>(3, 3)));
+                    gtsam::noiseModel::Robust::Create(
+                        gtsam::noiseModel::mEstimator::GemanMcClure::Create(
+                            params_.robust_param),
+                        gtsam::noiseModel::Gaussian::Covariance(
+                            pCov.block<3, 3>(3, 3))));
 
                 fg.addPrior(
                     R(kfId), p.rotation(),
-                    gtsam::noiseModel::Gaussian::Covariance(
-                        pCov.block<3, 3>(0, 0)));
+                    gtsam::noiseModel::Robust::Create(
+                        gtsam::noiseModel::mEstimator::GemanMcClure::Create(
+                            params_.robust_param),
+                        gtsam::noiseModel::Gaussian::Covariance(
+                            pCov.block<3, 3>(0, 0))));
             }
             else
             {
@@ -329,16 +337,28 @@ std::optional<NavState> NavStateFuse::build_and_optimize_fg(
 
     const auto& optimal = lm.optimize();
 
+    const double final_rmse = std::sqrt(fg.error(optimal) / fg.size());
+
     MRPT_LOG_DEBUG_STREAM(
         "[build_and_optimize_fg] LM ran for "
-        << lm.iterations() << " iterations, " << fg.size() << " factors, RMSE: "
+        << lm.iterations() << " iterations, " << fg.size() << " factors, "
+        << state_.data.size() << " KFs, RMSE: "
         << std::sqrt(fg.error(state_.impl->values) / fg.size()) << " => "
-        << std::sqrt(fg.error(optimal) / fg.size()));
+        << final_rmse);
 
     if (NAVSTATE_PRINT_FG)
     {
         optimal.print("Optimized:");
         std::cout << "\n query_KF_id: " << *query_KF_id << std::endl;
+    }
+
+    // final sanity check:
+    if (final_rmse > params_.max_rmse)
+    {
+        MRPT_LOG_DEBUG(
+            "[build_and_optimize_fg] Discarding solution due to high RMSE.");
+
+        return {};
     }
 
     // Extract results from the factor graph:

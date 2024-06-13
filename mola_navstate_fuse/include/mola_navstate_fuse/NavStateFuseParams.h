@@ -63,6 +63,9 @@ class NavStateFuseParams
     double sigma_integrator_position              = 0.10;  // [m]
     double sigma_integrator_orientation           = 0.10;  // [rad]
 
+    double robust_param = 30.0;
+    double max_rmse     = 1.0;
+
     mrpt::math::TTwist3D initial_twist;
     double               initial_twist_sigma_lin = 20.0;  // [m/s]
     double               initial_twist_sigma_ang = 3.0;  // [rad/s]
