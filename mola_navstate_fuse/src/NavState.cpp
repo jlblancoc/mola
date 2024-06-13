@@ -26,4 +26,18 @@
 
 #include <mola_navstate_fuse/NavState.h>
 
+#include <Eigen/Dense>
+#include <sstream>
+
 using namespace mola;
+
+std::string NavState::asString() const
+{
+    std::ostringstream ss;
+    ss << "pose  : " << pose;
+    ss << "twist : " << twist.asString() << "\n";
+    ss << "twist inv_cov diagonal: "
+       << twist_inv_cov.asEigen().diagonal().transpose() << "\n";
+
+    return ss.str();
+}

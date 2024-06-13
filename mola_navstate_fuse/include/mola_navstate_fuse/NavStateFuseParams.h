@@ -28,6 +28,7 @@
 
 #include <mrpt/containers/yaml.h>
 #include <mrpt/math/TPoint3D.h>
+#include <mrpt/math/TTwist3D.h>
 
 namespace mola
 {
@@ -62,8 +63,9 @@ class NavStateFuseParams
     double sigma_integrator_position              = 0.10;  // [m]
     double sigma_integrator_orientation           = 0.10;  // [rad]
 
-    /** Const. velocity model: sigma of lin and angular velocity */
-    double const_vel_model_std_linvel{1.0}, const_vel_model_std_angvel{1.0};
+    mrpt::math::TTwist3D initial_twist;
+    double               initial_twist_sigma_lin = 20.0;  // [m/s]
+    double               initial_twist_sigma_ang = 3.0;  // [rad/s]
 };
 
 }  // namespace mola

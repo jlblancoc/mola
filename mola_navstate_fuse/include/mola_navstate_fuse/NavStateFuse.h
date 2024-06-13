@@ -45,6 +45,7 @@
 // std:
 #include <mutex>
 #include <optional>
+#include <set>
 
 namespace mola
 {
@@ -93,7 +94,7 @@ class NavStateFuse : public mrpt::system::COutputLogger
 {
    public:
     NavStateFuse();
-    ~NavStateFuse() = default;
+    ~NavStateFuse();
 
     /** \name Main API
      *  @{ */
@@ -141,7 +142,7 @@ class NavStateFuse : public mrpt::system::COutputLogger
      * validity time window (e.g. too far in the future to be trustful).
      */
     std::optional<NavState> estimated_navstate(
-        const mrpt::Clock::time_point& timestamp);
+        const mrpt::Clock::time_point& timestamp, const std::string& frame_id);
 
 #if 0
     std::optional<mrpt::math::TTwist3D> get_last_twist() const
@@ -151,6 +152,9 @@ class NavStateFuse : public mrpt::system::COutputLogger
 
     void force_last_twist(const mrpt::math::TTwist3D& twist);
 #endif
+
+    /// Returns a list of known frame_ids:
+    auto known_frame_ids() -> std::set<std::string>;
 
     /** @} */
 
@@ -211,13 +215,16 @@ class NavStateFuse : public mrpt::system::COutputLogger
 #endif
     };
 
-    State                state_;
-    std::recursive_mutex state_mtx_;  /// to access state_
+    State state_;
 
-    void build_and_optimize_fg(const mrpt::Clock::time_point queryTimestamp);
+    std::optional<NavState> build_and_optimize_fg(
+        const mrpt::Clock::time_point queryTimestamp,
+        const std::string&            frame_id);
 
     /// Implementation of Eqs (1),(4) in the MOLA RSS2019 paper.
     void addFactor(const mola::FactorConstVelKinematics& f);
+
+    void delete_too_old_entries();
 };
 
 }  // namespace mola

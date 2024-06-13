@@ -19,83 +19,235 @@
  * ------------------------------------------------------------------------- */
 
 /**
- * @file   test-imu-rotation-integrator.cpp
- * @brief  Unit tests for mola-imu-preintegration functionality
+ * @file   test-navstate-basic.cpp
+ * @brief  Unit tests for NavStateFuse
  * @author Jose Luis Blanco Claraco
- * @date   Sep 21, 2021
+ * @date   Jun 13, 2024
  */
 
-#include <mola_imu_preintegration/RotationIntegrator.h>
+#include <mola_navstate_fuse/NavStateFuse.h>
 #include <mrpt/poses/Lie/SE.h>
+#include <mrpt/system/os.h>
 
+#include <Eigen/Dense>  // required by "matrix * scalar"
+#include <functional>
 #include <iostream>
+#include <map>
 
 using namespace std::string_literals;
 
-static const char* yamlRotIntParams1 =
-    R"###(# Config for gtsam::RotationIntegrationParams
-gyroBias: [-1.0e-4, 2.0e-4, -3.0e-4]
-sensorLocationInVehicle:
-  quaternion: [0.0, 0.0, 0.0, 1.0]
-  translation: [0.0, 0.0, 0.0]
+namespace
+{
+const char* navStateParams =
+    R"###(# Config for NavStateFuseParams
+sliding_window_length: 5.0 # [s]
+max_time_to_use_velocity_model: 2.0  # [s]
+time_between_frames_to_warning: 2.0  # [s]
+sigma_random_walk_acceleration_linear: 1.0 # [m/s²]
+sigma_random_walk_acceleration_angular: 1.0 # [rad/s²]
+sigma_integrator_position: 0.10 # [m]
+sigma_integrator_orientation: 0.10 # [rad]
 )###";
 
-static void test_rotation_integration()
+using namespace mrpt::literals;  // _deg
+using mrpt::math::CMatrixDouble66;
+
+class Data
 {
-    mola::RotationIntegrator ri;
-    ri.initialize(mrpt::containers::yaml::FromText(yamlRotIntParams1));
+   private:
+    Data() = default;
 
-    ASSERT_EQUAL_(ri.params_.gyroBias.x, -1.0e-4);
-    ASSERT_EQUAL_(ri.params_.gyroBias.y, +2.0e-4);
-    ASSERT_EQUAL_(ri.params_.gyroBias.z, -3.0e-4);
-
-    ASSERT_(!ri.params_.sensorPose.has_value());  // since it's the Identity.
-    // const auto gtPose = mrpt::poses::CPose3D::Identity();
-    // ASSERT_LT_(mrpt::poses::Lie::SE<3>::log(*ri.params_.sensorPose -
-    // gtPose).norm(),1e-6);
-
-    // Initial state:
-    auto lambdaAssertInitialState = [&ri]() {
-        const auto& s = ri.current_integration_state();
-        ASSERT_LT_(
-            (s.deltaRij_ - mrpt::math::CMatrixDouble33::Identity()).norm(),
-            1e-6);
-        ASSERT_EQUAL_(s.deltaTij_, .0);
-    };
-
-    lambdaAssertInitialState();
-
-    // Integrate some readings:
-    for (int t = 0; t < 2000; t++)
+   public:
+    static Data& Instance()
     {
-        const double dt = 1e-3;
-        ri.integrate_measurement({0, 0, 3.0}, dt);
-    }
-    // Final state:
-    {
-        const auto& s     = ri.current_integration_state();
-        const auto  gtRot = mrpt::poses::CPose3D::FromYawPitchRoll(6.0, 0, 0);
-
-        ASSERT_LT_((s.deltaRij_ - gtRot.getRotationMatrix()).norm(), 1e-2);
-        ASSERT_NEAR_(s.deltaTij_, 2.0, 1e-3);
+        static Data o;
+        return o;
     }
 
-    // reset:
-    ri.reset_integration();
-    lambdaAssertInitialState();
+    const CMatrixDouble66 I6_10cm =
+        CMatrixDouble66(CMatrixDouble66::Identity() * 0.10);
+
+    const mrpt::poses::CPose3D p0 = mrpt::poses::CPose3D::FromXYZYawPitchRoll(
+        0, 0, 0, 0.0_deg, 0.0_deg, 0.0_deg);
+    const mrpt::poses::CPose3DPDFGaussian pdf0{p0, I6_10cm};
+
+    const mrpt::poses::CPose3D p1 = mrpt::poses::CPose3D::FromXYZYawPitchRoll(
+        0.5, 0, 0, 0.0_deg, 0.0_deg, 0.0_deg);
+    const mrpt::poses::CPose3DPDFGaussian pdf1{p1, I6_10cm};
+
+    const mrpt::poses::CPose3D p2 = mrpt::poses::CPose3D::FromXYZYawPitchRoll(
+        1.0, 0, 0, 0.0_deg, 0.0_deg, 0.0_deg);
+    const mrpt::poses::CPose3DPDFGaussian pdf2{p2, I6_10cm};
+};
+
+// --------------------------------------
+void test_init_state()
+{
+    mola::NavStateFuse nav;
+    nav.initialize(mrpt::containers::yaml::FromText(navStateParams));
+
+    ASSERT_(nav.known_frame_ids().empty());
+
+    const auto ret = nav.estimated_navstate(mrpt::Clock::now(), "odom");
+    ASSERT_(!ret.has_value());
 }
+
+// --------------------------------------
+void test_one_pose()
+{
+    const auto& _ = Data::Instance();
+
+    mola::NavStateFuse nav;
+    nav.initialize(mrpt::containers::yaml::FromText(navStateParams));
+
+    const auto t0 = mrpt::Clock::fromDouble(.0);
+
+    nav.fuse_pose(t0, _.pdf0, "odom");
+
+    const auto ret = nav.estimated_navstate(t0, "odom");
+    ASSERT_(ret.has_value());
+
+    // std::cout << "Result:\n" << ret->asString() << std::endl;
+
+    ASSERT_NEAR_(
+        mrpt::poses::Lie::SE<3>::log(ret->pose.mean - _.pdf0.mean).norm(), 0.0,
+        1e-4);
+}
+
+// --------------------------------------
+void test_one_pose_extrapolate()
+{
+    const auto& _ = Data::Instance();
+
+    mola::NavStateFuse nav;
+    nav.initialize(mrpt::containers::yaml::FromText(navStateParams));
+
+    const auto t0 = mrpt::Clock::fromDouble(.0);
+    const auto t1 = mrpt::Clock::fromDouble(.5);
+
+    nav.fuse_pose(t0, _.pdf0, "odom");
+
+    const auto ret = nav.estimated_navstate(t1, "odom");
+    ASSERT_(ret.has_value());
+
+    // std::cout << "Result:\n" << ret->asString() << std::endl;
+
+    ASSERT_NEAR_(
+        mrpt::poses::Lie::SE<3>::log(ret->pose.mean - _.pdf0.mean).norm(), 0.0,
+        1e-4);
+
+    ASSERT_GT_(
+        std::sqrt(1.0 / ret->twist_inv_cov(0, 0)),
+        nav.params_.initial_twist_sigma_lin);
+}
+
+// --------------------------------------
+void test_2_poses()
+{
+    const auto& _ = Data::Instance();
+
+    mola::NavStateFuse nav;
+    nav.initialize(mrpt::containers::yaml::FromText(navStateParams));
+
+    const auto t0 = mrpt::Clock::fromDouble(0.0);
+    const auto t1 = mrpt::Clock::fromDouble(0.5);
+
+    const auto t2 = mrpt::Clock::fromDouble(0.6);
+    const auto t3 = mrpt::Clock::fromDouble(0.25);
+
+    nav.fuse_pose(t0, _.pdf0, "odom");
+    nav.fuse_pose(t1, _.pdf1, "odom");
+
+    const auto ret2 = nav.estimated_navstate(t2, "odom");
+    ASSERT_(ret2.has_value());
+
+    const auto ret3 = nav.estimated_navstate(t3, "odom");
+    ASSERT_(ret3.has_value());
+
+    // std::cout << "Result:\n" << ret2->asString() << std::endl;
+
+    const auto expected2 = mrpt::poses::CPose3D::FromXYZYawPitchRoll(
+        0.6, 0.0, 0.0, .0_deg, .0_deg, .0_deg);
+    ASSERT_NEAR_(
+        mrpt::poses::Lie::SE<3>::log(ret2->pose.mean - expected2).norm(), 0.0,
+        1e-2);
+
+    const auto expected3 = mrpt::poses::CPose3D::FromXYZYawPitchRoll(
+        0.25, 0.0, 0.0, .0_deg, .0_deg, .0_deg);
+    ASSERT_NEAR_(
+        mrpt::poses::Lie::SE<3>::log(ret3->pose.mean - expected3).norm(), 0.0,
+        1e-2);
+}
+
+// --------------------------------------
+void test_2_poses_too_late()
+{
+    const auto& _ = Data::Instance();
+
+    mola::NavStateFuse nav;
+    nav.initialize(mrpt::containers::yaml::FromText(navStateParams));
+
+    const auto t0 = mrpt::Clock::fromDouble(0.0);
+    const auto t1 = mrpt::Clock::fromDouble(0.5);
+
+    // too late/early to extrapolate!! must return nullopt:
+    const auto t2 = mrpt::Clock::fromDouble(
+        nav.params_.max_time_to_use_velocity_model + 0.5 + 0.1);
+    const auto t3 = mrpt::Clock::fromDouble(
+        0.0 - 0.1 - nav.params_.max_time_to_use_velocity_model);
+
+    nav.fuse_pose(t0, _.pdf0, "odom");
+    nav.fuse_pose(t1, _.pdf1, "odom");
+
+    const auto ret1 = nav.estimated_navstate(t2, "odom");
+    ASSERT_(!ret1.has_value());
+
+    const auto ret2 = nav.estimated_navstate(t3, "odom");
+    ASSERT_(!ret2.has_value());
+}
+
+}  // namespace
 
 int main([[maybe_unused]] int argc, [[maybe_unused]] char** argv)
 {
-    try
-    {
-        test_rotation_integration();
+    const std::map<std::string, std::function<void()>> tests = {
+        {"test_init_state", test_init_state},
+        {"test_one_pose", test_one_pose},
+        {"test_one_pose_extrap", test_one_pose_extrapolate},
+        {"test_2_poses", test_2_poses},
+        {"test_2_poses_too_late", test_2_poses_too_late},
+    };
 
-        std::cout << "Test successful." << std::endl;
-    }
-    catch (std::exception& e)
+    bool anyFail = false;
+
+    size_t index = 1;
+    for (const auto& [name, f] : tests)
     {
-        std::cerr << e.what() << std::endl;
-        return 1;
+        const auto sPrefix = mrpt::format(
+            "[ (%3zu / %3zu) %20s ]", index, tests.size(), name.c_str());
+        try
+        {
+            std::cout << sPrefix << " Running..." << std::endl;
+            f();
+
+            mrpt::system::consoleColorAndStyle(
+                mrpt::system::ConsoleForegroundColor::GREEN);
+            std::cout << sPrefix << " OK." << std::endl;
+        }
+        catch (std::exception& e)
+        {
+            mrpt::system::consoleColorAndStyle(
+                mrpt::system::ConsoleForegroundColor::RED);
+            std::cout << sPrefix << " ERROR: " << std::endl
+                      << e.what() << std::endl;
+            anyFail = true;
+        }
+
+        mrpt::system::consoleColorAndStyle(
+            mrpt::system::ConsoleForegroundColor::DEFAULT);
+
+        index++;
     }
+
+    return anyFail;
 }

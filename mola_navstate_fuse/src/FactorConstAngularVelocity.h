@@ -60,7 +60,7 @@ class FactorConstAngularVelocity
         const gtsam::SharedNoiseModel& model)
         : Base({kRi, kWi, kRj, kWj}, model, {0, 0, 0})
     {
-        this->initialize(Base::expression({kRi, kWi, kRj, kWj}));
+        this->initialize(This::expression({kRi, kWi, kRj, kWj}));
     }
 
     /// @return a deep copy of this factor

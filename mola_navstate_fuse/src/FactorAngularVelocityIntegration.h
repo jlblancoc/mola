@@ -68,7 +68,7 @@ class FactorAngularVelocityIntegration
         const gtsam::SharedNoiseModel& model)
         : Base({kRi, kbWi, kRj}, model, gtsam::Rot3()), dt_(dt)
     {
-        this->initialize(Base::expression({kRi, kbWi, kRj}));
+        this->initialize(This::expression({kRi, kbWi, kRj}));
     }
 
     /// @return a deep copy of this factor

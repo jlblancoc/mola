@@ -39,15 +39,20 @@ struct NavState
     NavState()  = default;
     ~NavState() = default;
 
-    /** SE(3) pose estimation, including information matrix
-     *  (in the "odom" frame) */
+    /** SE(3) pose estimation, including information matrix, given
+     *  in the requested frame_id.
+     */
     mrpt::poses::CPose3DPDFGaussianInf pose;
 
     /** Linear and angular velocity estimation (in the "odom" frame) */
     mrpt::math::TTwist3D twist;
 
-    /** Inverse covariance matrix (information) of twist */
+    /** Inverse covariance matrix (information) of twist,
+     *  with variable order in the matrix: [vx vy vz wx wy wz]
+     */
     mrpt::math::CMatrixDouble66 twist_inv_cov;
+
+    std::string asString() const;
 };
 
 }  // namespace mola

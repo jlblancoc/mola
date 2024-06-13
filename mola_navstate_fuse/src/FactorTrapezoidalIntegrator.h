@@ -62,7 +62,7 @@ class FactorTrapezoidalIntegrator
         const double dt, const gtsam::SharedNoiseModel& model)
         : Base({kPi, kVi, kPj, kVj}, model, /* error=0 */ {0, 0, 0}), dt_(dt)
     {
-        this->initialize(Base::expression({kPi, kVi, kPj, kVj}));
+        this->initialize(This::expression({kPi, kVi, kPj, kVj}));
     }
 
     /// @return a deep copy of this factor

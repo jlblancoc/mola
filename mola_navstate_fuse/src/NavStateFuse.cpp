@@ -26,6 +26,7 @@
 
 // MOLA & MRPT:
 #include <mola_navstate_fuse/NavStateFuse.h>
+#include <mrpt/core/get_env.h>
 #include <mrpt/math/gtsam_wrappers.h>
 #include <mrpt/poses/Lie/SO.h>
 #include <mrpt/poses/gtsam_wrappers.h>
@@ -36,6 +37,7 @@
 #include <gtsam/nonlinear/ExpressionFactor.h>
 #include <gtsam/nonlinear/LevenbergMarquardtOptimizer.h>
 #include <gtsam/nonlinear/LevenbergMarquardtParams.h>
+#include <gtsam/nonlinear/Marginals.h>
 #include <gtsam/nonlinear/NonlinearFactorGraph.h>
 #include <gtsam/nonlinear/Symbol.h>
 #include <gtsam/nonlinear/Values.h>
@@ -47,6 +49,8 @@
 #include "FactorAngularVelocityIntegration.h"
 #include "FactorConstAngularVelocity.h"
 #include "FactorTrapezoidalIntegrator.h"
+
+const bool NAVSTATE_PRINT_FG = mrpt::get_env<bool>("NAVSTATE_PRINT_FG", false);
 
 using namespace mola;
 
@@ -71,6 +75,7 @@ struct NavStateFuse::GtsamImpl
 NavStateFuse::State::State() : impl(mrpt::make_impl<NavStateFuse::GtsamImpl>())
 {
 }
+NavStateFuse::State::~State() = default;
 
 NavStateFuse::frameid_t NavStateFuse::State::frame_id(
     const std::string& frame_name)
@@ -93,6 +98,8 @@ NavStateFuse::NavStateFuse()
 {
     this->mrpt::system::COutputLogger::setLoggerName("NavStateFuse");
 }
+
+NavStateFuse::~NavStateFuse() = default;
 
 void NavStateFuse::initialize(const mrpt::containers::yaml& cfg)
 {
@@ -127,20 +134,22 @@ void NavStateFuse::fuse_odometry(
     // copy:
     state_.last_odom_obs = odom;
 #endif
+
+    delete_too_old_entries();
 }
 
 void NavStateFuse::fuse_imu(const mrpt::obs::CObservationIMU& imu)
 {
     THROW_EXCEPTION("TODO");
     (void)imu;
+
+    delete_too_old_entries();
 }
 
 void NavStateFuse::fuse_pose(
     const mrpt::Clock::time_point&         timestamp,
     const mrpt::poses::CPose3DPDFGaussian& pose, const std::string& frame_id)
 {
-    auto lck = mrpt::lockHelper(state_mtx_);
-
     // numerical sanity:
     for (int i = 0; i < 6; i++) ASSERT_GT_(pose.cov(i, i), .0);
 
@@ -148,7 +157,9 @@ void NavStateFuse::fuse_pose(
     d.frameId = state_.frame_id(frame_id);
     d.pose    = pose;
 
-    state_.data.insert(std::pair(timestamp, d));
+    state_.data.insert({timestamp, d});
+
+    delete_too_old_entries();
 }
 
 void NavStateFuse::fuse_twist(
@@ -156,6 +167,8 @@ void NavStateFuse::fuse_twist(
 {
     (void)timestamp;
     THROW_EXCEPTION("TODO");
+
+    delete_too_old_entries();
 }
 
 #if 0
@@ -166,23 +179,44 @@ void NavStateFuse::force_last_twist(const mrpt::math::TTwist3D& twist)
 #endif
 
 std::optional<NavState> NavStateFuse::estimated_navstate(
-    const mrpt::Clock::time_point& timestamp)
+    const mrpt::Clock::time_point& timestamp, const std::string& frame_id)
 {
-    build_and_optimize_fg(timestamp);
+    return build_and_optimize_fg(timestamp, frame_id);
+}
 
-    NavState ret;
+std::set<std::string> NavStateFuse::known_frame_ids()
+{
+    std::set<std::string> ret;
+    for (const auto& [name, id] : state_.known_frames.getDirectMap())
+        ret.insert(name);
+
     return ret;
 }
 
-void NavStateFuse::build_and_optimize_fg(
-    const mrpt::Clock::time_point queryTimestamp)
+std::optional<NavState> NavStateFuse::build_and_optimize_fg(
+    const mrpt::Clock::time_point queryTimestamp, const std::string& frame_id)
 {
-    auto lck = mrpt::lockHelper(state_mtx_);
+    using namespace std::string_literals;
 
-    if (state_.data.empty() || state_.known_frames.empty()) return;
+    // Return an empty answer if we don't have data, or we would need to
+    // extrapolate too much:
+    if (state_.data.empty() || state_.known_frames.empty()) return {};
+    {
+        const double tq_2_tfirst = mrpt::system::timeDifference(
+            queryTimestamp, state_.data.begin()->first);
+        const double tlast_2_tq = mrpt::system::timeDifference(
+            state_.data.rbegin()->first, queryTimestamp);
+        if (tq_2_tfirst > params_.max_time_to_use_velocity_model ||
+            tlast_2_tq > params_.max_time_to_use_velocity_model)
+            return {};
+    }
 
-    state_.impl->values.clear();
-    state_.impl->fg = {};
+    // shortcuts:
+    auto& fg     = state_.impl->fg;
+    auto& values = state_.impl->values;
+
+    values.clear();
+    fg = {};
 
     // Build the sequence of time points:
     // FG variable indices will use the indices in this vector:
@@ -192,21 +226,27 @@ void NavStateFuse::build_and_optimize_fg(
         std::multimap<mrpt::Clock::time_point, PointData>::value_type;
 
     std::vector<const map_it_t*> entries;
-    for (const auto& it : state_.data) entries.push_back(&it);
+    std::optional<size_t>        query_KF_id;
+    for (const auto& it : state_.data)
+    {
+        if (it.first == itQuery->first) query_KF_id = entries.size();
+
+        entries.push_back(&it);
+    }
+    ASSERT_(query_KF_id.has_value());
 
     // add const vel kinematic factors between consecutive KFs:
-    if (entries.size() >= 2)
-    {
-        for (size_t i = 1; i < entries.size(); i++)
-        {
-            mola::FactorConstVelKinematics f;
-            f.from_kf_   = i - 1;
-            f.to_kf_     = i;
-            f.deltaTime_ = mrpt::system::timeDifference(
-                entries[i - 1]->first, entries[i]->first);
+    ASSERT_(entries.size() >= 2);
 
-            addFactor(f);
-        }
+    for (size_t i = 1; i < entries.size(); i++)
+    {
+        mola::FactorConstVelKinematics f;
+        f.from_kf_   = i - 1;
+        f.to_kf_     = i;
+        f.deltaTime_ = mrpt::system::timeDifference(
+            entries[i - 1]->first, entries[i]->first);
+
+        addFactor(f);
     }
 
     // Init values:
@@ -219,27 +259,146 @@ void NavStateFuse::build_and_optimize_fg(
     }
     for (const auto& [frameName, frameId] : state_.known_frames.getDirectMap())
     {
+        // F(0): this variable is not used.
+        // We only need to estimate F(i), the SE(3) pose of the frame_id "i" wrt
+        // "0" (see paper diagrams!)
+        if (frameId == 0) continue;
+
         state_.impl->values.insert<gtsam::Pose3>(
             F(frameId), gtsam::Pose3::Identity());
     }
-    // Unary prior for first frameId only:
-    state_.impl->fg.addPrior(F(0 /*first one*/), gtsam::Pose3::Identity());
 
-#if 1
-    state_.impl->fg.print();
-    state_.impl->values.print();
-#endif
+    // Unary prior for initial twist:
+    const auto& tw = params_.initial_twist;
+    fg.addPrior(
+        V(0), gtsam::Vector3(tw.vx, tw.vy, tw.vz),
+        gtsam::noiseModel::Isotropic::Sigma(
+            3, params_.initial_twist_sigma_lin));
 
-    gtsam::LevenbergMarquardtOptimizer lm(state_.impl->fg, state_.impl->values);
+    fg.addPrior(
+        W(0), gtsam::Vector3(tw.wx, tw.wy, tw.wz),
+        gtsam::noiseModel::Isotropic::Sigma(
+            3, params_.initial_twist_sigma_ang));
+
+    // Process pose observations:
+    // ------------------------------------------
+    for (size_t kfId = 0; kfId < entries.size(); kfId++)
+    {
+        // const auto  tim = entries.at(kfId)->first;
+        const auto& d = entries.at(kfId)->second;
+
+        if (d.pose.has_value())
+        {
+            if (d.pose->frameId == 0)
+            {
+                // Pose observations in the first frame are just priors:
+                // (see paper!)
+
+                gtsam::Pose3   p;
+                gtsam::Matrix6 pCov;
+                mrpt::gtsam_wrappers::to_gtsam_se3_cov6(d.pose->pose, p, pCov);
+
+                fg.addPrior(
+                    P(kfId), p.translation(),
+                    gtsam::noiseModel::Gaussian::Covariance(
+                        pCov.block<3, 3>(3, 3)));
+
+                fg.addPrior(
+                    R(kfId), p.rotation(),
+                    gtsam::noiseModel::Gaussian::Covariance(
+                        pCov.block<3, 3>(0, 0)));
+            }
+            else
+            {
+                // Pose observations in subsequent frames are more complex:
+                // (see paper!)
+                THROW_EXCEPTION("todo");
+            }
+        }
+    }
+
+    // FG is built: optimize it
+    // -------------------------------------
+    if (NAVSTATE_PRINT_FG)
+    {
+        fg.print();
+        state_.impl->values.print();
+    }
+
+    gtsam::LevenbergMarquardtOptimizer lm(fg, state_.impl->values);
 
     const auto& optimal = lm.optimize();
 
-#if 1
-    optimal.print("Optimized:");
-#endif
+    MRPT_LOG_DEBUG_STREAM(
+        "[build_and_optimize_fg] LM ran for "
+        << lm.iterations() << " iterations, " << fg.size() << " factors, RMSE: "
+        << std::sqrt(fg.error(state_.impl->values) / fg.size()) << " => "
+        << std::sqrt(fg.error(optimal) / fg.size()));
+
+    if (NAVSTATE_PRINT_FG)
+    {
+        optimal.print("Optimized:");
+        std::cout << "\n query_KF_id: " << *query_KF_id << std::endl;
+    }
+
+    // Extract results from the factor graph:
+    // ----------------------------------------------
+    NavState out;
+
+    // SE(3) pose:
+    auto poseResult = gtsam::Pose3(
+        optimal.at<gtsam::Rot3>(R(*query_KF_id)),
+        optimal.at<gtsam::Point3>(P(*query_KF_id)));
+    out.pose.mean =
+        mrpt::poses::CPose3D(mrpt::gtsam_wrappers::toTPose3D(poseResult));
+
+    gtsam::Marginals marginals(fg, optimal);
+
+    // Pose SE(3) cov: (in mrpt order is xyz, then yaw/pitch/roll):
+    gtsam::Matrix6 cov_inv    = gtsam::Matrix6::Zero();
+    cov_inv.block<3, 3>(0, 0) = marginals.marginalInformation(P(*query_KF_id));
+    cov_inv.block<3, 3>(3, 3) = marginals.marginalInformation(R(*query_KF_id));
+    out.pose.cov_inv          = cov_inv;
+
+    // Twist:
+    const auto linVel = optimal.at<gtsam::Vector3>(V(*query_KF_id));
+    const auto angVel = optimal.at<gtsam::Vector3>(W(*query_KF_id));
+    out.twist.vx      = linVel.x();
+    out.twist.vy      = linVel.y();
+    out.twist.vz      = linVel.z();
+    out.twist.wx      = angVel.x();
+    out.twist.wy      = angVel.y();
+    out.twist.wz      = angVel.z();
+
+    // Twist cov:
+    gtsam::Matrix6 tw_cov_inv = gtsam::Matrix6::Zero();
+    tw_cov_inv.block<3, 3>(0, 0) =
+        marginals.marginalInformation(V(*query_KF_id));
+    tw_cov_inv.block<3, 3>(3, 3) =
+        marginals.marginalInformation(W(*query_KF_id));
+    out.twist_inv_cov = tw_cov_inv;
 
     // delete temporary entry:
     state_.data.erase(itQuery);
+
+    // Honor requested frame_id:
+    // ----------------------------------
+    ASSERTMSG_(
+        state_.known_frames.hasKey(frame_id),
+        "Requested results in unknown frame_id: '"s + frame_id + "'"s);
+
+    // if this is the first frame_id, we are already done, otherwise, recover
+    // and apply the transformation:
+    if (const frameid_t frameId = state_.known_frames.direct(frame_id);
+        frameId != 0)
+    {
+        // Apply F(frameId) transformation on the left:
+        const auto T = optimal.at<gtsam::Pose3>(F(frameId));
+
+        THROW_EXCEPTION("TODO");
+    }
+
+    return out;
 }
 
 /// Implementation of Eqs (1),(4) in the MOLA RSS2019 paper.
@@ -250,17 +409,16 @@ void NavStateFuse::addFactor(const mola::FactorConstVelKinematics& f)
         << f.from_kf_ << " ==> " << f.to_kf_ << " dt=" << f.deltaTime_);
 
     // Add const-vel factor to gtsam itself:
-    const double dt = f.deltaTime_;
-    ASSERT_GE_(dt, 0.);
+    double dt = f.deltaTime_;
+
+    // trick to easily handle queries on exactly an existing keyframe:
+    if (dt == 0) dt = 1e-5;
+
+    ASSERT_GT_(dt, 0.);
 
     // errors in constant vel:
     const double std_linvel = params_.sigma_random_walk_acceleration_linear;
     const double std_angvel = params_.sigma_random_walk_acceleration_angular;
-
-    auto noise_linVelModel =
-        gtsam::noiseModel::Isotropic::Sigma(3, std_linvel * dt);
-    auto noise_angVelModel =
-        gtsam::noiseModel::Isotropic::Sigma(3, std_angvel * dt);
 
     if (dt > params_.time_between_frames_to_warning)
     {
@@ -293,12 +451,14 @@ void NavStateFuse::addFactor(const mola::FactorConstVelKinematics& f)
 
     // See line 3 of eq (4) in the MOLA RSS2019 paper
     state_.impl->fg.emplace_shared<gtsam::BetweenFactor<gtsam::Point3>>(
-        kVi, kVj, gtsam::Z_3x1, noise_linVelModel);
+        kVi, kVj, gtsam::Z_3x1,
+        gtsam::noiseModel::Isotropic::Sigma(3, std_linvel * dt));
 
     // \omega is in the body frame, we need a special factor to rotate it:
     // See line 4 of eq (4) in the MOLA RSS2019 paper.
     state_.impl->fg.emplace_shared<FactorConstAngularVelocity>(
-        kRi, kbWi, kRj, kbWj, noise_angVelModel);
+        kRi, kbWi, kRj, kbWj,
+        gtsam::noiseModel::Isotropic::Sigma(3, std_angvel * dt));
 
     // 2) Add kinematics / numerical integration factor
     // ---------------------------------------------------
@@ -315,4 +475,24 @@ void NavStateFuse::addFactor(const mola::FactorConstVelKinematics& f)
     // Impl. line 1 of eq (4) in the MOLA RSS2019 paper.
     state_.impl->fg.emplace_shared<FactorAngularVelocityIntegration>(
         kRi, kbWi, kRj, dt, noise_kinematicsOrientation);
+}
+
+void NavStateFuse::delete_too_old_entries()
+{
+    if (state_.data.empty()) return;
+
+    const double newestTime =
+        mrpt::Clock::toDouble(state_.data.rbegin()->first);
+    const double minTime = newestTime - params_.sliding_window_length;
+
+    for (auto it = state_.data.begin(); it != state_.data.end();)
+    {
+        const double t = mrpt::Clock::toDouble(it->first);
+        if (t < minTime)
+        {
+            // remove it:
+            it = state_.data.erase(it);
+        }
+        else { ++it; }
+    }
 }

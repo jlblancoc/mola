@@ -38,4 +38,18 @@ void NavStateFuseParams::loadFrom(const mrpt::containers::yaml& cfg)
     MCP_LOAD_OPT(cfg, sigma_random_walk_acceleration_angular);
 
     MCP_LOAD_OPT(cfg, time_between_frames_to_warning);
+
+    MCP_LOAD_OPT(cfg, initial_twist_sigma_lin);
+    MCP_LOAD_OPT(cfg, initial_twist_sigma_ang);
+
+    if (cfg.has("initial_twist"))
+    {
+        ASSERT_(
+            cfg["initial_twist"].isSequence() &&
+            cfg["initial_twist"].asSequence().size() == 6);
+
+        auto&      tw  = initial_twist;
+        const auto seq = cfg["initial_twist"].asSequenceRange();
+        for (size_t i = 0; i < 6; i++) tw[i] = seq.at(i).as<double>();
+    }
 }
