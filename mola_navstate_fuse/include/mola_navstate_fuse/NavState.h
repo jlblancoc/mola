@@ -30,6 +30,10 @@
 
 namespace mola
 {
+/** The state returned by NavStateFuse
+ *
+ * \ingroup mola_navstate_fuse_grp
+ */
 struct NavState
 {
     NavState()  = default;

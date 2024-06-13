@@ -18,10 +18,10 @@
  * MOLA. If not, see <https://www.gnu.org/licenses/>.
  * ------------------------------------------------------------------------- */
 /**
- * @file   IMUIntegrationParams.cpp
- * @brief  Parameters for IMU preintegration.
+ * @file   NavStateFuseParams.cpp
+ * @brief  Parameters for NavStateFuse
  * @author Jose Luis Blanco Claraco
- * @date   Sep 19, 2021
+ * @date   Jan 22, 2024
  */
 
 #include <mola_navstate_fuse/NavStateFuseParams.h>
@@ -32,6 +32,10 @@ void NavStateFuseParams::loadFrom(const mrpt::containers::yaml& cfg)
 {
     MCP_LOAD_REQ(cfg, max_time_to_use_velocity_model);
 
+    MCP_LOAD_REQ(cfg, sliding_window_length);
+
     MCP_LOAD_OPT(cfg, sigma_random_walk_acceleration_linear);
     MCP_LOAD_OPT(cfg, sigma_random_walk_acceleration_angular);
+
+    MCP_LOAD_OPT(cfg, time_between_frames_to_warning);
 }

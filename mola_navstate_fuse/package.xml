@@ -16,8 +16,10 @@
   <license file="LICENSE">GPLv3</license>
 
   <depend>mola_common</depend>
+  <depend>mola_kernel</depend>
   <depend>mola_imu_preintegration</depend>
   <depend>mrpt2</depend>
+  <depend>gtsam</depend>
 
   <doc_depend>doxygen</doc_depend>
 

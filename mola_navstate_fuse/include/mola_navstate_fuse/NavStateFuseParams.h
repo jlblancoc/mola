@@ -33,7 +33,7 @@ namespace mola
 {
 /** Parameters needed by NavStateFuse.
  *
- * \ingroup mola_imu_preintegration_grp
+ * \ingroup mola_navstate_fuse__grp
  */
 class NavStateFuseParams
 {
@@ -45,11 +45,25 @@ class NavStateFuseParams
     void loadFrom(const mrpt::containers::yaml& cfg);
 
     /** Valid estimations will be extrapolated only up to this time since the
-     * last incorporated observation. */
+     * last incorporated observation. If a request is done farther away, an
+     * empty estimation will be returned.
+     */
     double max_time_to_use_velocity_model = 2.0;  // [s]
+
+    /// Time to keep past observations in the filter
+    double sliding_window_length = 5.0;  // [s]
+
+    /// If the time between two keyframes is larger than this, a warning will be
+    /// emitted; but the algorithm will keep trying its best.
+    double time_between_frames_to_warning = 3.0;  // [s]
 
     double sigma_random_walk_acceleration_linear  = 1.0;  // [m/s²]
     double sigma_random_walk_acceleration_angular = 1.0;  // [rad/s²]
+    double sigma_integrator_position              = 0.10;  // [m]
+    double sigma_integrator_orientation           = 0.10;  // [rad]
+
+    /** Const. velocity model: sigma of lin and angular velocity */
+    double const_vel_model_std_linvel{1.0}, const_vel_model_std_angvel{1.0};
 };
 
 }  // namespace mola
