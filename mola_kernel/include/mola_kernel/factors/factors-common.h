@@ -11,7 +11,7 @@
  */
 #pragma once
 
-#include <mola_kernel/factors/FactorDynamicsConstVel.h>
+#include <mola_kernel/factors/FactorConstVelKinematics.h>
 #include <mola_kernel/factors/FactorRelativePose3.h>
 #include <mola_kernel/factors/FactorStereoProjectionPose.h>
 #include <mola_kernel/factors/SmartFactorIMU.h>

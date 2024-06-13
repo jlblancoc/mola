@@ -25,7 +25,7 @@ MRPT_INITIALIZER(do_register_mrpt_kernel)
     // Register serializable classes:
     mrpt::rtti::registerClass(CLASS_ID(mola::WorldModelData));
 
-    mrpt::rtti::registerClass(CLASS_ID(mola::FactorDynamicsConstVel));
+    mrpt::rtti::registerClass(CLASS_ID(mola::FactorConstVelKinematics));
     mrpt::rtti::registerClass(CLASS_ID(mola::FactorRelativePose3));
     mrpt::rtti::registerClass(CLASS_ID(mola::FactorStereoProjectionPose));
     mrpt::rtti::registerClass(CLASS_ID(mola::SmartFactorIMU));

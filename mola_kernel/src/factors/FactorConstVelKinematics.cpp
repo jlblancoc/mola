@@ -4,21 +4,21 @@
  * See LICENSE for license information.
  * ------------------------------------------------------------------------- */
 /**
- * @file   FactorDynamicsConstVel.cpp
+ * @file   FactorConstVelKinematics.cpp
  * @brief  Constant-velocity model factor
  * @author Jose Luis Blanco Claraco
  * @date   Jan 08, 2019
  */
 
-#include <mola_kernel/factors/FactorDynamicsConstVel.h>
+#include <mola_kernel/factors/FactorConstVelKinematics.h>
 #include <mrpt/serialization/CArchive.h>
 
 using namespace mola;
 
 // arguments: classname, parent class, namespace
-IMPLEMENTS_SERIALIZABLE(FactorDynamicsConstVel, FactorBase, mola);
+IMPLEMENTS_SERIALIZABLE(FactorConstVelKinematics, FactorBase, mola);
 
-mola::id_t FactorDynamicsConstVel::edge_indices(const std::size_t i) const
+mola::id_t FactorConstVelKinematics::edge_indices(const std::size_t i) const
 {
     switch (i)
     {
@@ -32,14 +32,14 @@ mola::id_t FactorDynamicsConstVel::edge_indices(const std::size_t i) const
 }
 
 // Implementation of the CSerializable virtual interface:
-uint8_t FactorDynamicsConstVel::serializeGetVersion() const { return 0; }
-void    FactorDynamicsConstVel::serializeTo(
+uint8_t FactorConstVelKinematics::serializeGetVersion() const { return 0; }
+void    FactorConstVelKinematics::serializeTo(
     mrpt::serialization::CArchive& out) const
 {
     baseSerializeTo(out);
-    out << from_kf_ << to_kf_;
+    out << from_kf_ << to_kf_ << deltaTime_;
 }
-void FactorDynamicsConstVel::serializeFrom(
+void FactorConstVelKinematics::serializeFrom(
     mrpt::serialization::CArchive& in, uint8_t version)
 {
     baseSerializeFrom(in);
@@ -48,7 +48,7 @@ void FactorDynamicsConstVel::serializeFrom(
     {
         case 0:
         {
-            in >> from_kf_ >> to_kf_;
+            in >> from_kf_ >> to_kf_ >> deltaTime_;
         }
         break;
         default:

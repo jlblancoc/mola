@@ -4,7 +4,7 @@
  * See LICENSE for license information.
  * ------------------------------------------------------------------------- */
 /**
- * @file   FactorDynamicsConstVel.h
+ * @file   FactorConstVelKinematics.h
  * @brief  Constant-velocity model factor
  * @author Jose Luis Blanco Claraco
  * @date   Jan 08, 2019
@@ -16,24 +16,28 @@
 
 namespace mola
 {
-/**
+/** Abstract representation of a constant-velocity kinematic motion model factor
+ * between two key frames.
  *
  * \ingroup mola_kernel_grp
  */
-class FactorDynamicsConstVel : public FactorBase
+class FactorConstVelKinematics : public FactorBase
 {
-    DEFINE_SERIALIZABLE(FactorDynamicsConstVel, mola)
+    DEFINE_SERIALIZABLE(FactorConstVelKinematics, mola)
 
    public:
-    FactorDynamicsConstVel() = default;
+    FactorConstVelKinematics() = default;
 
     /** Creates relative pose constraint of KF `to` as seem from `from`. */
-    FactorDynamicsConstVel(id_t kf_from, id_t kf_to)
-        : from_kf_(kf_from), to_kf_{kf_to}
+    FactorConstVelKinematics(id_t kf_from, id_t kf_to, double deltaTime)
+        : from_kf_(kf_from), to_kf_(kf_to), deltaTime_(deltaTime)
     {
     }
 
-    id_t from_kf_{INVALID_ID}, to_kf_{INVALID_ID};
+    id_t from_kf_ = INVALID_ID, to_kf_ = INVALID_ID;
+
+    /** Elapsed time between "from_kf" and "to_kf" [seconds] */
+    double deltaTime_ = .0;
 
     std::size_t edge_count() const override { return 2; }
     mola::id_t  edge_indices(const std::size_t i) const override;

@@ -140,7 +140,7 @@ struct ContainerDeque : public BASE
     }
     std::vector<ID> all_ids() const override
     {
-        MRPT_TODO("Keep a separate list of *actually* existing IDs?");
+        // TODO(jlbc): Keep a separate list of *actually* existing IDs?
         std::vector<ID> ret(this->size());
         std::iota(ret.begin(), ret.end(), 1);
         return ret;
@@ -240,7 +240,7 @@ void WorldModel::initialize(const Yaml& c)
     YAML_LOAD_OPT(params_, age_to_unload_keyframes, double);
 
     // Create map container:
-    MRPT_TODO("Switch between container type per cfg");
+    // TODO(jlbc): Switch between container type per cfg
     data_.entities_ = std::make_unique<EntitiesContainerFastMap>();
     data_.factors_  = std::unique_ptr<FactorsContainerFastMap>();
 
@@ -342,7 +342,8 @@ std::set<mola::id_t> WorldModel::entity_neighbors(const mola::id_t id) const
     ASSERTMSG_(
         it_ns != data_.entity_connected_factors_.end(), "Unknown entity `id`");
 
-    auto adder = [&ids](const FactorBase& b) {
+    auto adder = [&ids](const FactorBase& b)
+    {
         const auto n = b.edge_count();
         for (size_t i = 0; i < n; i++) ids.insert(b.edge_indices(i));
     };
@@ -386,7 +387,8 @@ const annotations_data_t& WorldModel::entity_annotations_by_id(
     std::visit(
         overloaded{
             [&ret](const EntityBase& b) { ret = &b.annotations_; },
-            [&ret](const EntityOther& o) {
+            [&ret](const EntityOther& o)
+            {
                 ASSERT_(o);
                 ret = &o->annotations_;
             },
@@ -423,10 +425,7 @@ std::vector<mola::id_t> WorldModel::findEntitiesToSwapOff()
             // and report:
             aged_ids.push_back(id);
         }
-        else
-        {
-            ++it_ent;
-        }
+        else { ++it_ent; }
     }
 
     return aged_ids;
@@ -515,7 +514,7 @@ void    WorldModelData::serializeTo(mrpt::serialization::CArchive& out) const
     ASSERT_(entities_);
     ASSERT_(factors_);
 
-    MRPT_TODO("Improvement: offer a visitor-like instead of call all_ids()");
+    // TODO(jlbc): Improvement: offer a visitor-like instead of call all_ids()
 
     // Entities:
     std::vector<id_t> entity_ids = entities_->all_ids();
@@ -577,9 +576,10 @@ void WorldModelData::serializeFrom(
             for (auto fid : factor_ids)
             {
                 Factor f = in.ReadVariant<
-                    std::monostate, FactorRelativePose3, FactorDynamicsConstVel,
-                    FactorStereoProjectionPose, SmartFactorStereoProjectionPose,
-                    SmartFactorIMU, FactorOther>();
+                    std::monostate, FactorRelativePose3,
+                    FactorConstVelKinematics, FactorStereoProjectionPose,
+                    SmartFactorStereoProjectionPose, SmartFactorIMU,
+                    FactorOther>();
 
                 mola::factor_get_base(f).my_id_ = fid;
                 factors_->emplace_back(std::move(f));

@@ -33,7 +33,7 @@ SmartFactorStereoProjectionPose::SmartFactorStereoProjectionPose(
 
 std::size_t SmartFactorStereoProjectionPose::edge_count() const
 {
-    MRPT_TODO("Properly handle camera_id: count how many camera params, etc.");
+    // TODO(jlbc): Properly handle camera_id: count how many camera params, etc.
     return all_observations_.size();
 }
 mola::id_t SmartFactorStereoProjectionPose::edge_indices(
