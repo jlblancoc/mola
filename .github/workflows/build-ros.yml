@@ -36,6 +36,11 @@ jobs:
             ros_distribution: iron
             ros_version: 2
 
+          # Jazzy (2024 - ??)
+          - docker_image: ubuntu:noble
+            ros_distribution: jazzy
+            ros_version: 2
+
           # Rolling Ridley (No End-Of-Life)
 #          - docker_image: ubuntu:noble
 #            ros_distribution: rolling
