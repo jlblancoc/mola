@@ -173,6 +173,15 @@ class NavStateFuse : public mrpt::system::COutputLogger
         frameid_t                       frameId;
     };
 
+    // an observation from fuse_odometry()
+    struct OdomData
+    {
+        OdomData() = default;
+
+        mrpt::poses::CPose3D pose;
+        frameid_t            frameId;
+    };
+
     // Dummy type representing the query point.
     struct QueryPointData
     {
@@ -182,9 +191,11 @@ class NavStateFuse : public mrpt::system::COutputLogger
     struct PointData
     {
         PointData(const PoseData& p) : pose(p) {}
+        PointData(const OdomData& p) : odom(p) {}
         PointData(const QueryPointData& p) : query(p) {}
 
         std::optional<PoseData>       pose;
+        std::optional<OdomData>       odom;
         std::optional<QueryPointData> query;
 
        private:

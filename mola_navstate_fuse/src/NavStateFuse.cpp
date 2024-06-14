@@ -118,22 +118,18 @@ void NavStateFuse::reset()
 void NavStateFuse::fuse_odometry(
     const mrpt::obs::CObservationOdometry& odom, const std::string& odomName)
 {
-    THROW_EXCEPTION("TODO");
-#if 0
-    // temporarily, this will work well only for simple datasets:
-    if (state_.last_odom_obs && state_.last_pose)
-    {
-        const auto poseIncr = odom.odometry - state_.last_odom_obs->odometry;
+    using namespace std::string_literals;
 
-        state_.last_pose->mean =
-            state_.last_pose->mean + mrpt::poses::CPose3D(poseIncr);
+    MRPT_TODO("finish impl!");
+    return;
 
-        // and discard velocity-based model:
-        state_.last_twist = mrpt::math::TTwist3D(0, 0, 0, 0, 0, 0);
-    }
-    // copy:
-    state_.last_odom_obs = odom;
-#endif
+    ASSERT_(!odomName.empty());
+
+    OdomData d;
+    d.frameId = state_.frame_id(odomName);
+    d.pose    = mrpt::poses::CPose3D(odom.odometry);
+
+    state_.data.insert({odom.timestamp, d});
 
     delete_too_old_entries();
 }
