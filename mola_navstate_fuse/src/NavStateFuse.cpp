@@ -300,21 +300,37 @@ std::optional<NavState> NavStateFuse::build_and_optimize_fg(
                 gtsam::Matrix6 pCov;
                 mrpt::gtsam_wrappers::to_gtsam_se3_cov6(d.pose->pose, p, pCov);
 
-                fg.addPrior(
-                    P(kfId), p.translation(),
-                    gtsam::noiseModel::Robust::Create(
-                        gtsam::noiseModel::mEstimator::GemanMcClure::Create(
-                            params_.robust_param),
-                        gtsam::noiseModel::Gaussian::Covariance(
-                            pCov.block<3, 3>(3, 3))));
+                {
+                    auto noisePos = gtsam::noiseModel::Gaussian::Covariance(
+                        pCov.block<3, 3>(3, 3));
 
-                fg.addPrior(
-                    R(kfId), p.rotation(),
-                    gtsam::noiseModel::Robust::Create(
-                        gtsam::noiseModel::mEstimator::GemanMcClure::Create(
-                            params_.robust_param),
-                        gtsam::noiseModel::Gaussian::Covariance(
-                            pCov.block<3, 3>(0, 0))));
+                    gtsam::noiseModel::Base::shared_ptr robNoisePos;
+                    if (params_.robust_param > 0)
+                        robNoisePos = gtsam::noiseModel::Robust::Create(
+                            gtsam::noiseModel::mEstimator::GemanMcClure::Create(
+                                params_.robust_param),
+                            noisePos);
+                    else
+                        robNoisePos = noisePos;
+
+                    fg.addPrior(P(kfId), p.translation(), robNoisePos);
+                }
+
+                {
+                    auto noiseRot = gtsam::noiseModel::Gaussian::Covariance(
+                        pCov.block<3, 3>(0, 0));
+
+                    gtsam::noiseModel::Base::shared_ptr robNoiseRot;
+                    if (params_.robust_param > 0)
+                        robNoiseRot = gtsam::noiseModel::Robust::Create(
+                            gtsam::noiseModel::mEstimator::GemanMcClure::Create(
+                                params_.robust_param),
+                            noiseRot);
+                    else
+                        robNoiseRot = noiseRot;
+
+                    fg.addPrior(R(kfId), p.rotation(), robNoiseRot);
+                }
             }
             else
             {
