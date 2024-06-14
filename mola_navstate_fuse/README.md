@@ -1,11 +1,11 @@
 # mola_navstate_fuse
-SE(3) pose and twist path data fusion estimator.
+Sliding window Factor-graph data fusion for odometry, IMU, GNNS, and SE(3) pose/twist estimations.
 
 This repository provides:
 * `NavStateFuse`: C++ class to integrate odometry, IMU, and pose/twist estimations.
 
-Note: At present this package just extrapolates the latest pose/twist estimations, taking into account
-random-walk uncertainty. TODO: Proper integration of IMU and odometry.
+See package [documentation](https://docs.mola-slam.org/latest/modules.html).
+
 
 ## Build and install
 Refer to the [root MOLA repository](https://github.com/MOLAorg/mola).
