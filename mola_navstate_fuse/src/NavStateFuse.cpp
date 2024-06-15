@@ -93,6 +93,20 @@ NavStateFuse::frameid_t NavStateFuse::State::frame_id(
     }
 }
 
+std::optional<std::pair<mrpt::Clock::time_point, NavStateFuse::PoseData>>
+    NavStateFuse::State::last_pose_of_frame_id(const std::string& frameId)
+{
+    const auto frId = frame_id(frameId);
+    for (auto it = data.rbegin(); it != data.rend(); ++it)
+    {
+        if (!it->second.pose) continue;
+        const auto& p = *it->second.pose;
+        if (p.frameId != frId) continue;
+        return std::make_pair(it->first, p);
+    }
+    return {};
+}
+
 // -------- NavStateFuse -------
 NavStateFuse::NavStateFuse()
 {
@@ -146,6 +160,11 @@ void NavStateFuse::fuse_pose(
     const mrpt::Clock::time_point&         timestamp,
     const mrpt::poses::CPose3DPDFGaussian& pose, const std::string& frame_id)
 {
+#if 0
+    // find last KF of this frame_id before adding the new one:
+    const auto lastKF = state_.last_pose_of_frame_id(frame_id);
+#endif
+
     // numerical sanity:
     for (int i = 0; i < 6; i++) ASSERT_GT_(pose.cov(i, i), .0);
 
@@ -154,25 +173,59 @@ void NavStateFuse::fuse_pose(
     d.pose    = pose;
 
     state_.data.insert({timestamp, d});
-
     delete_too_old_entries();
+
+    // Estimate twist:
+#if 0
+    if (!lastKF) return;
+
+    const double dt = mrpt::system::timeDifference(lastKF->first, timestamp);
+
+    if (dt > params_.max_time_to_use_velocity_model) return;
+
+    ASSERT_GT_(dt, .0);
+
+    mrpt::math::TTwist3D tw;
+
+    const auto incrPosePdf = pose - lastKF->second.pose;
+    const auto incrPose    = incrPosePdf.mean;
+
+    tw.vx = incrPose.x() / dt;
+    tw.vy = incrPose.y() / dt;
+    tw.vz = incrPose.z() / dt;
+
+    const auto logRot =
+        mrpt::poses::Lie::SO<3>::log(incrPose.getRotationMatrix());
+
+    tw.wx = logRot[0] / dt;
+    tw.wy = logRot[1] / dt;
+    tw.wz = logRot[2] / dt;
+
+    // TODO: Estimate twist cov?
+    const double v_var = mrpt::square(0.1);
+    const double w_var = mrpt::square(0.1);
+
+    mrpt::math::CMatrixDouble66 twCov;
+    twCov.setZero();
+    twCov.asEigen().block<3, 3>(0, 0).diagonal().setConstant(v_var);
+    twCov.asEigen().block<3, 3>(3, 3).diagonal().setConstant(w_var);
+
+    this->fuse_twist(timestamp, tw, twCov);
+#endif
 }
 
 void NavStateFuse::fuse_twist(
-    const mrpt::Clock::time_point& timestamp, const mrpt::math::TTwist3D& twist)
+    const mrpt::Clock::time_point& timestamp, const mrpt::math::TTwist3D& twist,
+    const mrpt::math::CMatrixDouble66& twistCov)
 {
-    (void)timestamp;
-    THROW_EXCEPTION("TODO");
+    TwistData d;
+    d.twist    = twist;
+    d.twistCov = twistCov;
+
+    state_.data.insert({timestamp, d});
 
     delete_too_old_entries();
 }
-
-#if 0
-void NavStateFuse::force_last_twist(const mrpt::math::TTwist3D& twist)
-{
-    state_.last_twist = twist;
-}
-#endif
 
 std::optional<NavState> NavStateFuse::estimated_navstate(
     const mrpt::Clock::time_point& timestamp, const std::string& frame_id)
@@ -206,7 +259,16 @@ std::optional<NavState> NavStateFuse::build_and_optimize_fg(
             state_.data.rbegin()->first, queryTimestamp);
         if (tq_2_tfirst > params_.max_time_to_use_velocity_model ||
             tlast_2_tq > params_.max_time_to_use_velocity_model)
+        {
+            MRPT_LOG_DEBUG_STREAM(
+                "[build_and_optimize_fg] Skipping due to need to extrapolate "
+                "too much: tq_2_tfirst="
+                << tq_2_tfirst << " tlast_2_tq=" << tlast_2_tq
+                << " max_time_to_use_velocity_model="
+                << params_.max_time_to_use_velocity_model);
+
             return {};
+        }
     }
 
     // shortcuts:
@@ -285,6 +347,9 @@ std::optional<NavState> NavStateFuse::build_and_optimize_fg(
         // const auto  tim = entries.at(kfId)->first;
         const auto& d = entries.at(kfId)->second;
 
+        // ---------------------------------
+        // Data point of type: Pose
+        // ---------------------------------
         if (d.pose.has_value())
         {
             if (d.pose->frameId == 0)
@@ -335,7 +400,46 @@ std::optional<NavState> NavStateFuse::build_and_optimize_fg(
                 THROW_EXCEPTION("todo");
             }
         }
-    }
+        // ---------------------------------
+        // Data point of type: Twist
+        // ---------------------------------
+        else if (d.twist.has_value())
+        {
+            const auto&          pd   = d.twist.value();
+            const gtsam::Vector3 v    = {pd.twist.vx, pd.twist.vy, pd.twist.vz};
+            const gtsam::Vector3 w    = {pd.twist.wx, pd.twist.wy, pd.twist.wz};
+            gtsam::Matrix3       vCov = pd.twistCov.asEigen().block<3, 3>(0, 0);
+            gtsam::Matrix3       wCov = pd.twistCov.asEigen().block<3, 3>(3, 3);
+
+            {
+                auto noiseV = gtsam::noiseModel::Gaussian::Covariance(vCov);
+                gtsam::noiseModel::Base::shared_ptr robNoiseV;
+                if (params_.robust_param > 0)
+                    robNoiseV = gtsam::noiseModel::Robust::Create(
+                        gtsam::noiseModel::mEstimator::GemanMcClure::Create(
+                            params_.robust_param),
+                        noiseV);
+                else
+                    robNoiseV = noiseV;
+
+                fg.addPrior(V(kfId), v, robNoiseV);
+            }
+            {
+                auto noiseW = gtsam::noiseModel::Gaussian::Covariance(wCov);
+                gtsam::noiseModel::Base::shared_ptr robNoiseW;
+                if (params_.robust_param > 0)
+                    robNoiseW = gtsam::noiseModel::Robust::Create(
+                        gtsam::noiseModel::mEstimator::GemanMcClure::Create(
+                            params_.robust_param),
+                        noiseW);
+                else
+                    robNoiseW = noiseW;
+
+                fg.addPrior(W(kfId), w, robNoiseW);
+            }
+        }
+
+    }  // end for each kfId
 
     // FG is built: optimize it
     // -------------------------------------
@@ -368,7 +472,8 @@ std::optional<NavState> NavStateFuse::build_and_optimize_fg(
     if (final_rmse > params_.max_rmse)
     {
         MRPT_LOG_DEBUG(
-            "[build_and_optimize_fg] Discarding solution due to high RMSE.");
+            "[build_and_optimize_fg] Discarding solution due to high "
+            "RMSE.");
 
         return {};
     }
@@ -381,8 +486,8 @@ std::optional<NavState> NavStateFuse::build_and_optimize_fg(
     auto poseResult = gtsam::Pose3(
         optimal.at<gtsam::Rot3>(R(*query_KF_id)),
         optimal.at<gtsam::Point3>(P(*query_KF_id)));
-    out.pose.mean =
-        mrpt::poses::CPose3D(mrpt::gtsam_wrappers::toTPose3D(poseResult));
+    const auto outPose = mrpt::gtsam_wrappers::toTPose3D(poseResult);
+    out.pose.mean      = mrpt::poses::CPose3D(outPose);
 
     gtsam::Marginals marginals(fg, optimal);
 
@@ -395,12 +500,17 @@ std::optional<NavState> NavStateFuse::build_and_optimize_fg(
     // Twist:
     const auto linVel = optimal.at<gtsam::Vector3>(V(*query_KF_id));
     const auto angVel = optimal.at<gtsam::Vector3>(W(*query_KF_id));
-    out.twist.vx      = linVel.x();
-    out.twist.vy      = linVel.y();
-    out.twist.vz      = linVel.z();
-    out.twist.wx      = angVel.x();
-    out.twist.wy      = angVel.y();
-    out.twist.wz      = angVel.z();
+
+    // linear vel is in world frame:
+    out.twist.vx = linVel.x();
+    out.twist.vy = linVel.y();
+    out.twist.vz = linVel.z();
+    out.twist.rotate(-outPose);
+
+    // angular vel is already in body frame:
+    out.twist.wx = angVel.x();
+    out.twist.wy = angVel.y();
+    out.twist.wz = angVel.z();
 
     // Twist cov:
     gtsam::Matrix6 tw_cov_inv = gtsam::Matrix6::Zero();
@@ -419,8 +529,8 @@ std::optional<NavState> NavStateFuse::build_and_optimize_fg(
         state_.known_frames.hasKey(frame_id),
         "Requested results in unknown frame_id: '"s + frame_id + "'"s);
 
-    // if this is the first frame_id, we are already done, otherwise, recover
-    // and apply the transformation:
+    // if this is the first frame_id, we are already done, otherwise,
+    // recover and apply the transformation:
     if (const frameid_t frameId = state_.known_frames.direct(frame_id);
         frameId != 0)
     {
@@ -436,9 +546,11 @@ std::optional<NavState> NavStateFuse::build_and_optimize_fg(
 /// Implementation of Eqs (1),(4) in the MOLA RSS2019 paper.
 void NavStateFuse::addFactor(const mola::FactorConstVelKinematics& f)
 {
+#if 0
     MRPT_LOG_DEBUG_STREAM(
         "[addFactor] FactorConstVelKinematics: "
         << f.from_kf_ << " ==> " << f.to_kf_ << " dt=" << f.deltaTime_);
+#endif
 
     // Add const-vel factor to gtsam itself:
     double dt = f.deltaTime_;

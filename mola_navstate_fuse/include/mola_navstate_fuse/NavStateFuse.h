@@ -133,8 +133,9 @@ class NavStateFuse : public mrpt::system::COutputLogger
 
     /** Integrates new twist estimation (in the odom frame) */
     void fuse_twist(
-        const mrpt::Clock::time_point& timestamp,
-        const mrpt::math::TTwist3D&    twist);
+        const mrpt::Clock::time_point&     timestamp,
+        const mrpt::math::TTwist3D&        twist,
+        const mrpt::math::CMatrixDouble66& twistCov);
 
     /** Computes the estimated vehicle state at a given timestep using the
      * observations in the time window. A std::nullopt is returned if there is
@@ -182,6 +183,14 @@ class NavStateFuse : public mrpt::system::COutputLogger
         frameid_t            frameId;
     };
 
+    // an observation from fuse_twist()
+    struct TwistData
+    {
+        TwistData() = default;
+        mrpt::math::TTwist3D        twist;  // in the local frame of reference
+        mrpt::math::CMatrixDouble66 twistCov;
+    };
+
     // Dummy type representing the query point.
     struct QueryPointData
     {
@@ -192,10 +201,12 @@ class NavStateFuse : public mrpt::system::COutputLogger
     {
         PointData(const PoseData& p) : pose(p) {}
         PointData(const OdomData& p) : odom(p) {}
+        PointData(const TwistData& p) : twist(p) {}
         PointData(const QueryPointData& p) : query(p) {}
 
         std::optional<PoseData>       pose;
         std::optional<OdomData>       odom;
+        std::optional<TwistData>      twist;
         std::optional<QueryPointData> query;
 
        private:
@@ -218,12 +229,8 @@ class NavStateFuse : public mrpt::system::COutputLogger
         /// The sliding window of observation data:
         std::multimap<mrpt::Clock::time_point, PointData> data;
 
-#if 0
-        std::optional<mrpt::Clock::time_point>         last_pose_obs_tim;
-        std::optional<mrpt::obs::CObservationOdometry> last_odom_obs;
-        std::optional<mrpt::poses::CPose3DPDFGaussian> last_pose;
-        std::optional<mrpt::math::TTwist3D>            last_twist;
-#endif
+        auto last_pose_of_frame_id(const std::string& frame_id)
+            -> std::optional<std::pair<mrpt::Clock::time_point, PoseData>>;
     };
 
     State state_;
