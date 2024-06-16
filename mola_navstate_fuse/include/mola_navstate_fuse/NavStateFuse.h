@@ -199,6 +199,8 @@ class NavStateFuse : public mrpt::system::COutputLogger
 
     struct PointData
     {
+        PointData() = default;
+
         PointData(const PoseData& p) : pose(p) {}
         PointData(const OdomData& p) : odom(p) {}
         PointData(const TwistData& p) : twist(p) {}
@@ -209,8 +211,9 @@ class NavStateFuse : public mrpt::system::COutputLogger
         std::optional<TwistData>      twist;
         std::optional<QueryPointData> query;
 
-       private:
-        PointData() = default;
+        std::string asString() const;
+
+        bool empty() const { return !pose && !odom && !twist && !query; }
     };
 
     struct State
@@ -227,7 +230,7 @@ class NavStateFuse : public mrpt::system::COutputLogger
         frameid_t frame_id(const std::string& frame_name);
 
         /// The sliding window of observation data:
-        std::multimap<mrpt::Clock::time_point, PointData> data;
+        std::map<mrpt::Clock::time_point, PointData> data;
 
         auto last_pose_of_frame_id(const std::string& frame_id)
             -> std::optional<std::pair<mrpt::Clock::time_point, PoseData>>;

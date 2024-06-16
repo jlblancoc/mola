@@ -27,6 +27,7 @@
 
 #include <mola_navstate_fuse/NavStateFuse.h>
 #include <mrpt/poses/Lie/SE.h>
+#include <mrpt/random/RandomGenerators.h>
 #include <mrpt/system/os.h>
 
 #include <Eigen/Dense>  // required by "matrix * scalar"
@@ -47,6 +48,8 @@ sigma_random_walk_acceleration_linear: 1.0 # [m/s²]
 sigma_random_walk_acceleration_angular: 1.0 # [rad/s²]
 sigma_integrator_position: 0.10 # [m]
 sigma_integrator_orientation: 0.10 # [rad]
+robust_param: 0
+max_rmse: 2
 )###";
 
 using namespace mrpt::literals;  // _deg
@@ -64,20 +67,41 @@ class Data
         return o;
     }
 
-    const CMatrixDouble66 I6_10cm =
-        CMatrixDouble66(CMatrixDouble66::Identity() * 0.10);
+    const CMatrixDouble66 I6_2cm =
+        CMatrixDouble66(CMatrixDouble66::Identity() * 0.02);
 
     const mrpt::poses::CPose3D p0 = mrpt::poses::CPose3D::FromXYZYawPitchRoll(
         0, 0, 0, 0.0_deg, 0.0_deg, 0.0_deg);
-    const mrpt::poses::CPose3DPDFGaussian pdf0{p0, I6_10cm};
+    const mrpt::poses::CPose3DPDFGaussian pdf0{p0, I6_2cm};
 
     const mrpt::poses::CPose3D p1 = mrpt::poses::CPose3D::FromXYZYawPitchRoll(
         0.5, 0, 0, 0.0_deg, 0.0_deg, 0.0_deg);
-    const mrpt::poses::CPose3DPDFGaussian pdf1{p1, I6_10cm};
+    const mrpt::poses::CPose3DPDFGaussian pdf1{p1, I6_2cm};
 
     const mrpt::poses::CPose3D p2 = mrpt::poses::CPose3D::FromXYZYawPitchRoll(
         1.0, 0, 0, 0.0_deg, 0.0_deg, 0.0_deg);
-    const mrpt::poses::CPose3DPDFGaussian pdf2{p2, I6_10cm};
+    const mrpt::poses::CPose3DPDFGaussian pdf2{p2, I6_2cm};
+
+    // circle:
+    const mrpt::poses::CPose3D pc0 = mrpt::poses::CPose3D::FromXYZYawPitchRoll(
+        0, 0, 0, 0.0_deg, 0.0_deg, 0.0_deg);
+    const mrpt::poses::CPose3DPDFGaussian pdf_c0{pc0, I6_2cm};
+
+    const double wc = 0.2, vc = 10.0, Rc = vc / wc;
+
+    const mrpt::poses::CPose3D pc1 = mrpt::poses::CPose3D::FromXYZYawPitchRoll(
+        Rc * sin(wc * 0.1), Rc*(1 - cos(wc * 0.1)), 0, wc * 0.1, 0.0_deg,
+        0.0_deg);
+    const mrpt::poses::CPose3DPDFGaussian pdf_c1{pc1, I6_2cm};
+
+    const mrpt::poses::CPose3D pc2 = mrpt::poses::CPose3D::FromXYZYawPitchRoll(
+        Rc * sin(wc * 0.2), Rc*(1 - cos(wc * 0.2)), 0, wc * 0.2, 0.0_deg,
+        0.0_deg);
+    const mrpt::poses::CPose3DPDFGaussian pdf_c2{pc2, I6_2cm};
+
+    const mrpt::poses::CPose3D pc3 = mrpt::poses::CPose3D::FromXYZYawPitchRoll(
+        Rc * sin(wc * 0.3), Rc*(1 - cos(wc * 0.3)), 0, wc * 0.3, 0.0_deg,
+        0.0_deg);
 };
 
 // --------------------------------------
@@ -206,9 +230,95 @@ void test_2_poses_too_late()
     ASSERT_(!ret2.has_value());
 }
 
+// --------------------------------------
+void test_3_poses()
+{
+    const auto& _ = Data::Instance();
+
+    mola::NavStateFuse nav;
+    nav.initialize(mrpt::containers::yaml::FromText(navStateParams));
+
+    const auto t0 = mrpt::Clock::fromDouble(0.0);
+    const auto t1 = mrpt::Clock::fromDouble(0.1);
+    const auto t2 = mrpt::Clock::fromDouble(0.2);
+    const auto t3 = mrpt::Clock::fromDouble(0.3);
+
+    nav.fuse_pose(t0, _.pdf_c0, "odom");
+    nav.fuse_pose(t1, _.pdf_c1, "odom");
+    nav.fuse_pose(t2, _.pdf_c2, "odom");
+
+    const auto ret2 = nav.estimated_navstate(t3, "odom");
+    ASSERT_(ret2.has_value());
+
+    // std::cout << "Result:\n" << ret2->asString() << std::endl;
+
+    ASSERT_NEAR_(
+        mrpt::poses::Lie::SE<3>::log(ret2->pose.mean - _.pc3).norm(), 0.0,
+        1e-1);
+
+    ASSERT_NEAR_(ret2->twist.vx, _.vc, 0.1);
+    // ASSERT_NEAR_(ret2->twist.vy, .0, 0.2);
+    ASSERT_NEAR_(ret2->twist.vz, .0, 0.2);
+
+    ASSERT_NEAR_(ret2->twist.wx, .0, 0.01);
+    ASSERT_NEAR_(ret2->twist.wy, .0, 0.01);
+    ASSERT_NEAR_(ret2->twist.wz, _.wc, 0.05);
+}
+
+// --------------------------------------
+void test_noisy_straight()
+{
+    const auto& _ = Data::Instance();
+
+    mola::NavStateFuse nav;
+    nav.initialize(mrpt::containers::yaml::FromText(navStateParams));
+
+    auto& rng = mrpt::random::getRandomGenerator();
+
+    const size_t nSteps = 10;
+    const double vx     = 8.0;  // m/s
+    const double T      = 0.100;  // s
+
+    const double stdXYZ = 0.03;
+    const double stdYPR = mrpt::DEG2RAD(0.2);
+
+    for (size_t i = 0; i < nSteps; i++)
+    {
+        const double tt = T * i;
+        const auto   t  = mrpt::Clock::fromDouble(tt);
+
+        const mrpt::poses::CPose3D p =
+            mrpt::poses::CPose3D::FromXYZYawPitchRoll(
+                vx * tt + rng.drawGaussian1D(0, stdXYZ),
+                rng.drawGaussian1D(0, stdXYZ), +rng.drawGaussian1D(0, stdXYZ),
+                rng.drawGaussian1D(0, stdYPR), rng.drawGaussian1D(0, stdYPR),
+                rng.drawGaussian1D(0, stdYPR));
+        const mrpt::poses::CPose3DPDFGaussian pdf{p, _.I6_2cm};
+
+        nav.fuse_pose(t, pdf, "odom");
+    }
+
+    // query:
+    const double tt_q = T * nSteps;
+    const auto   t_q  = mrpt::Clock::fromDouble(tt_q);
+
+    const auto ret = nav.estimated_navstate(t_q, "odom");
+    ASSERT_(ret.has_value());
+
+    // std::cout << "Result:\n" << ret->asString() << std::endl;
+
+    ASSERT_NEAR_(ret->twist.vx, vx, 0.1);
+    ASSERT_NEAR_(ret->twist.vy, .0, 0.1);
+    ASSERT_NEAR_(ret->twist.vz, .0, 0.1);
+
+    ASSERT_NEAR_(ret->twist.wx, .0, 0.01);
+    ASSERT_NEAR_(ret->twist.wy, .0, 0.01);
+    ASSERT_NEAR_(ret->twist.wz, .0, 0.01);
+}
+
 }  // namespace
 
-int main([[maybe_unused]] int argc, [[maybe_unused]] char** argv)
+int main(int argc, char** argv)
 {
     const std::map<std::string, std::function<void()>> tests = {
         {"test_init_state", test_init_state},
@@ -216,15 +326,24 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char** argv)
         {"test_one_pose_extrap", test_one_pose_extrapolate},
         {"test_2_poses", test_2_poses},
         {"test_2_poses_too_late", test_2_poses_too_late},
+        {"test_3_poses", test_3_poses},
+        {"test_noisy_straight", test_noisy_straight},
     };
+
+    int runOnlyIdx = -1;
+    if (argc == 2) runOnlyIdx = std::stoi(argv[1]);
 
     bool anyFail = false;
 
-    size_t index = 1;
+    int index = 0;
     for (const auto& [name, f] : tests)
     {
+        index++;
+
+        if (runOnlyIdx >= 0 && index != runOnlyIdx) continue;
+
         const auto sPrefix = mrpt::format(
-            "[ (%3zu / %3zu) %20s ]", index, tests.size(), name.c_str());
+            "[ (%3i / %3zu) %20s ]", index, tests.size(), name.c_str());
         try
         {
             std::cout << sPrefix << " Running..." << std::endl;
@@ -245,8 +364,6 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char** argv)
 
         mrpt::system::consoleColorAndStyle(
             mrpt::system::ConsoleForegroundColor::DEFAULT);
-
-        index++;
     }
 
     return anyFail;

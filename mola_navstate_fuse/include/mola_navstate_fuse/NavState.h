@@ -44,7 +44,8 @@ struct NavState
      */
     mrpt::poses::CPose3DPDFGaussianInf pose;
 
-    /** Linear and angular velocity estimation (in the "odom" frame) */
+    /** Linear and angular velocity estimation, given in the local vehicle
+     *  frame. */
     mrpt::math::TTwist3D twist;
 
     /** Inverse covariance matrix (information) of twist,

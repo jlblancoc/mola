@@ -36,19 +36,21 @@ namespace mola
 /**
  * Factor for constant angular velocity model, equivalent to expression:
  *
- *   Pi + 0.5 * dt * (Vi + Vj) - Pj = errZero
+ *   Pi + 0.5 * dt * (gtsam::rotate(Ri, bVi) + gtsam::rotate(Rj, bVj)) - Pj =
+ * errZero
  *
  */
 class FactorTrapezoidalIntegrator
     : public gtsam::ExpressionFactorN<
-          gtsam::Point3 /*return type*/, gtsam::Point3, gtsam::Point3,
-          gtsam::Point3, gtsam::Point3>
+          gtsam::Point3 /*return type*/,  //
+          gtsam::Point3, gtsam::Point3, gtsam::Rot3,  // Pi, bVi, Ri
+          gtsam::Point3, gtsam::Point3, gtsam::Rot3>
 {
    private:
     using This = FactorTrapezoidalIntegrator;
     using Base = gtsam::ExpressionFactorN<
         gtsam::Point3 /*return type*/, gtsam::Point3, gtsam::Point3,
-        gtsam::Point3, gtsam::Point3>;
+        gtsam::Rot3, gtsam::Point3, gtsam::Point3, gtsam::Rot3>;
 
     double dt_ = .0;
 
@@ -58,11 +60,13 @@ class FactorTrapezoidalIntegrator
     ~FactorTrapezoidalIntegrator() override = default;
 
     FactorTrapezoidalIntegrator(
-        gtsam::Key kPi, gtsam::Key kVi, gtsam::Key kPj, gtsam::Key kVj,
+        gtsam::Key kPi, gtsam::Key kVi, gtsam::Key kRi,  //
+        gtsam::Key kPj, gtsam::Key kVj, gtsam::Key kRj,  //
         const double dt, const gtsam::SharedNoiseModel& model)
-        : Base({kPi, kVi, kPj, kVj}, model, /* error=0 */ {0, 0, 0}), dt_(dt)
+        : Base({kPi, kVi, kRi, kPj, kVj, kRj}, model, /* error=0 */ {0, 0, 0}),
+          dt_(dt)
     {
-        this->initialize(This::expression({kPi, kVi, kPj, kVj}));
+        this->initialize(This::expression({kPi, kVi, kRi, kPj, kVj, kRj}));
     }
 
     /// @return a deep copy of this factor
@@ -77,12 +81,17 @@ class FactorTrapezoidalIntegrator
         const std::array<gtsam::Key, NARY_EXPRESSION_SIZE>& keys) const override
     {
         gtsam::Expression<gtsam::Point3> Pi_(keys[0]);
-        gtsam::Expression<gtsam::Point3> Vi_(keys[1]);
+        gtsam::Expression<gtsam::Point3> bVi_(keys[1]);
+        gtsam::Expression<gtsam::Rot3>   Ri_(keys[2]);
 
-        gtsam::Expression<gtsam::Point3> Pj_(keys[2]);
-        gtsam::Expression<gtsam::Point3> Vj_(keys[3]);
+        gtsam::Expression<gtsam::Point3> Pj_(keys[3]);
+        gtsam::Expression<gtsam::Point3> bVj_(keys[4]);
+        gtsam::Expression<gtsam::Rot3>   Rj_(keys[5]);
 
-        return {Pi_ + 0.5 * dt_ * (Vi_ + Vj_) - Pj_};
+        return {
+            Pi_ +
+            0.5 * dt_ * (gtsam::rotate(Ri_, bVi_) + gtsam::rotate(Rj_, bVj_)) -
+            Pj_};
     }
 
     /** implement functions needed for Testable */
@@ -96,7 +105,9 @@ class FactorTrapezoidalIntegrator
                   << keyFormatter(Factor::keys_[0]) << ","
                   << keyFormatter(Factor::keys_[1]) << ","
                   << keyFormatter(Factor::keys_[2]) << ","
-                  << keyFormatter(Factor::keys_[3]) << ")\n";
+                  << keyFormatter(Factor::keys_[3]) << ","
+                  << keyFormatter(Factor::keys_[4]) << ","
+                  << keyFormatter(Factor::keys_[5]) << ")\n";
         gtsam::traits<double>::Print(dt_, "  dt: ");
         gtsam::traits<gtsam::Point3>::Print(measured_, "  measured: ");
         this->noiseModel_->print("  noise model: ");
