@@ -18,26 +18,41 @@
  * MOLA. If not, see <https://www.gnu.org/licenses/>.
  * ------------------------------------------------------------------------- */
 /**
- * @file   NavState.cpp
- * @brief  State vector for SE(3) pose + velocity
+ * @file   NavStateFGParams.cpp
+ * @brief  Parameters for NavStateFuse
  * @author Jose Luis Blanco Claraco
  * @date   Jan 22, 2024
  */
 
-#include <mola_navstate_fuse/NavState.h>
-
-#include <Eigen/Dense>
-#include <sstream>
+#include <mola_navstate_fg/NavStateFGParams.h>
 
 using namespace mola;
 
-std::string NavState::asString() const
+void NavStateFGParams::loadFrom(const mrpt::containers::yaml& cfg)
 {
-    std::ostringstream ss;
-    ss << "pose  : " << pose;
-    ss << "twist : " << twist.asString() << "\n";
-    ss << "twist inv_cov diagonal: "
-       << twist_inv_cov.asEigen().diagonal().transpose() << "\n";
+    MCP_LOAD_REQ(cfg, max_time_to_use_velocity_model);
 
-    return ss.str();
+    MCP_LOAD_REQ(cfg, sliding_window_length);
+
+    MCP_LOAD_OPT(cfg, sigma_random_walk_acceleration_linear);
+    MCP_LOAD_OPT(cfg, sigma_random_walk_acceleration_angular);
+
+    MCP_LOAD_OPT(cfg, time_between_frames_to_warning);
+
+    MCP_LOAD_OPT(cfg, initial_twist_sigma_lin);
+    MCP_LOAD_OPT(cfg, initial_twist_sigma_ang);
+
+    MCP_LOAD_OPT(cfg, max_rmse);
+    MCP_LOAD_OPT(cfg, robust_param);
+
+    if (cfg.has("initial_twist"))
+    {
+        ASSERT_(
+            cfg["initial_twist"].isSequence() &&
+            cfg["initial_twist"].asSequence().size() == 6);
+
+        auto&      tw  = initial_twist;
+        const auto seq = cfg["initial_twist"].asSequenceRange();
+        for (size_t i = 0; i < 6; i++) tw[i] = seq.at(i).as<double>();
+    }
 }

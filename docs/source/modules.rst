@@ -29,6 +29,7 @@ source code or the `<license>` tag of its `package.xml` file.
   module_mola_kernel
   module_mola_launcher
   module_mola_metric_maps
+  module_mola_navstate_fg
   module_mola_navstate_fuse
   module_mola_pose_list
   module_mola_relocalization

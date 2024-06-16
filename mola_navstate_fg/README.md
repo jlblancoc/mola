@@ -1,5 +1,5 @@
 # mola_navstate_fuse
-Simple kinematic state vector extrapolation algorithm to fuse odometry sources.
+Sliding window Factor-graph data fusion for odometry, IMU, GNNS, and SE(3) pose/twist estimations.
 
 This repository provides:
 * `NavStateFuse`: C++ class to integrate odometry, IMU, and pose/twist estimations.

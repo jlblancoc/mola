@@ -17,32 +17,19 @@
  * You should have received a copy of the GNU General Public License along with
  * MOLA. If not, see <https://www.gnu.org/licenses/>.
  * ------------------------------------------------------------------------- */
+
 /**
- * @file   IMUIntegrationParams.cpp
- * @brief  Parameters for IMU preintegration.
+ * @file   register.cpp
+ * @brief  Register RTTI classes
  * @author Jose Luis Blanco Claraco
- * @date   Sep 19, 2021
+ * @date   Sep 18, 2021
  */
 
-#include <mola_navstate_fuse/NavStateFuseParams.h>
+#include <mrpt/core/initializer.h>
 
-using namespace mola;
+// using namespace mola;
 
-void NavStateFuseParams::loadFrom(const mrpt::containers::yaml& cfg)
+MRPT_INITIALIZER(do_register_navstate_fuse)
 {
-    MCP_LOAD_REQ(cfg, max_time_to_use_velocity_model);
-
-    MCP_LOAD_OPT(cfg, sigma_random_walk_acceleration_linear);
-    MCP_LOAD_OPT(cfg, sigma_random_walk_acceleration_angular);
-
-    if (cfg.has("initial_twist"))
-    {
-        ASSERT_(
-            cfg["initial_twist"].isSequence() &&
-            cfg["initial_twist"].asSequence().size() == 6);
-
-        auto&      tw  = initial_twist;
-        const auto seq = cfg["initial_twist"].asSequenceRange();
-        for (size_t i = 0; i < 6; i++) tw[i] = seq.at(i).as<double>();
-    }
+    //  MOLA_REGISTER_MODULE(xx);
 }

@@ -4,7 +4,7 @@
      side-by-side to ROS packages in a catkin/ament environment.
 -->
 <package format="3">
-  <name>mola_navstate_fuse</name>
+  <name>mola_navstate_fg</name>
   <version>1.0.5</version>
   <description>SE(3) pose and twist path data fusion estimator</description>
 
@@ -19,6 +19,19 @@
   <depend>mola_kernel</depend>
   <depend>mola_imu_preintegration</depend>
   <depend>mrpt2</depend>
+  
+  <!-- GTSAM and its Boost deps -->
+  <build_depend>gtsam</build_depend>
+  <build_depend>libboost-serialization-dev</build_depend>
+  <build_depend>libboost-system-dev</build_depend>
+  <build_depend>libboost-filesystem-dev</build_depend>
+  <build_depend>libboost-thread-dev</build_depend>
+  <build_depend>libboost-program-options-dev</build_depend>
+  <build_depend>libboost-date-time-dev</build_depend>
+  <build_depend>libboost-timer-dev</build_depend>
+  <build_depend>libboost-chrono-dev</build_depend>
+  <build_depend>libboost-regex-dev</build_depend>
+
 
   <doc_depend>doxygen</doc_depend>
 

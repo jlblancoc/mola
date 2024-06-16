@@ -18,42 +18,33 @@
  * MOLA. If not, see <https://www.gnu.org/licenses/>.
  * ------------------------------------------------------------------------- */
 /**
- * @file   NavState.h
+ * @file   NavStateFilter.cpp
  * @brief  State vector for SE(3) pose + velocity
  * @author Jose Luis Blanco Claraco
  * @date   Jan 22, 2024
  */
-#pragma once
 
-#include <mrpt/math/TTwist3D.h>
-#include <mrpt/poses/CPose3DPDFGaussianInf.h>
+#include <mola_kernel/interfaces/NavStateFilter.h>
 
-namespace mola
+#include <Eigen/Dense>
+#include <sstream>
+
+using namespace mola;
+
+NavStateFilter::NavStateFilter()
 {
-/** The state returned by NavStateFuse
- *
- * \ingroup mola_navstate_fuse_grp
- */
-struct NavState
+    this->mrpt::system::COutputLogger::setLoggerName("NavStateFilter");
+}
+
+NavStateFilter::~NavStateFilter() = default;
+
+std::string NavState::asString() const
 {
-    NavState()  = default;
-    ~NavState() = default;
+    std::ostringstream ss;
+    ss << "pose  : " << pose;
+    ss << "twist : " << twist.asString() << "\n";
+    ss << "twist inv_cov diagonal: "
+       << twist_inv_cov.asEigen().diagonal().transpose() << "\n";
 
-    /** SE(3) pose estimation, including information matrix, given
-     *  in the requested frame_id.
-     */
-    mrpt::poses::CPose3DPDFGaussianInf pose;
-
-    /** Linear and angular velocity estimation, given in the local vehicle
-     *  frame. */
-    mrpt::math::TTwist3D twist;
-
-    /** Inverse covariance matrix (information) of twist,
-     *  with variable order in the matrix: [vx vy vz wx wy wz]
-     */
-    mrpt::math::CMatrixDouble66 twist_inv_cov;
-
-    std::string asString() const;
-};
-
-}  // namespace mola
+    return ss.str();
+}

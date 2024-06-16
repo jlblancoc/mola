@@ -18,8 +18,8 @@
  * MOLA. If not, see <https://www.gnu.org/licenses/>.
  * ------------------------------------------------------------------------- */
 /**
- * @file   NavStateFuseParams.h
- * @brief  Parameters for NavStateFuse
+ * @file   NavStateFGParams.h
+ * @brief  Parameters for NavStateFG
  * @author Jose Luis Blanco Claraco
  * @date   Jan 22, 2024
  */
@@ -32,27 +32,43 @@
 
 namespace mola
 {
-/** Parameters needed by NavStateFuse.
+/** Parameters needed by NavStateFG.
  *
- * \ingroup mola_imu_preintegration_grp
+ * \ingroup mola_navstate_fuse__grp
  */
-class NavStateFuseParams
+class NavStateFGParams
 {
    public:
-    NavStateFuseParams()  = default;
-    ~NavStateFuseParams() = default;
+    NavStateFGParams()  = default;
+    ~NavStateFGParams() = default;
 
     /// Loads all parameters from a YAML map node.
     void loadFrom(const mrpt::containers::yaml& cfg);
 
     /** Valid estimations will be extrapolated only up to this time since the
-     * last incorporated observation. */
+     * last incorporated observation. If a request is done farther away, an
+     * empty estimation will be returned.
+     */
     double max_time_to_use_velocity_model = 2.0;  // [s]
 
-    mrpt::math::TTwist3D initial_twist;
+    /// Time to keep past observations in the filter
+    double sliding_window_length = 5.0;  // [s]
+
+    /// If the time between two keyframes is larger than this, a warning will be
+    /// emitted; but the algorithm will keep trying its best.
+    double time_between_frames_to_warning = 3.0;  // [s]
 
     double sigma_random_walk_acceleration_linear  = 1.0;  // [m/s²]
     double sigma_random_walk_acceleration_angular = 1.0;  // [rad/s²]
+    double sigma_integrator_position              = 0.10;  // [m]
+    double sigma_integrator_orientation           = 0.10;  // [rad]
+
+    double robust_param = 0.0;  // 0: no robust
+    double max_rmse     = 2.0;
+
+    mrpt::math::TTwist3D initial_twist;
+    double               initial_twist_sigma_lin = 20.0;  // [m/s]
+    double               initial_twist_sigma_ang = 3.0;  // [rad/s]
 };
 
 }  // namespace mola

@@ -20,12 +20,12 @@
 
 /**
  * @file   test-navstate-basic.cpp
- * @brief  Unit tests for NavStateFuse
+ * @brief  Unit tests for NavStateFG
  * @author Jose Luis Blanco Claraco
  * @date   Jun 13, 2024
  */
 
-#include <mola_navstate_fuse/NavStateFuse.h>
+#include <mola_navstate_fg/NavStateFG.h>
 #include <mrpt/poses/Lie/SE.h>
 #include <mrpt/random/RandomGenerators.h>
 #include <mrpt/system/os.h>
@@ -40,7 +40,7 @@ using namespace std::string_literals;
 namespace
 {
 const char* navStateParams =
-    R"###(# Config for NavStateFuseParams
+    R"###(# Config for NavStateFGParams
 sliding_window_length: 5.0 # [s]
 max_time_to_use_velocity_model: 2.0  # [s]
 time_between_frames_to_warning: 2.0  # [s]
@@ -107,7 +107,7 @@ class Data
 // --------------------------------------
 void test_init_state()
 {
-    mola::NavStateFuse nav;
+    mola::NavStateFG nav;
     nav.initialize(mrpt::containers::yaml::FromText(navStateParams));
 
     ASSERT_(nav.known_frame_ids().empty());
@@ -121,7 +121,7 @@ void test_one_pose()
 {
     const auto& _ = Data::Instance();
 
-    mola::NavStateFuse nav;
+    mola::NavStateFG nav;
     nav.initialize(mrpt::containers::yaml::FromText(navStateParams));
 
     const auto t0 = mrpt::Clock::fromDouble(.0);
@@ -143,7 +143,7 @@ void test_one_pose_extrapolate()
 {
     const auto& _ = Data::Instance();
 
-    mola::NavStateFuse nav;
+    mola::NavStateFG nav;
     nav.initialize(mrpt::containers::yaml::FromText(navStateParams));
 
     const auto t0 = mrpt::Clock::fromDouble(.0);
@@ -170,7 +170,7 @@ void test_2_poses()
 {
     const auto& _ = Data::Instance();
 
-    mola::NavStateFuse nav;
+    mola::NavStateFG nav;
     nav.initialize(mrpt::containers::yaml::FromText(navStateParams));
 
     const auto t0 = mrpt::Clock::fromDouble(0.0);
@@ -208,7 +208,7 @@ void test_2_poses_too_late()
 {
     const auto& _ = Data::Instance();
 
-    mola::NavStateFuse nav;
+    mola::NavStateFG nav;
     nav.initialize(mrpt::containers::yaml::FromText(navStateParams));
 
     const auto t0 = mrpt::Clock::fromDouble(0.0);
@@ -235,7 +235,7 @@ void test_3_poses()
 {
     const auto& _ = Data::Instance();
 
-    mola::NavStateFuse nav;
+    mola::NavStateFG nav;
     nav.initialize(mrpt::containers::yaml::FromText(navStateParams));
 
     const auto t0 = mrpt::Clock::fromDouble(0.0);
@@ -270,7 +270,7 @@ void test_noisy_straight()
 {
     const auto& _ = Data::Instance();
 
-    mola::NavStateFuse nav;
+    mola::NavStateFG nav;
     nav.initialize(mrpt::containers::yaml::FromText(navStateParams));
 
     auto& rng = mrpt::random::getRandomGenerator();
