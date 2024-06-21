@@ -2,6 +2,11 @@
 Changelog for package mola_traj_tools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* traj_tf program split in two: traj_tf_left and traj_tf_right for the two types of transformations
+* Contributors: Jose Luis Blanco-Claraco
+
 1.0.5 (2024-05-28)
 ------------------
 * ncd-csv2tum: More robust against comments, commas instead of spaces, etc.

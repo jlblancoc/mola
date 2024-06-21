@@ -2,6 +2,12 @@
 Changelog for package mola_kernel
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Create new NavStateFilter interface and separate the simple fuser and the factor-graph approach in two packages
+* mola_kernel: renamed factor FactorConstVelKinematics
+* Contributors: Jose Luis Blanco-Claraco
+
 1.0.5 (2024-05-28)
 ------------------
 * viz: fix mismatched free/delete inside nanogui layout

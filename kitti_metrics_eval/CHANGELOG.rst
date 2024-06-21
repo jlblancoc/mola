@@ -3,6 +3,9 @@ Changelog for package kitti_metrics_eval
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
+Forthcoming
+-----------
+
 1.0.5 (2024-05-28)
 ------------------
 * Add new flag --result-in-kitti-format to read trajectories in KITTI format too, not only in TUM format.

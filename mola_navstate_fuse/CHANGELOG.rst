@@ -2,6 +2,12 @@
 Changelog for package mola_navstate_fuse
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Create new NavStateFilter interface and separate the simple fuser and the factor-graph approach in two packages
+* Twist in local frame
+* Contributors: Jose Luis Blanco-Claraco
+
 1.0.5 (2024-05-28)
 ------------------
 
