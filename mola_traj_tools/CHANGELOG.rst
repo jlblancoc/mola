@@ -2,8 +2,8 @@
 Changelog for package mola_traj_tools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.0.6 (2024-06-21)
+------------------
 * traj_tf program split in two: traj_tf_left and traj_tf_right for the two types of transformations
 * Contributors: Jose Luis Blanco-Claraco
 
