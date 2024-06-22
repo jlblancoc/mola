@@ -52,6 +52,11 @@ class VizInterface
         const std::string&           viewportName = "main",
         const std::string&           parentWindow = "main") = 0;
 
+    virtual std::future<bool> update_viewport_camera_azimuth(
+        const double azimuth, bool absolute_falseForRelative = true,
+        const std::string& viewportName = "main",
+        const std::string& parentWindow = "main") = 0;
+
     virtual std::future<void> enqueue_custom_nanogui_code(
         const std::function<void(void)>& userCode) = 0;
 

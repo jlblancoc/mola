@@ -1017,6 +1017,43 @@ std::future<bool> MolaViz::update_viewport_look_at(
     return task->get_future();
 }
 
+std::future<bool> MolaViz::update_viewport_camera_azimuth(
+    const double azimuth, bool absolute_falseForRelative,
+    const std::string& viewportName, const std::string& parentWindow)
+{
+    using return_type = bool;
+
+    auto task = std::make_shared<std::packaged_task<return_type()>>(
+        [this, azimuth, absolute_falseForRelative, viewportName, parentWindow]()
+        {
+            MRPT_LOG_DEBUG_STREAM(
+                "update_viewport_camera_azimuth() azimuth="
+                << azimuth
+                << " absolute_falseForRelative:" << absolute_falseForRelative);
+
+            ASSERT_(windows_.count(parentWindow));
+            auto topWin = windows_.at(parentWindow).win;
+            ASSERT_(topWin);
+
+            // No need to acquire the mutex, since this task will be run
+            // in the proper moment in the proper thread:
+            ASSERT_(topWin->background_scene);
+
+            if (absolute_falseForRelative)
+                topWin->camera().setAzimuthDegrees(mrpt::RAD2DEG(azimuth));
+            else
+                topWin->camera().setAzimuthDegrees(
+                    mrpt::RAD2DEG(azimuth) +
+                    topWin->camera().getAzimuthDegrees());
+            return true;
+        });
+
+    auto lck = mrpt::lockHelper(guiThreadPendingTasksMtx_);
+    guiThreadPendingTasks_.emplace_back([=]() { (*task)(); });
+    guiThreadMustReLayoutTheseWindows_.insert(parentWindow);
+    return task->get_future();
+}
+
 std::future<bool> MolaViz::output_console_message(
     const std::string& msg, const std::string& parentWindow)
 {

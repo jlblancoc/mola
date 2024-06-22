@@ -95,6 +95,11 @@ class MolaViz : public ExecutableBase, public VizInterface
         const std::string&           viewportName = "main",
         const std::string& parentWindow = DEFAULT_WINDOW_NAME) override;
 
+    std::future<bool> update_viewport_camera_azimuth(
+        const double azimuth, bool absolute_falseForRelative = true,
+        const std::string& viewportName = "main",
+        const std::string& parentWindow = "main") override;
+
     std::future<bool> output_console_message(
         const std::string& msg,
         const std::string& parentWindow = "main") override;
