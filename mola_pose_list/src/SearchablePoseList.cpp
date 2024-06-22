@@ -42,6 +42,8 @@ std::tuple<bool /*isFirst*/, mrpt::poses::CPose3D /*distanceToClosest*/>
     }
     else
     {
+        ASSERT_EQUAL_(kf_poses_.size(), kf_points_.size());
+
         std::vector<mrpt::math::TPoint3Df> closest;
         std::vector<float>                 closestSqrDist;
         std::vector<uint64_t>              closestID;
@@ -61,7 +63,7 @@ std::tuple<bool /*isFirst*/, mrpt::poses::CPose3D /*distanceToClosest*/>
         {
             const auto&  candidate = kf_poses_.at(closestID.at(i));
             const double rot       = mrpt::poses::Lie::SO<3>::log(
-                                   (p - candidate).getRotationMatrix())
+                                         (p - candidate).getRotationMatrix())
                                    .norm();
 
             closestSqrDist[i] += ROTATION_WEIGHT * mrpt::square(rot);
@@ -101,4 +103,5 @@ void SearchablePoseList::removeAllFartherThan(
     // replace:
     kf_poses_  = std::move(new_kf_poses);
     kf_points_ = std::move(new_kf_points);
+    ASSERT_EQUAL_(kf_poses_.size(), kf_points_.size());
 }
