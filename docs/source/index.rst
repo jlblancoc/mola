@@ -23,6 +23,11 @@ MOLA
   :caption: 3D LiDAR
 
   mola_lidar_odometry
+  mola_lidar_odometry_cli
+  mola_lo_apps
+  mola_lo_pipelines
+  mola_lo_demos
+  mola_lo_ros
 
 .. toctree::
   :maxdepth: 2
