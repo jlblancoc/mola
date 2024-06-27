@@ -76,9 +76,13 @@ Get started:
 How to cite us
 ==============
 
-The mola_lidar_odometry system was presented in... (TBD 2024-Q2!).
+The ``mola_lidar_odometry`` system was presented in :cite:`blanco2024mola_lo`:
 
+  J.L. Blanco,
+  `A flexible framework for accurate LiDAR odometry, map manipulation, and localization`_, in
+  ArXiV, 2024.
 
+.. _A flexible framework for accurate LiDAR odometry, map manipulation, and localization: https://TBD
 
 The basics of the MOLA framework were introduced in :cite:`blanco2019modular`.
 

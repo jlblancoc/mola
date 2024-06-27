@@ -26,3 +26,5 @@ forth and back throughout the system.
 
 
 (Expand me!)
+
+TODO: Add ExecutableBase life cycle figures.
