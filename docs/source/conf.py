@@ -46,7 +46,7 @@ extensions = [
     'sphinx.ext.ifconfig',
     'sphinx.ext.mathjax',
     'sphinx_design',
-    'sphinx.ext.autosectionlabel',
+    #    'sphinx.ext.autosectionlabel',
     'sphinxcontrib.bibtex',
 ]
 
