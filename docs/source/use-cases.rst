@@ -3,10 +3,11 @@
 =============
 Use cases
 =============
-This page shows some examples of applications of MOLA SLAM solutions with 3D LiDAR.
+This page shows some examples of applications of MOLA SLAM solutions with :ref:`3D LiDAR Odometry <mola_lidar_odometry>`.
 
 .. contents:: Table of Contents
     :depth: 2
+    :hidden:
 
 Automotive SLAM
 -----------------
