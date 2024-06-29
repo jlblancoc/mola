@@ -71,8 +71,7 @@ How to install all MOLA modules:
         git clone https://github.com/MOLAorg/mola_test_datasets.git
 
         # MOLA lidar odometry package:
-        # not published yet!
-        #git clone https://github.com/MOLAorg/mola_lidar_odometry.git --recursive
+        git clone https://github.com/MOLAorg/mola_lidar_odometry.git --recursive
 
     Dependencies
     ~~~~~~~~~~~~~~~~~
