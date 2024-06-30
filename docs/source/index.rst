@@ -62,8 +62,6 @@ Get started:
  - See :ref:`concepts` for an overview of the MOLA modular system.
  - See `videos`_ on YouTube.
 
-.. .. image:: mola-slam-representations.png
-
 .. image:: https://mrpt.github.io/imgs/mola-slam-kitti-demo.gif
 
 
