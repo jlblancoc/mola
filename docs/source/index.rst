@@ -14,6 +14,7 @@ MOLA
   Home <index.html#http://>
   solutions
   use-cases
+  building-maps
 
 .. toctree::
   :maxdepth: 2
@@ -101,7 +102,7 @@ How to install all MOLA modules:
         # If a GUI app is opened, it means installation was successful.
         mm-viewer
 
-    Check the `build status table <https://github.com/MOLAorg/mola#build-matrix-status>`_ to find out
+    Check the `build status table <https://github.com/MOLAorg/mola>`_ to find out
     what MOLA version is available for your ROS distribution.
 
 
