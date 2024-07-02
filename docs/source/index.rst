@@ -64,6 +64,8 @@ Get started:
 .. _MOLA: https://github.com/MOLAorg/mola
 .. _videos: https://www.youtube.com/playlist?list=PLOJ3GF0x2_eVaujK78PoVOvxJGrl_Z7fV
 
+|
+
 .. _installing:
 
 Installing
@@ -170,6 +172,7 @@ How to install all MOLA modules:
         # For example, let's launch the mm map viewer:
         mm-viewer
 
+|
 
 How to cite MOLA
 ==================

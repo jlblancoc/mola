@@ -16,29 +16,39 @@ This page describes the steps for building metric maps using MOLA.
 1. Prepare the input data
 ---------------------------------
 - Think what sensors do you want to use:
+
   - At least, one **2D or 3D LiDAR**. It is possible to have multiple LiDARs.
   - Optional: Encoder-based odometry, for wheeled robots.
   - Optional: Low-cost GNNS (GPS) receiver, for georeferencing the final metric maps. 
     You can use `mrpt_sensor_gnns_nmea <https://github.com/mrpt-ros-pkg/mrpt_sensors?tab=readme-ov-file#mrpt_sensor_gnns_nmea>`_ for 
     standard GNNS USB devices providing NMEA messages.
 
-- Decide whether SLAM will run **online** (live) or **ofline** (in postprocessing).
+- Decide whether SLAM will run **online** (live) or **offline** (in postprocessing).
 
-- If it will be run **offline** (which is normally **recommended**): Grab the data using `ros2 bag record <https://docs.ros.org/en/foxy/Tutorials/Beginner-CLI-Tools/Recording-And-Playing-Back-Data/Recording-And-Playing-Back-Data.html>`_
+- If running **offline** (**recommended**): Grab the data using `ros2 bag record <https://docs.ros.org/en/foxy/Tutorials/Beginner-CLI-Tools/Recording-And-Playing-Back-Data/Recording-And-Playing-Back-Data.html>`_
   if you use ROS 2. Alternative options include using :ref:`MOLA-based dataset sources <supported_sensors>`.
 
 - If using ROS 2...
+
   - ...and you only have **one LiDAR** as the **unique sensor**,
-  then setting up `ROS tf frames <https://www.google.com/search?q=ROS+tf+frames+tutorials>`_
-  is not mandatory, if you are happy with tracking the **sensor** pose (vs the vehicle pose).
-  - ...and you have odometry or more sensors on a real robot, then having correct `/tf` messages
-  published is important to let the mapping algorithm what is the relative pose of the sensor within
-  the vehicle.
+    then setting up `ROS tf frames <https://www.google.com/search?q=ROS+tf+frames+tutorials>`_
+    is not mandatory, if you are happy with tracking the **sensor** pose (vs the vehicle pose).
+
+  - ...and you have wheels odometry or additional sensors on the robot, then having correct ``/tf`` messages
+    published is important to let the mapping algorithm know what is the **relative pose of the sensor** within
+    the vehicle.
+    
+- Even if having only one single LiDAR, correctly defining the sensor pose on the vehicle is important
+  for correctly tracking the *vehicle pose* instead of the *sensor pose*. This can be done by either...
+
+    - correctly setting up ``/tf``, or
+    - using the MOLA-LO applications :ref:`flag <mola_lo_gui_rosbag2>` to manually set the sensor pose on the vehicle without ``/tf``.
 
 
 2. Run MOLA-LO
 ---------------------------------
-The output of running LiDAR odometry on your dataset is a **simple-map**:
+The output of running LiDAR odometry on your dataset is a 
+an estimated trajectory and a **simple-map** (here is the main stuff to build maps from):
 
 .. figure:: imgs/odometry_inputs_outputs.png
    :width: 400
@@ -46,18 +56,20 @@ The output of running LiDAR odometry on your dataset is a **simple-map**:
    Role of an "odometry" module (Figure adapted from :cite:`blanco2024mola_lo`).
 
 
-To process an offline dataset, use any of the available options in :ref:`MOLA-LO applications <_launching_mola_lo>`:
-  - :ref:`mola-lo-gui-rosbag2 <mola_lo_gui_rosbag2>` for a version with GUI, or
-  - :ref:`mola-lidar-odometry-cli <mola_lidar_odometry_cli>` for a terminal (CLI) version.
+To process an **offline dataset**, use any of the available options in :ref:`MOLA-LO applications <_launching_mola_lo>`:
 
-To launch SLAM live on a robot, read :ref:`mola_lo_ros`.
+- :ref:`mola-lo-gui-rosbag2 <mola_lo_gui_rosbag2>` for a version with GUI, or
+- :ref:`mola-lidar-odometry-cli <mola_lidar_odometry_cli>` for a terminal (CLI) version.
 
-In any case above, make sure to enable the option of **generating and saving the output simple-map** and
-take note of where is the generated file.
+To **launch SLAM live** on a robot, read :ref:`how to launch the MOLA-LO ROS 2 node <mola_lo_ros>`.
+
+In any case, make sure to enable the option of **generating and saving the output simple-map** and
+take note of where is the generated file. This can be done via environment variables before launching MOLA-LO,
+or from the :ref:`UI controls <mola_lo_gui_common_parts>` in the ``mola_lidar_odometry`` subwindow.
 
 .. hint::
 
-    To help you getting familiar with the whole process, feel free of downloading any of these example simple-maps
+    To help you getting familiar with the whole process, feel free of **downloading any of these example simple-maps**
     so you can use the following steps before building your own maps:
     
     - warehouse.simplemap : A map of a (simulated) warehouse, built from a wheeled robot with a 3D LiDAR.
@@ -90,7 +102,8 @@ Visualizing metric map files (``*.mm``) can be done with :ref:`mm-viewer <app_mm
 6. What's next?
 ----------------------------------------
 
-Write me: 
+Write me:
+
 - georeferencing
 - loop closure
 - Use for localization
