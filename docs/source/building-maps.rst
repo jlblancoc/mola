@@ -72,34 +72,120 @@ or from the :ref:`UI controls <mola_lo_gui_common_parts>` in the ``mola_lidar_od
     To help you getting familiar with the whole process, feel free of **downloading any of these example simple-maps**
     so you can use the following steps before building your own maps:
     
-    - warehouse.simplemap : A map of a (simulated) warehouse, built from a wheeled robot with a 3D LiDAR.
+    - `mvsim-warehouse01.simplemap <https://molaorg.github.io/mola_test_datasets/datasets/simplemaps/mvsim-warehouse01.simplemap>`_ : 
+      A map of a (simulated) warehouse, built from a wheeled robot with a 3D LiDAR.
 
 
 3. Inspect the resulting simple-map
 ----------------------------------------
 To verify that the generated simple-map is correct, you can use :ref:`sm-cli <app_sm-cli>`.
-For example: 
+
+.. dropdown:: Examples
+
+    These examples assume you have downloaded the warehouse simple-map from the link above,
+    but can be also applied, of course, to your own maps:
+
+    .. tab-set::
+
+        .. tab-item:: Basic information
+
+            .. code-block:: bash
+
+                sm-cli info mvsim-warehouse01.simplemap
+
+            Output:
+
+            .. code-block:: yaml
+
+                Loading: 'mvsim-warehouse01.simplemap' of 46.77 MB...
+
+                size_bytes:           46771378
+                keyframe_count:       77
+                has_twist:            true
+                kf_bounding_box_min:  [-13.275376 -11.909915 -0.003725]
+                kf_bounding_box_max:  [19.122171 11.847500 0.364639]
+                kf_bounding_box_span: [32.397546 23.757415 0.368364]
+                timestamp_first_utc:  2024/01/03,11:25:30.875170
+                timestamp_last_utc:   2024/01/03,11:31:19.875170
+                timestamp_span:       05min 49.000s
+                observations:
+                  - label: 'lidar1'
+                    class: 'mrpt::obs::CObservationPointCloud'
+                    count: 77
+                  - label: 'metadata'
+                    class: 'mrpt::obs::CObservationComment'
+                    count: 77
 
 
-.. code-block:: bash
+        .. tab-item:: Plot keyframes
+          :selected:
 
-    sm-cli info YOUR_FILE.simplemap
+            .. code-block:: bash
+
+                sm-cli export-keyframes mvsim-warehouse01.simplemap --output kfs.tum
+                evo_traj tum  kfs.tum -p --plot_mode=xy
+
+            .. image:: imgs/mola_tutorial_building_maps_warehouse_keyframes.png
+
+        .. tab-item:: See stored LiDAR scans
+
+            .. code-block:: bash
+
+                sm-cli export-rawlog mvsim-warehouse01.simplemap --output warehouse.rawlog
+                RawLogViewer warehouse.rawlog
+
+            .. image:: imgs/mola_tutorial_building_maps_warehouse_rawlog.png
 
 
-4. Build metric maps
-----------------------------------------
+4. Build metric maps and visualize them
+------------------------------------------
 Generating metric maps from a simple-maps is done with mp2p_icp filtering pipelines.
 It can be done directly from C++ if so desired, or easily from the command 
 line with :ref:`sm2mm <app_sm2mm>`.
 
-
-5. Visualize the maps
-----------------------------------------
-
-Visualizing metric map files (``*.mm``) can be done with :ref:`mm-viewer <app_mm-viewer>`.
+Afterwards, visualizing metric map files (``*.mm``) can be done with :ref:`mm-viewer <app_mm-viewer>`.
 
 
-6. What's next?
+.. dropdown:: Examples
+
+    These examples assume you have downloaded the warehouse simple-map from the link above,
+    but can be also applied, of course, to your own maps:
+
+    .. tab-set::
+
+        .. tab-item:: Build an aggregated 3D point cloud
+          :selected:
+
+            Download the example pipeline `sm2mm_pointcloud_voxelize.yaml <https://github.com/MOLAorg/mp2p_icp/blob/master/demos/sm2mm_pointcloud_voxelize.yaml>`_
+            and then run:
+
+            .. code-block:: bash
+
+                # Build metric map (mm) from simplemap (sm):
+                sm2mm -i mvsim-warehouse01.simplemap -o mvsim-warehouse01.mm -p sm2mm_pointcloud_voxelize.yaml
+
+                # View mm:
+                mm-viewer mvsim-warehouse01.mm
+
+            .. image:: https://mrpt.github.io/imgs/mola_tutorial_building_maps_warehouse_pointcloud_voxelize.gif
+
+        .. tab-item:: Build a voxel map + 2D grid map
+
+            Download the example pipeline `sm2mm_bonxai_voxelmap_gridmap.yaml <https://github.com/MOLAorg/mp2p_icp/blob/master/demos/sm2mm_bonxai_voxelmap_gridmap.yaml>`_
+            and then run:
+
+            .. code-block:: bash
+
+                # Build metric map (mm) from simplemap (sm):
+                sm2mm -i mvsim-warehouse01.simplemap -o mvsim-warehouse01.mm -p sm2mm_bonxai_voxelmap_gridmap.yaml
+
+                # View mm:
+                mm-viewer mvsim-warehouse01.mm
+
+            .. image:: https://mrpt.github.io/imgs/mola_tutorial_building_maps_warehouse_pointcloud_voxel_and_2d_grid.gif
+
+
+5. What's next?
 ----------------------------------------
 
 Write me:
