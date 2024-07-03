@@ -4,7 +4,7 @@
 How to build a map
 ====================
 
-This page describes the steps for building metric maps using MOLA.
+This tutorial describes the steps for building metric maps using MOLA.
 
 
 .. contents::
@@ -44,6 +44,9 @@ This page describes the steps for building metric maps using MOLA.
     - correctly setting up ``/tf``, or
     - using the MOLA-LO applications :ref:`flag <mola_lo_gui_rosbag2>` to manually set the sensor pose on the vehicle without ``/tf``.
 
+|
+
+
 
 2. Run MOLA-LO
 ---------------------------------
@@ -67,13 +70,52 @@ In any case, make sure to enable the option of **generating and saving the outpu
 take note of where is the generated file. This can be done via environment variables before launching MOLA-LO,
 or from the :ref:`UI controls <mola_lo_gui_common_parts>` in the ``mola_lidar_odometry`` subwindow.
 
+.. dropdown:: Use these commands to get going
+  :open:
+
+    For quickly getting MOLA-LO running, **you can start using these commands**, although it is recommended
+    to later go through the documentation linked above to learn about all the possibilities:
+
+    .. tab-set::
+
+        .. tab-item:: From a rosbag2 (GUI)
+          :selected:
+
+            .. code-block:: bash
+
+                MOLA_LIDAR_TOPIC=/ouster/points \
+                MOLA_GENERATE_SIMPLEMAP=true \
+                MOLA_SIMPLEMAP_OUTPUT=myMap.simplemap \
+                  mola-lo-gui-rosbag2 /path/to/your/dataset.mcap
+
+            .. note::
+                Remember changing ``MOLA_LIDAR_TOPIC`` to your actual raw (unfiltered) LiDAR topic (``sensor_msgs/PointCloud2``).
+
+        .. tab-item:: From a rosbag2 (CLI)
+
+            .. code-block:: bash
+
+                mola-lidar-odometry-cli \
+                  -c $(ros2 pkg prefix mola_lidar_odometry)/share/mola_lidar_odometry/pipelines/lidar3d-default.yaml \
+                  --input-rosbag2 /path/to/your/dataset.mcap \
+                  --lidar-sensor-label /ouster/points \
+                  --output-tum-path trajectory.tum \
+                  --output-simplemap myMap.simplemap
+
+            .. note::
+                Remember changing ``--lidar-sensor-label /ouster/points`` to your actual raw (unfiltered) LiDAR topic (``sensor_msgs/PointCloud2``).
+
+
 .. hint::
 
     To help you getting familiar with the whole process, feel free of **downloading any of these example simple-maps**
-    so you can use the following steps before building your own maps:
+    so you can use follow the rest of the tutorial before building your own maps:
     
     - `mvsim-warehouse01.simplemap <https://molaorg.github.io/mola_test_datasets/datasets/simplemaps/mvsim-warehouse01.simplemap>`_ : 
       A map of a (simulated) warehouse, built from a wheeled robot with a 3D LiDAR.
+
+
+|
 
 
 3. Inspect the resulting simple-map
@@ -81,8 +123,9 @@ or from the :ref:`UI controls <mola_lo_gui_common_parts>` in the ``mola_lidar_od
 To verify that the generated simple-map is correct, you can use :ref:`sm-cli <app_sm-cli>`.
 
 .. dropdown:: Examples
+  :open:
 
-    These examples assume you have downloaded the warehouse simple-map from the link above,
+    These examples assume you have downloaded `mvsim-warehouse01.simplemap <https://molaorg.github.io/mola_test_datasets/datasets/simplemaps/mvsim-warehouse01.simplemap>`_,
     but can be also applied, of course, to your own maps:
 
     .. tab-set::
@@ -137,18 +180,22 @@ To verify that the generated simple-map is correct, you can use :ref:`sm-cli <ap
             .. image:: imgs/mola_tutorial_building_maps_warehouse_rawlog.png
 
 
+|
+
+
 4. Build metric maps and visualize them
 ------------------------------------------
 Generating metric maps from a simple-maps is done with mp2p_icp filtering pipelines.
 It can be done directly from C++ if so desired, or easily from the command 
 line with :ref:`sm2mm <app_sm2mm>`.
 
-Afterwards, visualizing metric map files (``*.mm``) can be done with :ref:`mm-viewer <app_mm-viewer>`.
+Afterwards, visualizing :ref:`metric map files <mp2p_icp_basics>` (``*.mm``) can be done with :ref:`mm-viewer <app_mm-viewer>`.
 
 
 .. dropdown:: Examples
+  :open:
 
-    These examples assume you have downloaded the warehouse simple-map from the link above,
+    These examples assume you have downloaded `mvsim-warehouse01.simplemap <https://molaorg.github.io/mola_test_datasets/datasets/simplemaps/mvsim-warehouse01.simplemap>`_,
     but can be also applied, of course, to your own maps:
 
     .. tab-set::
@@ -184,6 +231,7 @@ Afterwards, visualizing metric map files (``*.mm``) can be done with :ref:`mm-vi
 
             .. image:: https://mrpt.github.io/imgs/mola_tutorial_building_maps_warehouse_pointcloud_voxel_and_2d_grid.gif
 
+|
 
 5. What's next?
 ----------------------------------------

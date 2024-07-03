@@ -53,9 +53,9 @@ MOLA
 :octicon:`mark-github` `MOLA`_ is a Modular system for Localization and Mapping.
 
 Get started:
- - See :octicon:`rocket` :ref:`mola_lidar_odometry` for documentation of the LiDAR odometry module.
+ - Read the tutorial: :ref:`building-maps`.
+ - Read :octicon:`rocket` :ref:`mola_lidar_odometry` documentation.
  - See :ref:`use-cases` for examples of use.
- - See :ref:`concepts` for an overview of the MOLA modular system.
  - See `videos`_ on YouTube.
 
 .. image:: https://mrpt.github.io/imgs/mola-slam-kitti-demo.gif
