@@ -19,9 +19,9 @@ This page describes the steps for building metric maps using MOLA.
 
   - At least, one **2D or 3D LiDAR**. It is possible to have multiple LiDARs.
   - Optional: Encoder-based odometry, for wheeled robots.
-  - Optional: Low-cost GNNS (GPS) receiver, for georeferencing the final metric maps. 
-    You can use `mrpt_sensor_gnns_nmea <https://github.com/mrpt-ros-pkg/mrpt_sensors?tab=readme-ov-file#mrpt_sensor_gnns_nmea>`_ for 
-    standard GNNS USB devices providing NMEA messages.
+  - Optional: Low-cost GNSS (GPS) receiver, for georeferencing the final metric maps. 
+    You can use `mrpt_sensor_gnss_nmea <https://github.com/mrpt-ros-pkg/mrpt_sensors?tab=readme-ov-file#mrpt_sensor_gnss_nmea>`_ for 
+    standard GNSS USB devices providing NMEA messages.
 
 - Decide whether SLAM will run **online** (live) or **offline** (in postprocessing).
 

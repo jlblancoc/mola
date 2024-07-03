@@ -49,7 +49,7 @@ namespace mola
  * - observations: pointclouds/2d_scan, reference_map: 2D gridmap
  * - observations: pointclouds, reference_map: pointclouds
  *
- * \todo Implement likelihood of observations GNNS datum within georeferenced
+ * \todo Implement likelihood of observations GNSS datum within georeferenced
  *       maps.
  *
  * \ingroup mola_relocalization_grp

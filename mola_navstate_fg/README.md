@@ -1,5 +1,5 @@
 # mola_navstate_fuse
-Sliding window Factor-graph data fusion for odometry, IMU, GNNS, and SE(3) pose/twist estimations.
+Sliding window Factor-graph data fusion for odometry, IMU, GNSS, and SE(3) pose/twist estimations.
 
 This repository provides:
 * `NavStateFuse`: C++ class to integrate odometry, IMU, and pose/twist estimations.

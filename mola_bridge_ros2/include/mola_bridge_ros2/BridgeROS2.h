@@ -176,7 +176,7 @@ class BridgeROS2 : public RawDataSourceBase, public mola::RawDataConsumer
         subsImu_;
 
     std::vector<rclcpp::Subscription<sensor_msgs::msg::NavSatFix>::SharedPtr>
-        subsGNNS_;
+        subsGNSS_;
 
     void callbackOnPointCloud2(
         const sensor_msgs::msg::PointCloud2&       o,

@@ -39,9 +39,9 @@ Backpack 3D mapping indoors
     </div>
 
 
-3D LiDAR mapping plus georeferencing (GNNS)
+3D LiDAR mapping plus georeferencing (GNSS)
 --------------------------------------------
-Demo from the Mulran dataset, which contains both 3D LiDAR and consumer-grade GNNS.
+Demo from the Mulran dataset, which contains both 3D LiDAR and consumer-grade GNSS.
 
 (TO-DO: add videos)
 

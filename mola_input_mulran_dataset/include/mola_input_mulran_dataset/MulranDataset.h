@@ -36,7 +36,7 @@ namespace mola
  * Each "sequence" directory contains these sensor streams:
  * - `lidar`: Ouster OS1-64 LIDAR. As mrpt::obs::CObservationPointCloud
  *            with XYZIRT channels.
- * - `gps`  : Consumer-grade GNNS receiver, as mrpt::obs::CObservationGPS with
+ * - `gps`  : Consumer-grade GNSS receiver, as mrpt::obs::CObservationGPS with
  *            a message type NMEA GGA (mrpt::obs::gnss::Message_NMEA_GGA).
  *            HDOP in that struct is computed as reported standard deviation
  *            from the dataset, divided by HDOP_REFERENCE_METERS.
@@ -167,7 +167,7 @@ class MulranDataset : public RawDataSourceBase,
     {
         Invalid = 0,
         Lidar,
-        GNNS,
+        GNSS,
         GroundTruth,
     };
 

@@ -40,7 +40,7 @@ def generate_launch_description():
         launch_arguments={
             # 'log_level_core': 'DEBUG',
             'topic_sensors_point_clouds': '/pf_input_points',
-            'topic_gnns': '/gps',
+            'topic_gnss': '/gps',
             'pf_params_file': pf_params_file,
 
             # For robots with odometry, use: 'base_link'->'odom'->'map'.

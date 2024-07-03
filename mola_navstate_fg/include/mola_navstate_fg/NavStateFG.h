@@ -48,7 +48,7 @@
 
 namespace mola
 {
-/** Sliding window Factor-graph data fusion for odometry, IMU, GNNS, and SE(3)
+/** Sliding window Factor-graph data fusion for odometry, IMU, GNSS, and SE(3)
  * pose/twist estimations.
  *
  * Frame conventions:
@@ -67,7 +67,7 @@ namespace mola
  *    existing frames of reference.
  * - `fuse_pose()`: Can be used to integrate information from any "odometry" or
  *   "localization" input, as mentioned above.
- * - `fuse_gnns()`: TO-DO.
+ * - `fuse_gnss()`: TO-DO.
  * - `fuse_imu()`: TO-DO.
  *
  * Usage:

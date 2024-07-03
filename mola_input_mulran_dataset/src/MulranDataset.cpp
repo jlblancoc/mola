@@ -152,7 +152,7 @@ void MulranDataset::initialize_rds(const Yaml& c)
         for (int row = 0; row < gpsCsvData_.rows(); row++)
         {
             const double t     = 1e-9 * gpsCsvData_(row, 0);
-            Entry        entry = {EntryType::GNNS};
+            Entry        entry = {EntryType::GNSS};
             entry.gpsIdx       = row;
             datasetEntries_.emplace(t, entry);
         }
@@ -358,7 +358,7 @@ void MulranDataset::spinOnce()
             }
             break;
 
-            case EntryType::GNNS:
+            case EntryType::GNSS:
             {
                 if (!publish_gps_) break;
 
@@ -558,7 +558,7 @@ mrpt::obs::CObservationGPS::Ptr MulranDataset::getGPS(timestep_t step) const
     auto it = datasetEntries_.begin();
     std::advance(it, step);
 
-    if (it->second.type != EntryType::GNNS) return {};
+    if (it->second.type != EntryType::GNSS) return {};
 
     return get_gps_by_row_index(it->second.gpsIdx);
 }

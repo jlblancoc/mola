@@ -74,10 +74,10 @@
 
     # If set to true, the PF will not be initialized until:
     # - A map is provided with georeferencing information, and
-    # - The first GNNS observation arrives (with a GGA datum)
-    initialize_from_gnns: true
+    # - The first GNSS observation arrives (with a GGA datum)
+    initialize_from_gnss: true
 
-    # (the ROS topic to listen for GNNS is ser via a launch argument)
+    # (the ROS topic to listen for GNSS is ser via a launch argument)
 
 
     # Particle filter options:

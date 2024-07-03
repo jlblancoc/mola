@@ -1136,7 +1136,7 @@ void BridgeROS2::internalAnalyzeTopicsToSubscribe(
         }
         else if (type == "NavSatFix")
         {
-            subsGNNS_.emplace_back(
+            subsGNSS_.emplace_back(
                 rosNode_->create_subscription<sensor_msgs::msg::NavSatFix>(
                     topic_name, qos,
                     [this, output_sensor_label,
