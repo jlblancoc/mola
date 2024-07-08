@@ -7,7 +7,6 @@ This page shows some examples of applications of MOLA SLAM solutions with :ref:`
 
 .. contents:: Table of Contents
     :depth: 2
-    :hidden:
 
 Automotive SLAM
 -----------------
