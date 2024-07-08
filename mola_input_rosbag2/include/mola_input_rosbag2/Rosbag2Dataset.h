@@ -203,7 +203,8 @@ class Rosbag2Dataset : public RawDataSourceBase,
     bool findOutSensorPose(
         mrpt::poses::CPose3D& des, const std::string& target_frame,
         const std::string&                         source_frame,
-        const std::optional<mrpt::poses::CPose3D>& fixedSensorPose);
+        const std::optional<mrpt::poses::CPose3D>& fixedSensorPose,
+        const std::string_view                     label);
 
     mutable timestep_t    last_used_tim_index_ = 0;
     bool                  paused_              = false;

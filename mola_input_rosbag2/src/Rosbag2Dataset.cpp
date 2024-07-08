@@ -455,7 +455,7 @@ void Rosbag2Dataset::spinOnce()
             if (!rosbag_begin_time_) rosbag_begin_time_ = de_tim.value();
 
             double thisTim =
-                    timeDifference(*rosbag_begin_time_, de_tim.value());
+                timeDifference(*rosbag_begin_time_, de_tim.value());
 
             // mechanism to detect mis-timestamped datasets:
             // e.g. good sensors mixed with LiDARs with timestamps starting
@@ -472,12 +472,12 @@ void Rosbag2Dataset::spinOnce()
                     "reference. Please, fix your sensor timestamps.");
             }
 
-                // Reset time after a "teleport"?
-                if (last_dataset_time_ == 0) last_dataset_time_ = thisTim;
+            // Reset time after a "teleport"?
+            if (last_dataset_time_ == 0) last_dataset_time_ = thisTim;
 
-                // end of playback for now?
-                if (last_dataset_time_ < thisTim) break;
-            }
+            // end of playback for now?
+            if (last_dataset_time_ < thisTim) break;
+        }
 
         // Send observations out:
         if (SF::Ptr sf = de->obs; sf)
@@ -605,7 +605,8 @@ mrpt::obs::CSensoryFrame::Ptr Rosbag2Dataset::datasetGetObservations(
 bool Rosbag2Dataset::findOutSensorPose(
     mrpt::poses::CPose3D& des, const std::string& frame,
     const std::string&                         referenceFrame,
-    const std::optional<mrpt::poses::CPose3D>& fixedSensorPose)
+    const std::optional<mrpt::poses::CPose3D>& fixedSensorPose,
+    const std::string_view                     label)
 {
     if (fixedSensorPose)
     {
@@ -631,7 +632,10 @@ bool Rosbag2Dataset::findOutSensorPose(
     }
     catch (const tf2::TransformException& ex)
     {
-        MRPT_LOG_ERROR_STREAM("findOutSensorPose: " << ex.what());
+        MRPT_LOG_ERROR_STREAM(
+            "findOutSensorPose (label='" << label << "', " << frame << "<-"
+                                         << referenceFrame
+                                         << "): " << ex.what());
         return false;
     }
 }
@@ -652,7 +656,7 @@ Rosbag2Dataset::Obs Rosbag2Dataset::toPointCloud2(
 
     bool sensorPoseOK = findOutSensorPose(
         ptsObs->sensorPose, pts.header.frame_id, base_link_frame_id_,
-        fixedSensorPose);
+        fixedSensorPose, label);
     ASSERT_(sensorPoseOK);
 
     // Convert points:
@@ -713,7 +717,7 @@ Rosbag2Dataset::Obs Rosbag2Dataset::toPointCloud2(
 }
 
 Rosbag2Dataset::Obs Rosbag2Dataset::toLidar2D(
-    std::string_view msg, const rosbag2_storage::SerializedBagMessage& rosmsg,
+    std::string_view label, const rosbag2_storage::SerializedBagMessage& rosmsg,
     const std::optional<mrpt::poses::CPose3D>& fixedSensorPose)
 {
     rclcpp::SerializedMessage serMsg(*rosmsg.serialized_data);
@@ -728,19 +732,19 @@ Rosbag2Dataset::Obs Rosbag2Dataset::toLidar2D(
     mrpt::poses::CPose3D sensorPose;
     mrpt::ros2bridge::fromROS(scan, sensorPose, *scanObs);
 
-    scanObs->sensorLabel = msg;
+    scanObs->sensorLabel = label;
     scanObs->timestamp   = mrpt::ros2bridge::fromROS(scan.header.stamp);
 
     bool sensorPoseOK = findOutSensorPose(
         scanObs->sensorPose, scan.header.frame_id, base_link_frame_id_,
-        fixedSensorPose);
+        fixedSensorPose, label);
     ASSERT_(sensorPoseOK);
 
     return {scanObs};
 }
 
 Rosbag2Dataset::Obs Rosbag2Dataset::toRotatingScan(
-    std::string_view msg, const rosbag2_storage::SerializedBagMessage& rosmsg,
+    std::string_view label, const rosbag2_storage::SerializedBagMessage& rosmsg,
     const std::optional<mrpt::poses::CPose3D>& fixedSensorPose)
 {
     rclcpp::SerializedMessage serMsg(*rosmsg.serialized_data);
@@ -768,19 +772,19 @@ Rosbag2Dataset::Obs Rosbag2Dataset::toRotatingScan(
             "CObservationRotatingScan. Trying another format.");
     }
 
-    obsRotScan->sensorLabel = msg;
+    obsRotScan->sensorLabel = label;
     obsRotScan->timestamp   = mrpt::ros2bridge::fromROS(pts.header.stamp);
 
     bool sensorPoseOK = findOutSensorPose(
         obsRotScan->sensorPose, pts.header.frame_id, base_link_frame_id_,
-        fixedSensorPose);
+        fixedSensorPose, label);
     ASSERT_(sensorPoseOK);
 
     return {obsRotScan};
 }
 
 Rosbag2Dataset::Obs Rosbag2Dataset::toIMU(
-    std::string_view msg, const rosbag2_storage::SerializedBagMessage& rosmsg,
+    std::string_view label, const rosbag2_storage::SerializedBagMessage& rosmsg,
     const std::optional<mrpt::poses::CPose3D>& fixedSensorPose)
 {
     rclcpp::SerializedMessage serMsg(*rosmsg.serialized_data);
@@ -791,7 +795,7 @@ Rosbag2Dataset::Obs Rosbag2Dataset::toIMU(
 
     auto imuObs = mrpt::obs::CObservationIMU::Create();
 
-    imuObs->sensorLabel = msg;
+    imuObs->sensorLabel = label;
     imuObs->timestamp   = mrpt::ros2bridge::fromROS(imu.header.stamp);
 
     // Convert data:
@@ -799,14 +803,14 @@ Rosbag2Dataset::Obs Rosbag2Dataset::toIMU(
 
     bool sensorPoseOK = findOutSensorPose(
         imuObs->sensorPose, imu.header.frame_id, base_link_frame_id_,
-        fixedSensorPose);
+        fixedSensorPose, label);
     ASSERT_(sensorPoseOK);
 
     return {imuObs};
 }
 
 Rosbag2Dataset::Obs Rosbag2Dataset::toGPS(
-    std::string_view msg, const rosbag2_storage::SerializedBagMessage& rosmsg,
+    std::string_view label, const rosbag2_storage::SerializedBagMessage& rosmsg,
     const std::optional<mrpt::poses::CPose3D>& fixedSensorPose)
 {
     rclcpp::SerializedMessage serMsg(*rosmsg.serialized_data);
@@ -817,7 +821,7 @@ Rosbag2Dataset::Obs Rosbag2Dataset::toGPS(
 
     auto gpsObs = mrpt::obs::CObservationGPS::Create();
 
-    gpsObs->sensorLabel = msg;
+    gpsObs->sensorLabel = label;
     gpsObs->timestamp   = mrpt::ros2bridge::fromROS(gps.header.stamp);
 
     // Convert data:
@@ -825,14 +829,14 @@ Rosbag2Dataset::Obs Rosbag2Dataset::toGPS(
 
     bool sensorPoseOK = findOutSensorPose(
         gpsObs->sensorPose, gps.header.frame_id, base_link_frame_id_,
-        fixedSensorPose);
+        fixedSensorPose, label);
     ASSERT_(sensorPoseOK);
 
     return {gpsObs};
 }
 
 Rosbag2Dataset::Obs Rosbag2Dataset::toOdometry(
-    std::string_view msg, const rosbag2_storage::SerializedBagMessage& rosmsg)
+    std::string_view label, const rosbag2_storage::SerializedBagMessage& rosmsg)
 {
     rclcpp::SerializedMessage serMsg(*rosmsg.serialized_data);
     static rclcpp::Serialization<nav_msgs::msg::Odometry> serializer;
@@ -842,7 +846,7 @@ Rosbag2Dataset::Obs Rosbag2Dataset::toOdometry(
 
     auto mrptObs = mrpt::obs::CObservationOdometry::Create();
 
-    mrptObs->sensorLabel = msg;
+    mrptObs->sensorLabel = label;
     mrptObs->timestamp   = mrpt::ros2bridge::fromROS(odo.header.stamp);
 
     // Convert data:
@@ -858,7 +862,7 @@ Rosbag2Dataset::Obs Rosbag2Dataset::toOdometry(
 }
 
 Rosbag2Dataset::Obs Rosbag2Dataset::toImage(
-    std::string_view msg, const rosbag2_storage::SerializedBagMessage& rosmsg,
+    std::string_view label, const rosbag2_storage::SerializedBagMessage& rosmsg,
     const std::optional<mrpt::poses::CPose3D>& fixedSensorPose)
 {
     rclcpp::SerializedMessage serMsg(*rosmsg.serialized_data);
@@ -869,7 +873,7 @@ Rosbag2Dataset::Obs Rosbag2Dataset::toImage(
 
     auto imgObs = mrpt::obs::CObservationImage::Create();
 
-    imgObs->sensorLabel = msg;
+    imgObs->sensorLabel = label;
     imgObs->timestamp   = mrpt::ros2bridge::fromROS(image->header.stamp);
 
     auto cv_ptr = cv_bridge::toCvShare(image);
@@ -878,7 +882,7 @@ Rosbag2Dataset::Obs Rosbag2Dataset::toImage(
 
     bool sensorPoseOK = findOutSensorPose(
         imgObs->cameraPose, image->header.frame_id, base_link_frame_id_,
-        fixedSensorPose);
+        fixedSensorPose, label);
     ASSERT_(sensorPoseOK);
 
     return {imgObs};
