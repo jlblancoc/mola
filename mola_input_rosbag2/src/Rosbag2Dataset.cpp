@@ -454,10 +454,23 @@ void Rosbag2Dataset::spinOnce()
         {
             if (!rosbag_begin_time_) rosbag_begin_time_ = de_tim.value();
 
-            if (rosbag_begin_time_)
-            {
-                const double thisTim =
+            double thisTim =
                     timeDifference(*rosbag_begin_time_, de_tim.value());
+
+            // mechanism to detect mis-timestamped datasets:
+            // e.g. good sensors mixed with LiDARs with timestamps starting
+            //      in UNIX epoch.
+            if (std::abs(thisTim - last_dataset_time_) > 1e9)
+            {
+                rosbag_begin_time_ = de_tim.value();
+                thisTim            = .0;
+                last_dataset_time_ = thisTim;
+
+                MRPT_LOG_THROTTLE_WARN(
+                    2.0,
+                    "Apparently mis-timestamped sensors: resetting time "
+                    "reference. Please, fix your sensor timestamps.");
+            }
 
                 // Reset time after a "teleport"?
                 if (last_dataset_time_ == 0) last_dataset_time_ = thisTim;
@@ -465,7 +478,6 @@ void Rosbag2Dataset::spinOnce()
                 // end of playback for now?
                 if (last_dataset_time_ < thisTim) break;
             }
-        }
 
         // Send observations out:
         if (SF::Ptr sf = de->obs; sf)
