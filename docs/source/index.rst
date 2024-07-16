@@ -13,8 +13,8 @@ MOLA
 
   Home <index.html#http://>
   solutions
-  use-cases
   building-maps
+  use-cases
 
 .. toctree::
   :maxdepth: 2
@@ -56,6 +56,7 @@ Get started:
  - Read the tutorial: :ref:`building-maps`.
  - Read :octicon:`rocket` :ref:`mola_lidar_odometry` documentation.
  - See :ref:`use-cases` for examples of use.
+ - See :ref:`installing` and :ref:`how to cite it <citing_mola>`.
  - See `videos`_ on YouTube.
 
 .. image:: https://mrpt.github.io/imgs/mola-slam-kitti-demo.gif
@@ -173,6 +174,8 @@ How to install all MOLA modules:
         mm-viewer
 
 |
+
+.. _citing_mola:
 
 How to cite MOLA
 ==================

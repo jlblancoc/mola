@@ -1,8 +1,8 @@
 .. _building-maps:
 
-====================
-How to build a map
-====================
+======================
+Tutorial: build a map
+======================
 
 This tutorial describes the steps for building metric maps using MOLA.
 
