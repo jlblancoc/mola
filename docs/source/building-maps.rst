@@ -233,7 +233,15 @@ Afterwards, visualizing :ref:`metric map files <mp2p_icp_basics>` (``*.mm``) can
 
 |
 
-5. What's next?
+5. Publish the map to ROS 2
+----------------------------------------
+
+Write me!
+
+|
+
+
+6. What's next?
 ----------------------------------------
 
 Write me:
