@@ -203,7 +203,7 @@ Afterwards, visualizing :ref:`metric map files <mp2p_icp_basics>` (``*.mm``) can
         .. tab-item:: Build an aggregated 3D point cloud
           :selected:
 
-            Download the example pipeline `sm2mm_pointcloud_voxelize.yaml <https://github.com/MOLAorg/mp2p_icp/blob/master/demos/sm2mm_pointcloud_voxelize.yaml>`_
+            Download the example pipeline `sm2mm_pointcloud_voxelize.yaml <https://github.com/MOLAorg/mp2p_icp/raw/master/demos/sm2mm_pointcloud_voxelize.yaml>`_
             and then run:
 
             .. code-block:: bash
@@ -218,7 +218,7 @@ Afterwards, visualizing :ref:`metric map files <mp2p_icp_basics>` (``*.mm``) can
 
         .. tab-item:: Build a voxel map + 2D grid map
 
-            Download the example pipeline `sm2mm_bonxai_voxelmap_gridmap.yaml <https://github.com/MOLAorg/mp2p_icp/blob/master/demos/sm2mm_bonxai_voxelmap_gridmap.yaml>`_
+            Download the example pipeline `sm2mm_bonxai_voxelmap_gridmap.yaml <https://github.com/MOLAorg/mp2p_icp/raw/master/demos/sm2mm_pointcloud_voxelize.yaml>`_
             and then run:
 
             .. code-block:: bash
@@ -236,7 +236,36 @@ Afterwards, visualizing :ref:`metric map files <mp2p_icp_basics>` (``*.mm``) can
 5. Publish the map to ROS 2
 ----------------------------------------
 
-Write me!
+Publishing metric maps (``*.mm`` files) as ROS topics for other nodes to use them is the purpose of the `mrpt_map_server package <https://github.com/mrpt-ros-pkg/mrpt_navigation/tree/ros2/mrpt_map_server>`_.
+Please, read carefully `its documentation <https://github.com/mrpt-ros-pkg/mrpt_navigation/tree/ros2/mrpt_map_server>`_ to learn about all available features and parameters.
+
+.. dropdown:: Map publish example
+  :open:
+
+  This example assumes you built ``mvsim-warehouse01.mm`` following instructions above.
+  
+  To publish maps you need to install ``mrpt_map_server``. The easiest way is:
+
+  .. code-block:: bash
+
+      # Make sure mrpt_map_server is installed:
+      sudo apt install ros-${ROS_DISTRO}-mrpt-map-server
+
+  In a terminal, run:
+
+  .. code-block:: bash
+
+      # Publish all map layers as ROS 2 topics:
+      ros2 launch mrpt_map_server mrpt_map_server.launch.py \
+        mm_file:=$(pwd)/mvsim-warehouse01.mm
+
+  Next, open ``rviz2`` in another terminal, and:
+
+   * Add a new display object of type ``PointCloud2`` linked to the topic ``/mrpt_map/filtered_points``.
+   * Make sure of changing its ``Durability`` to "transient local".  
+
+  .. image:: https://mrpt.github.io/imgs/screenshot-rviz2-mrpt-map-server-demo-warehouse.png
+
 
 |
 
