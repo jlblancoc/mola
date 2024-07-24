@@ -2,6 +2,9 @@
 Changelog for package mola
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 1.0.6 (2024-06-21)
 ------------------
 * Create new NavStateFilter interface and separate the simple fuser and the factor-graph approach in two packages
