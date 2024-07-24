@@ -3,8 +3,8 @@ Changelog for package mola_input_rosbag2
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
-Forthcoming
------------
+1.0.7 (2024-07-24)
+------------------
 * Better warning messages related to missing /tf messages
 * Mechanism to replay datasets with mis-timestamped LiDARs
 * Contributors: Jose Luis Blanco-Claraco

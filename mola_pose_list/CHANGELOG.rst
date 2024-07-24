@@ -2,8 +2,8 @@
 Changelog for package mola_pose_list
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.0.7 (2024-07-24)
+------------------
 * Add sanity asserts
 * Contributors: Jose Luis Blanco-Claraco
 

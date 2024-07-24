@@ -2,8 +2,8 @@
 Changelog for package mola_navstate_fg
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.0.7 (2024-07-24)
+------------------
 * Fix GNSS typo
 * Contributors: Jose Luis Blanco-Claraco
 

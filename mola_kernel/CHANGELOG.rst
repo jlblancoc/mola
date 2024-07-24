@@ -2,8 +2,8 @@
 Changelog for package mola_kernel
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.0.7 (2024-07-24)
+------------------
 * Viz interface: add API for rotate camera
 * Contributors: Jose Luis Blanco-Claraco
 

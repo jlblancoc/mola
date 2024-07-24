@@ -3,8 +3,8 @@ Changelog for package mola_bridge_ros2
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
-Forthcoming
------------
+1.0.7 (2024-07-24)
+------------------
 * Fix GNSS typo
 * Contributors: Jose Luis Blanco-Claraco
 

@@ -3,8 +3,8 @@ Changelog for package mola_input_mulran_dataset
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
-Forthcoming
------------
+1.0.7 (2024-07-24)
+------------------
 * Fix GNSS typo
 * Contributors: Jose Luis Blanco-Claraco
 
