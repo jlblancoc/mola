@@ -27,15 +27,15 @@ file(GLOB_RECURSE LIB_SRCS src/*.cpp src/*.h)
 file(GLOB_RECURSE LIB_PUBLIC_HDRS include/*.h)
 
 mola_add_library(
-	TARGET ${PROJECT_NAME}
-	SOURCES ${LIB_SRCS} ${LIB_PUBLIC_HDRS}
-	PUBLIC_LINK_LIBRARIES
-		mola::mola_kernel
-		mrpt::gui
-		mrpt::opengl
-		mrpt::maps
-	CMAKE_DEPENDENCIES
-		mola_kernel
-		mrpt-gui
-		mrpt-opengl
+  TARGET ${PROJECT_NAME}
+  SOURCES ${LIB_SRCS} ${LIB_PUBLIC_HDRS}
+  PUBLIC_LINK_LIBRARIES
+    mola::mola_kernel
+    mrpt::gui
+    mrpt::opengl
+    mrpt::maps
+  CMAKE_DEPENDENCIES
+    mola_kernel
+    mrpt-gui
+    mrpt-opengl
 )

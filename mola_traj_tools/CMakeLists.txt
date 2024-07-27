@@ -23,31 +23,31 @@ find_package(mrpt-poses)
 # define app targets:
 
 mola_add_executable(
-	TARGET  traj_ypr2tum
-	SOURCES src/traj_ypr2tum.cpp
-	LINK_LIBRARIES
-		mrpt::poses
+  TARGET  traj_ypr2tum
+  SOURCES src/traj_ypr2tum.cpp
+  LINK_LIBRARIES
+    mrpt::poses
 )
 
 mola_add_executable(
-	TARGET  traj_tf_left
-	SOURCES src/traj_tf_left.cpp
-	LINK_LIBRARIES
-		mrpt::poses
+  TARGET  traj_tf_left
+  SOURCES src/traj_tf_left.cpp
+  LINK_LIBRARIES
+    mrpt::poses
 )
 
 mola_add_executable(
-	TARGET  traj_tf_right
-	SOURCES src/traj_tf_right.cpp
-	LINK_LIBRARIES
-		mrpt::poses
+  TARGET  traj_tf_right
+  SOURCES src/traj_tf_right.cpp
+  LINK_LIBRARIES
+    mrpt::poses
 )
 
 mola_add_executable(
-	TARGET  traj_rebase
-	SOURCES src/traj_rebase.cpp
-	LINK_LIBRARIES
-		mrpt::poses
+  TARGET  traj_rebase
+  SOURCES src/traj_rebase.cpp
+  LINK_LIBRARIES
+    mrpt::poses
 )
 
 # Install "executables" too:

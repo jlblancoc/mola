@@ -28,16 +28,16 @@ list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 find_package(Filesystem REQUIRED)
 
 mola_add_library(
-	TARGET ${PROJECT_NAME}
-	SOURCES ${LIB_SRCS} ${LIB_PUBLIC_HDRS}
-	PUBLIC_LINK_LIBRARIES
-		mrpt::containers
-	PRIVATE_LINK_LIBRARIES
-		mrpt::system
-		CXX::Filesystem  # the C++>=17 std lib
-	CMAKE_DEPENDENCIES
-		mrpt-containers
-		mrpt-system
+  TARGET ${PROJECT_NAME}
+  SOURCES ${LIB_SRCS} ${LIB_PUBLIC_HDRS}
+  PUBLIC_LINK_LIBRARIES
+    mrpt::containers
+  PRIVATE_LINK_LIBRARIES
+    mrpt::system
+    CXX::Filesystem  # the C++>=17 std lib
+  CMAKE_DEPENDENCIES
+    mrpt-containers
+    mrpt-system
 )
 
 # -----------------------

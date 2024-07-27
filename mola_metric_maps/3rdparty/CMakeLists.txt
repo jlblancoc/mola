@@ -39,15 +39,15 @@ configure_file(
 )
 # Install cmake config module
 install(
-	EXPORT
-		robin_map-targets
-	DESTINATION
-		${CMAKE_INSTALL_LIBDIR}/robin_map/cmake
+  EXPORT
+    robin_map-targets
+  DESTINATION
+    ${CMAKE_INSTALL_LIBDIR}/robin_map/cmake
 )
 install(
-	FILES
-		${CMAKE_BINARY_DIR}/robin_map-config.cmake
-		#${CMAKE_BINARY_DIR}/robin_map-config-version.cmake
-	DESTINATION
-		${CMAKE_INSTALL_LIBDIR}/robin_map/cmake
+  FILES
+    ${CMAKE_BINARY_DIR}/robin_map-config.cmake
+    #${CMAKE_BINARY_DIR}/robin_map-config-version.cmake
+  DESTINATION
+    ${CMAKE_INSTALL_LIBDIR}/robin_map/cmake
 )

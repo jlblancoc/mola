@@ -28,24 +28,24 @@ find_package(mola_test_datasets) # optional
 # -----------------------
 # define lib:
 mola_add_library(
-	TARGET ${PROJECT_NAME}
-	SOURCES 
-		src/find_best_poses_se2.cpp
-		src/RelocalizationICP_SE2.cpp
-		src/RelocalizationLikelihood_SE2.cpp
-		include/mola_relocalization/relocalization.h
-	PUBLIC_LINK_LIBRARIES
-		mrpt::obs
-		mrpt::maps
-		mrpt::slam
-		mola::mp2p_icp
-		mola::mola_pose_list
-#	PRIVATE_LINK_LIBRARIES
-#		mrpt::obs
-	CMAKE_DEPENDENCIES
-		mola_common
-		mp2p_icp
-		mola_pose_list
+  TARGET ${PROJECT_NAME}
+  SOURCES
+    src/find_best_poses_se2.cpp
+    src/RelocalizationICP_SE2.cpp
+    src/RelocalizationLikelihood_SE2.cpp
+    include/mola_relocalization/relocalization.h
+  PUBLIC_LINK_LIBRARIES
+    mrpt::obs
+    mrpt::maps
+    mrpt::slam
+    mola::mp2p_icp
+    mola::mola_pose_list
+#  PRIVATE_LINK_LIBRARIES
+#    mrpt::obs
+  CMAKE_DEPENDENCIES
+    mola_common
+    mp2p_icp
+    mola_pose_list
 )
 
 # -----------------------

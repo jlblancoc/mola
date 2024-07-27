@@ -1,6 +1,6 @@
 # Unit tests:
 
-if (mola_test_datasets_FOUND)
+if(mola_test_datasets_FOUND)
 #message(STATUS "mola_test_datasets: ${mola_test_datasets_DIR}")
 
 set(TEST_DATASETS_ROOT "${mola_test_datasets_DIR}/../datasets/")

@@ -30,18 +30,18 @@ file(GLOB_RECURSE LIB_SRCS src/*.cpp src/*.h)
 file(GLOB_RECURSE LIB_PUBLIC_HDRS include/*.h)
 
 mola_add_library(
-	TARGET ${PROJECT_NAME}
-	SOURCES ${LIB_SRCS} ${LIB_PUBLIC_HDRS}
-	PUBLIC_LINK_LIBRARIES
-		mrpt::obs
-		mola::mola_kernel
-		mola::mola_imu_preintegration
-	PRIVATE_LINK_LIBRARIES
-		gtsam
-	CMAKE_DEPENDENCIES
-		mola_common
-		mola_imu_preintegration
-		mola_kernel
+  TARGET ${PROJECT_NAME}
+  SOURCES ${LIB_SRCS} ${LIB_PUBLIC_HDRS}
+  PUBLIC_LINK_LIBRARIES
+    mrpt::obs
+    mola::mola_kernel
+    mola::mola_imu_preintegration
+  PRIVATE_LINK_LIBRARIES
+    gtsam
+  CMAKE_DEPENDENCIES
+    mola_common
+    mola_imu_preintegration
+    mola_kernel
 )
 target_include_directories(${PROJECT_NAME} PRIVATE ".")
 

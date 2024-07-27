@@ -24,15 +24,15 @@ find_package(mrpt-tclap)
 # ----------------------
 # define app target:
 mola_add_executable(
-	TARGET  kitti-metrics-eval
-	SOURCES apps/kitti-metrics-eval.cpp
-	LINK_LIBRARIES
-		mrpt::tclap
-		mrpt::poses
-		mrpt::math
+  TARGET  kitti-metrics-eval
+  SOURCES apps/kitti-metrics-eval.cpp
+  LINK_LIBRARIES
+    mrpt::tclap
+    mrpt::poses
+    mrpt::math
 )
 
 # Silent tons of warnings from kitti-eval original code:
-if (CMAKE_COMPILER_IS_GNUCXX)
+if(CMAKE_COMPILER_IS_GNUCXX)
     target_compile_options(kitti-metrics-eval PRIVATE "-Wno-unused-result" "-Wno-shadow" "-Wno-sign-compare")
 endif()

@@ -25,19 +25,19 @@ file(GLOB_RECURSE LIB_SRCS src/*.cpp src/*.h)
 file(GLOB_RECURSE LIB_PUBLIC_HDRS include/*.h)
 
 mola_add_library(
-	TARGET ${PROJECT_NAME}
-	SOURCES ${LIB_SRCS} ${LIB_PUBLIC_HDRS}
-	PUBLIC_LINK_LIBRARIES
-		mrpt::obs
-		mrpt::gui
-		mola::mola_yaml
-#	PRIVATE_LINK_LIBRARIES
-	CMAKE_DEPENDENCIES
-		mrpt-obs
-		mrpt-gui
-		mola_yaml
+  TARGET ${PROJECT_NAME}
+  SOURCES ${LIB_SRCS} ${LIB_PUBLIC_HDRS}
+  PUBLIC_LINK_LIBRARIES
+    mrpt::obs
+    mrpt::gui
+    mola::mola_yaml
+#  PRIVATE_LINK_LIBRARIES
+  CMAKE_DEPENDENCIES
+    mrpt-obs
+    mrpt-gui
+    mola_yaml
 )
 
-if ("$ENV{VERBOSE}")
-	message(STATUS "mola_kernel: Using MRPT version: ${MRPT_VERSION}")
+if("$ENV{VERBOSE}")
+  message(STATUS "mola_kernel: Using MRPT version: ${MRPT_VERSION}")
 endif()

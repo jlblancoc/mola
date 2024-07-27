@@ -11,7 +11,7 @@
 cmake_minimum_required(VERSION 3.5)
 
 if("$ENV{ROS_VERSION}" STREQUAL "2")
-	set(DETECTED_ROS2 TRUE)
+  set(DETECTED_ROS2 TRUE)
 endif()
 
 # Tell CMake we'll use C++ for use in its tests/flags
@@ -37,13 +37,13 @@ install(DIRECTORY
 # -----------------------------------------------------------------------------
 #  ROS2
 # -----------------------------------------------------------------------------
-if (DETECTED_ROS2)
-	# find dependencies
-	find_package(ament_cmake REQUIRED)
+if(DETECTED_ROS2)
+  # find dependencies
+  find_package(ament_cmake REQUIRED)
 
-	#ament_target_dependencies(MY_TARGET
-	#  rclcpp...
-	#)
+  #ament_target_dependencies(MY_TARGET
+  #  rclcpp...
+  #)
 
-	ament_package()
+  ament_package()
 endif()

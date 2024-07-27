@@ -19,9 +19,10 @@ find_package(mola_common REQUIRED)
 find_package(mrpt-maps REQUIRED)
 
 find_package(mrpt-ros2bridge QUIET)
-if (NOT mrpt-ros2bridge_FOUND)
-	message(STATUS "*NOTE*: Module mola_input_ros2 will NOT be built due to missing dependency mrpt-ros2bridge. Set mrpt-ros2bridge_DIR to enable it.")
-	return()
+if(NOT mrpt-ros2bridge_FOUND)
+  message(STATUS "*NOTE*: Module mola_input_ros2 will NOT be built due to missing"
+    "dependency mrpt-ros2bridge. Set mrpt-ros2bridge_DIR to enable it.")
+  return()
 endif()
 
 # Find MOLA pkgs:
@@ -44,24 +45,24 @@ file(GLOB_RECURSE LIB_PUBLIC_HDRS include/*.h)
 
 # This adds non-ROS deps. The rest are handled below with ament_target_dependencies()
 mola_add_library(
-	TARGET ${PROJECT_NAME}
-	SOURCES ${LIB_SRCS} ${LIB_PUBLIC_HDRS}
-	PRIVATE_LINK_LIBRARIES
-		mola::mola_kernel
-		mrpt::maps
-		mrpt::ros2bridge
-	CMAKE_DEPENDENCIES
-		mola_kernel
-		mrpt-maps
+  TARGET ${PROJECT_NAME}
+  SOURCES ${LIB_SRCS} ${LIB_PUBLIC_HDRS}
+  PRIVATE_LINK_LIBRARIES
+    mola::mola_kernel
+    mrpt::maps
+    mrpt::ros2bridge
+  CMAKE_DEPENDENCIES
+    mola_kernel
+    mrpt-maps
 )
 
 ament_target_dependencies(${PROJECT_NAME} PUBLIC
-	geometry_msgs
-	nav_msgs
-	rclcpp
-	sensor_msgs
-	tf2
-	tf2_geometry_msgs
+  geometry_msgs
+  nav_msgs
+  rclcpp
+  sensor_msgs
+  tf2
+  tf2_geometry_msgs
 )
 
 ament_export_dependencies()
