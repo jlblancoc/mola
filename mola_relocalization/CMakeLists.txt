@@ -46,6 +46,7 @@ mola_add_library(
     mola_common
     mp2p_icp
     mola_pose_list
+    mrpt-slam
 )
 
 # -----------------------
