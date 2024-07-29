@@ -3,8 +3,8 @@ Changelog for package mola_input_mulran_dataset
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
-Forthcoming
------------
+1.0.8 (2024-07-29)
+------------------
 * ament_lint_cmake: clean warnings
 * Contributors: Jose Luis Blanco-Claraco
 

@@ -2,8 +2,8 @@
 Changelog for package mola_metric_maps
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.0.8 (2024-07-29)
+------------------
 * Update robin-map to latest version (Fix cmake < 3.5 compatibility warning)
 * ament_lint_cmake: clean warnings
 * Contributors: Jose Luis Blanco-Claraco
