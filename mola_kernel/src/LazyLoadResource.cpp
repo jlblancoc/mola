@@ -95,8 +95,8 @@ void LazyLoadResource::unload() const
             "Trying to unload() a resource without associated external file. "
             "Aborting, it would imply losing data.");
 
-    MRPT_TODO(
-        "Add a setter for a 'modified' flag to re-write to disk if needed");
+    // TODO(jlbc): Add a setter for a 'modified' flag to re-write to disk if
+    // needed
 
     // If the file already exists, assume it's up-to-date and dont overwrite.
     if (!mrpt::system::fileExists(fil))

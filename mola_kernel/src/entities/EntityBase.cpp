@@ -38,8 +38,7 @@ void EntityBase::load()
     // If I am a KeyFrame: unload observations:
     if (auto kf = dynamic_cast<KeyFrameBase*>(this); kf != nullptr)
     {
-        // TO DO:
-        MRPT_TODO("Reload kf->raw_observations_");
+        // TODO(jlbc): Reload kf->raw_observations_
     }
 
     MRPT_TRY_END
