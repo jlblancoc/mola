@@ -32,8 +32,9 @@
   <depend>mola_viz</depend>
   <depend>mola_yaml</depend>
 
-  <depend>ament_lint_common</depend>
-  <depend>ament_lint_auto</depend>
+  <test_depend>ament_lint_auto</test_depend>
+  <test_depend>ament_cmake_xmllint</test_depend>
+  <test_depend>ament_lint_cmake</test_depend>
 
   <export>
     <build_type>ament_cmake</build_type>
