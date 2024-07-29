@@ -1,0 +1,8 @@
+# This service requests re-localization around a given pose.
+
+# Request
+geometry_msgs/PoseWithCovarianceStamped pose
+---
+# Result. False if there was no MOLA localization module
+# accepting this request.
+bool accepted

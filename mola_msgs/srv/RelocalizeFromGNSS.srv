@@ -1,0 +1,8 @@
+# This service requests re-localization using the next GNSS message.
+
+# Request.
+# No data needed.
+---
+# Result. False if there was no MOLA localization module
+# accepting this request.
+bool accepted
