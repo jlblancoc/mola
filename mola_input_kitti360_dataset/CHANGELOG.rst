@@ -2,8 +2,8 @@
 Changelog for package mola_input_kitti_dataset
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-1.0.8 (2024-07-29)
-------------------
+Forthcoming
+-----------
 * ament_lint_cmake: clean warnings
 * Contributors: Jose Luis Blanco-Claraco
 
