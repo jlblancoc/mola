@@ -2,8 +2,8 @@
 Changelog for package mola_msgs
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.0.8 (2024-07-29)
+------------------
 * Add mola_msgs package with ROS service definitions
 * Contributors: Jose Luis Blanco-Claraco
 
