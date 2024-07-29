@@ -2,6 +2,11 @@
 Changelog for package mola_pose_list
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* ament_lint_cmake: clean warnings
+* Contributors: Jose Luis Blanco-Claraco
+
 1.0.7 (2024-07-24)
 ------------------
 * Add sanity asserts

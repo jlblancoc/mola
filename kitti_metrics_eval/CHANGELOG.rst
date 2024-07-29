@@ -3,6 +3,11 @@ Changelog for package kitti_metrics_eval
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
+Forthcoming
+-----------
+* ament_lint_cmake: clean warnings
+* Contributors: Jose Luis Blanco-Claraco
+
 1.0.7 (2024-07-24)
 ------------------
 

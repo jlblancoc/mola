@@ -2,6 +2,12 @@
 Changelog for package mola_kernel
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* mola_kernel: add C++ virtual interface for relocalization methods
+* ament_lint_cmake: clean warnings
+* Contributors: Jose Luis Blanco-Claraco
+
 1.0.7 (2024-07-24)
 ------------------
 * Viz interface: add API for rotate camera
