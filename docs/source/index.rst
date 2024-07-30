@@ -53,7 +53,7 @@ MOLA
 :octicon:`mark-github` `MOLA`_ is a Modular system for Localization and Mapping.
 
 Get started:
- - Read the tutorial: :ref:`building-maps`.
+ - Read: :ref:`building-maps`.
  - Read :octicon:`rocket` :ref:`mola_lidar_odometry` documentation.
  - See :ref:`use-cases` for examples of use.
  - See :ref:`installing` and :ref:`how to cite it <citing_mola>`.
@@ -89,7 +89,9 @@ How to install all MOLA modules:
         sudo apt install ros-$ROS_DISTRO-mola
         
         # Install the MOLA LIDAR odometry package:
-        sudo apt install ros-$ROS_DISTRO-mola-lidar-odometry
+        # sudo apt install ros-$ROS_DISTRO-mola-lidar-odometry
+        # As of Jul 2024, this package is not available from apt yet! 
+        # Please see instructions below to clone and build it from sources
 
         # Install example small datasets to run demos/unit tests:
         sudo apt install ros-$ROS_DISTRO-mola-test-datasets
@@ -97,9 +99,6 @@ How to install all MOLA modules:
     Check if all new nodes and apps are visible:
 
     .. code-block:: bash
-
-        cd ~/ros2_mola_ws/
-        . install/setup.bash
 
         # For example, let's launch the mm map viewer. 
         # If a GUI app is opened, it means installation was successful.
@@ -128,9 +127,6 @@ How to install all MOLA modules:
 
         mkdir -p ~/ros2_mola_ws/src/ 
         cd ~/ros2_mola_ws/src/
-
-        # Optional: Get latest version of mrpt2.
-        # git clone https://github.com/MRPT/mrpt.git mrpt2 --recursive
 
         # Main MOLA modules:
         git clone https://github.com/MOLAorg/mola_common.git
