@@ -91,7 +91,7 @@ The complete framework comprises these software repositories:
 
 Contact
 ===========
-To request details on **licensing a closed-source version for commercial usages** and/or **consulting services**, please use the contact form below:
+To request details on **licensing a closed-source version for commercial usages** and/or **consulting services**, please use `this contact form <https://docs.google.com/forms/d/e/1FAIpQLSdgFfPclN7MuB4uKIbENxUDgC-pmimcu_PGcq5-vAALjUAOrg/>`_:
 
 .. raw:: html
 
