@@ -182,7 +182,7 @@ The ``mola_lidar_odometry`` system was presented in :cite:`blanco2024mola_lo`:
   `A flexible framework for accurate LiDAR odometry, map manipulation, and localization`_, in
   ArXiV, 2024.
 
-.. _A flexible framework for accurate LiDAR odometry, map manipulation, and localization: https://TBD
+.. _A flexible framework for accurate LiDAR odometry, map manipulation, and localization: https://arxiv.org/abs/2407.20465
 
 The basics of the MOLA framework were introduced in :cite:`blanco2019modular`.
 
