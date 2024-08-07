@@ -52,10 +52,18 @@ Refer to the [official documentation](https://docs.mola-slam.org/latest/) for bu
 
 The latest publications on MOLA are ([PDF](https://arxiv.org/abs/2407.20465)).
 
-    J.L. Blanco,
-    `A flexible framework for accurate LiDAR odometry, map manipulation, and localization`_, in ArXiV, 2024.
-    
-    
+```bibtex
+@misc{blanco2024mola,
+      title={A flexible framework for accurate LiDAR odometry, map manipulation, and localization},
+      author={José Luis Blanco-Claraco},
+      year={2024},
+      eprint={2407.20465},
+      archivePrefix={arXiv},
+      primaryClass={cs.RO},
+      url={https://arxiv.org/abs/2407.20465},
+}
+```
+
 MOLA was initially presented in 2019 in ([PDF](http://www.roboticsproceedings.org/rss15/p43.pdf)):
 
 ```bibtex
