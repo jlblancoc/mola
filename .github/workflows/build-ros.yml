@@ -42,19 +42,16 @@ jobs:
             ros_version: 2
 
           # Rolling Ridley (No End-Of-Life)
-#          - docker_image: ubuntu:noble
-#            ros_distribution: rolling
-#            ros_version: 2
+          - docker_image: ubuntu:noble
+            ros_distribution: rolling
+            ros_version: 2
 
     container:
       image: ${{ matrix.docker_image }}
 
     steps:
-      - name: Checkout
-        run: |
-          apt-get -y update
-          apt-get -y install git
-          git clone https://github.com/$GITHUB_REPOSITORY.git --recursive "$GITHUB_WORKSPACE"
+      - name: Checkout source code
+        uses: actions/checkout@v3
 
       - name: setup ROS environment
         uses: ros-tooling/setup-ros@v0.7
