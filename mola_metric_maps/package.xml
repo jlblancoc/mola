@@ -8,12 +8,11 @@
   <version>1.0.8</version>
   <description>Advanced metric map classes, using the generic `mrpt::maps::CMetricMap` interface, for use in other MOLA odometry and SLAM modules.</description>
 
-  <author     email="joseluisblancoc@gmail.com">Jose-Luis Blanco-Claraco</author>
   <maintainer email="joseluisblancoc@gmail.com">Jose-Luis Blanco-Claraco</maintainer>
+  <license file="LICENSE">GPLv3</license>
 
   <url type="website">https://github.com/MOLAorg/mola/tree/develop/mola_metric_maps</url>
 
-  <license file="LICENSE">GPLv3</license>
 
   <depend>mola_common</depend>
   <depend>mrpt2</depend>

@@ -8,18 +8,17 @@
   <version>1.0.8</version>
   <description>SE(3) pose and twist path data fusion estimator</description>
 
-  <author     email="joseluisblancoc@gmail.com">Jose-Luis Blanco-Claraco</author>
   <maintainer email="joseluisblancoc@gmail.com">Jose-Luis Blanco-Claraco</maintainer>
+  <license file="LICENSE">GPLv3</license>
 
   <url type="website">https://github.com/MOLAorg/mola/tree/develop/mola_navstate_fuse</url>
 
-  <license file="LICENSE">GPLv3</license>
 
   <depend>mola_common</depend>
   <depend>mola_kernel</depend>
   <depend>mola_imu_preintegration</depend>
   <depend>mrpt2</depend>
-  
+
   <!-- GTSAM and its Boost deps -->
   <build_depend>gtsam</build_depend>
   <build_depend>libboost-serialization-dev</build_depend>
