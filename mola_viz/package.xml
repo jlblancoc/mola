@@ -8,12 +8,11 @@
   <version>1.0.8</version>
   <description>GUI for MOLA</description>
 
-  <author     email="joseluisblancoc@gmail.com">Jose-Luis Blanco-Claraco</author>
   <maintainer email="joseluisblancoc@gmail.com">Jose-Luis Blanco-Claraco</maintainer>
+  <license file="LICENSE">GPLv3</license>
 
   <url type="website">https://github.com/MOLAorg/mola/tree/develop/mola_viz</url>
 
-  <license file="LICENSE">GPLv3</license>
 
   <depend>mola_kernel</depend>
   <depend>mrpt2</depend>

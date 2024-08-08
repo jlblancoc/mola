@@ -8,14 +8,13 @@
   <version>1.0.8</version>
   <description>Demo and example launch files for MOLA</description>
 
-  <author     email="joseluisblancoc@gmail.com">Jose-Luis Blanco-Claraco</author>
   <maintainer email="joseluisblancoc@gmail.com">Jose-Luis Blanco-Claraco</maintainer>
+  <license file="LICENSE">BSD</license>
 
   <url type="website">https://github.com/MOLAorg/</url>
 
-  <license file="LICENSE">BSD</license>
 
-<!-- <depend>mola_common</depend> -->
+  <!-- <depend>mola_common</depend> -->
 
   <doc_depend>doxygen</doc_depend>
 

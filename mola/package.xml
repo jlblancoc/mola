@@ -4,8 +4,8 @@
   <name>mola</name>
   <version>1.0.8</version>
   <description>Metapackage with all core open-sourced MOLA packages.</description>
+
   <maintainer email="jlblanco@ual.es">Jose-Luis Blanco-Claraco</maintainer>
-  <author>Jose-Luis Blanco-Claraco</author>
   <license file="LICENSE">BSD</license>
 
   <buildtool_depend>ament_cmake</buildtool_depend>

@@ -67,6 +67,55 @@ Get started:
 
 |
 
+.. humble badges ------
+
+.. |badgeHdev| image:: https://build.ros2.org/job/Hdev__mola__ubuntu_jammy_amd64/badge/icon
+   :scale: 100%
+   :align: middle
+   :target: https://build.ros2.org/job/Hdev__mola__ubuntu_jammy_amd64/
+
+.. |badgeHrel| image:: https://img.shields.io/ros/v/humble/mola
+   :scale: 100%
+   :align: middle
+   :target: https://index.ros.org/search/?term=mola
+
+.. iron badges ------
+
+.. |badgeIdev| image:: https://build.ros2.org/job/Idev__mola__ubuntu_jammy_amd64/badge/icon
+   :scale: 100%
+   :align: middle
+   :target: https://build.ros2.org/job/Idev__mola__ubuntu_jammy_amd64/
+
+.. |badgeIrel| image:: https://img.shields.io/ros/v/iron/mola
+   :scale: 100%
+   :align: middle
+   :target: https://index.ros.org/search/?term=mola
+
+.. jazzy badges ------
+
+.. |badgeJdev| image:: https://build.ros2.org/job/Jdev__mola__ubuntu_noble_amd64/badge/icon
+   :scale: 100%
+   :align: middle
+   :target: https://build.ros2.org/job/Jdev__mola__ubuntu_noble_amd64/
+
+.. |badgeJrel| image:: https://img.shields.io/ros/v/jazzy/mola
+   :scale: 100%
+   :align: middle
+   :target: https://index.ros.org/search/?term=mola
+
+.. rolling badges ------
+
+.. |badgeRdev| image:: https://build.ros2.org/job/Rdev__mola__ubuntu_noble_amd64/badge/icon
+   :scale: 100%
+   :align: middle
+   :target: https://build.ros2.org/job/Rdev__mola__ubuntu_noble_amd64/
+
+.. |badgeRrel| image:: https://img.shields.io/ros/v/rolling/mola
+   :scale: 100%
+   :align: middle
+   :target: https://index.ros.org/search/?term=mola
+
+
 .. _installing:
 
 Installing
@@ -104,8 +153,19 @@ How to install all MOLA modules:
         # If a GUI app is opened, it means installation was successful.
         mm-viewer
 
-    Check the `build status table <https://github.com/MOLAorg/mola>`_ to find out
-    what MOLA version is available for your ROS distribution.
+    These are the versions available from ROS build farms:
+
+    +-------------------------+-----------------------------+------------------------------------+
+    | ROS distribution        | Development build status    | Last release (available via apt)   |
+    +=========================+=============================+====================================+
+    | ROS 2 Humble (u22.04)   |    |badgeHdev|              |     |badgeHrel|                    |
+    +-------------------------+-----------------------------+------------------------------------+
+    | ROS 2 Iron (u22.04)     |    |badgeIdev|              |     |badgeIrel|                    |
+    +-------------------------+-----------------------------+------------------------------------+
+    | ROS 2 Jazzy (u24.04)    |    |badgeJdev|              |     |badgeJrel|                    |
+    +-------------------------+-----------------------------+------------------------------------+
+    | ROS 2 Rolling (u24.04)  |    |badgeRdev|              |     |badgeRrel|                    |
+    +-------------------------+-----------------------------+------------------------------------+
 
 
 .. dropdown:: Build from sources

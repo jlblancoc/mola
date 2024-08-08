@@ -8,12 +8,10 @@
   <version>1.0.8</version>
   <description>Bidirectional bridge ROS2-MOLA</description>
 
-  <author     email="joseluisblancoc@gmail.com">Jose-Luis Blanco-Claraco</author>
   <maintainer email="joseluisblancoc@gmail.com">Jose-Luis Blanco-Claraco</maintainer>
+  <license file="LICENSE">BSD</license>
 
   <url type="website">https://github.com/MOLAorg/mola/tree/develop/mola_bridge_ros2</url>
-
-  <license file="LICENSE">BSD</license>
 
   <doc_depend>doxygen</doc_depend>
 
