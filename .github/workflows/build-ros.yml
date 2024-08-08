@@ -1,7 +1,7 @@
 # Based on GTSAM file (by @ProfFan)
 name: CI Build colcon
 
-on: [push, pull_request]
+on: [push]
 
 jobs:
   build_docker: # On Linux, iterates on all ROS 1 and ROS 2 distributions.
@@ -42,9 +42,9 @@ jobs:
             ros_version: 2
 
           # Rolling Ridley (No End-Of-Life)
-#          - docker_image: ubuntu:noble
-#            ros_distribution: rolling
-#            ros_version: 2
+          - docker_image: ubuntu:noble
+            ros_distribution: rolling
+            ros_version: 2
 
     container:
       image: ${{ matrix.docker_image }}
@@ -55,6 +55,9 @@ jobs:
           apt-get -y update
           apt-get -y install git
           git clone https://github.com/$GITHUB_REPOSITORY.git --recursive "$GITHUB_WORKSPACE"
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          git checkout $GITHUB_SHA
+          git submodule update --init --recursive
 
       - name: setup ROS environment
         uses: ros-tooling/setup-ros@v0.7
