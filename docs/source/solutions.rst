@@ -1,14 +1,14 @@
 .. _solutions:
 
 =========================
-Solutions and pricing
+Solutions and licensing
 =========================
 
 Solutions
 ===============
 
-1. Flexible LIDAR odometry and Localization
-------------------------------------------
+1. Flexible 3D LIDAR odometry and Localization
+------------------------------------------------
 :ref:`LiDAR odometry <mola_lidar_odometry>` is one of the most advanced and flexible LIDAR odometry modules out there.
 Check out the tutorial: :ref:`building-maps`.
 
@@ -17,16 +17,38 @@ Check out the tutorial: :ref:`building-maps`.
 
 |
 
-
-
-2. Full SLAM solution (GNSS, submapping, loop closures)
---------------------------------------------------------
+2. Full 3D SLAM solution (GNSS, submapping, loop closures)
+------------------------------------------------------------
 
 Build **geo-referenced** consistent global maps, even mixing indoor and outdoor scenarios.
+This functionality is provided by:
+
+- ``mola_sm_loop_closure``: TO-DO: add docs.
+  At present, this package is not open-sourced, see: :ref:`mola_licenses`.
+
+  - **Geo-referencing** metric maps with consumer-grade GNSS sensors.
+  - Off-line **loop closure** for consistent global maps.
+
+- ``mola_3d_lidar_slam``: (Coming soon!)
+
 
 .. image:: https://mrpt.github.io/imgs/kaist01_georef_sample.png
 
+
 |
+
+3. Full 2D SLAM solution
+----------------------------
+
+Build **geo-referenced** consistent global 2D maps from 2D LiDARs.
+This functionality is provided by:
+
+- ``mola_2d_lidar_slam``: (Coming soon!)
+
+
+|
+
+.. _mola_licenses:
 
 License and pricing
 =====================
@@ -91,7 +113,7 @@ The complete framework comprises these software repositories:
 
 Contact
 ===========
-To request details on **licensing a closed-source version for commercial usages** and/or **consulting services**, please use `this contact form <https://docs.google.com/forms/d/e/1FAIpQLSdgFfPclN7MuB4uKIbENxUDgC-pmimcu_PGcq5-vAALjUAOrg/>`_:
+To request details on **licensing a closed-source version for commercial usages** and/or **consulting services**, please use `this contact form <https://docs.google.com/forms/d/e/1FAIpQLSdgFfPclN7MuB4uKIbENxUDgC-pmimcu_PGcq5-vAALjUAOrg/viewform?usp=sf_link>`_:
 
 .. raw:: html
 
