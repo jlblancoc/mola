@@ -118,6 +118,8 @@ or from the :ref:`UI controls <mola_lo_gui_common_parts>` in the ``mola_lidar_od
 |
 
 
+.. _building-maps_sect_inspect_sm:
+
 3. Inspect the resulting simple-map
 ----------------------------------------
 To verify that the generated simple-map is correct, you can use :ref:`sm-cli <app_sm-cli>`.
