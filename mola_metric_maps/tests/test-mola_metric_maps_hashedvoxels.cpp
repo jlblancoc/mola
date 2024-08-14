@@ -59,9 +59,8 @@ void test_voxelmap_insert_2d_scan()
     {
         size_t nPts = 0;
 
-        const auto lambdaVisitPoints = [&nPts](const mrpt::math::TPoint3Df&) {
-            nPts++;
-        };
+        const auto lambdaVisitPoints = [&nPts](const mrpt::math::TPoint3Df&)
+        { nPts++; };
 
         map.visitAllPoints(lambdaVisitPoints);
 
@@ -70,8 +69,8 @@ void test_voxelmap_insert_2d_scan()
 
     // test NN search:
     mrpt::maps::CSimplePointsMap refPts;
-    map.visitAllPoints(
-        [&](const mrpt::math::TPoint3Df& pt) { refPts.insertPoint(pt); });
+    map.visitAllPoints([&](const mrpt::math::TPoint3Df& pt)
+                       { refPts.insertPoint(pt); });
 
     mrpt::maps::CSimplePointsMap queryPts;
     queryPts.insertObservation(

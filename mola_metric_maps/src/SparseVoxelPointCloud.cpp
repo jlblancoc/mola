@@ -110,7 +110,7 @@ IMPLEMENTS_SERIALIZABLE(SparseVoxelPointCloud, CMetricMap, mola)
 
 uint8_t SparseVoxelPointCloud::serializeGetVersion() const { return 0; }
 void    SparseVoxelPointCloud::serializeTo(
-    mrpt::serialization::CArchive& out) const
+       mrpt::serialization::CArchive& out) const
 {
     // params:
     out << INNER_GRID_BIT_COUNT << voxel_size_;
@@ -251,19 +251,18 @@ void SparseVoxelPointCloud::getVisualizationInto(
             const auto lambdaVisitVoxels =
                 [&obj](
                     const outer_index3d_t&, const inner_plain_index_t,
-                    const VoxelData& v, const InnerGrid& parentGrid) {
-                    // Insert the mean/average point:
-                    if (!v.points(parentGrid).empty())
-                        obj->insertPoint(v.mean());
-                };
+                    const VoxelData& v, const InnerGrid& parentGrid)
+            {
+                // Insert the mean/average point:
+                if (!v.points(parentGrid).empty()) obj->insertPoint(v.mean());
+            };
             this->visitAllVoxels(lambdaVisitVoxels);
         }
         else
         {
             const auto lambdaVisitPoints =
-                [&obj](const mrpt::math::TPoint3Df& pt) {
-                    obj->insertPoint(pt);
-                };
+                [&obj](const mrpt::math::TPoint3Df& pt)
+            { obj->insertPoint(pt); };
             this->visitAllPoints(lambdaVisitPoints);
         }
 
@@ -295,22 +294,24 @@ void SparseVoxelPointCloud::getVisualizationInto(
             const auto lambdaVisitVoxels =
                 [&obj, &hists](
                     const outer_index3d_t&, const inner_plain_index_t,
-                    const VoxelData& v, const InnerGrid& parentGrid) {
-                    if (v.points(parentGrid).empty()) return;
-                    const auto& m = v.mean();
-                    obj->insertPoint({m.x, m.y, m.z, 0, 0, 0});
-                    for (int i = 0; i < 3; i++) hists[i].add(m[i]);
-                };
+                    const VoxelData& v, const InnerGrid& parentGrid)
+            {
+                if (v.points(parentGrid).empty()) return;
+                const auto& m = v.mean();
+                obj->insertPoint({m.x, m.y, m.z, 0, 0, 0});
+                for (int i = 0; i < 3; i++) hists[i].add(m[i]);
+            };
             this->visitAllVoxels(lambdaVisitVoxels);
         }
         else
         {
             const auto lambdaVisitPoints =
-                [&obj, &hists](const mrpt::math::TPoint3Df& pt) {
-                    // x y z R G B [A]
-                    obj->insertPoint({pt.x, pt.y, pt.z, 0, 0, 0});
-                    for (int i = 0; i < 3; i++) hists[i].add(pt[i]);
-                };
+                [&obj, &hists](const mrpt::math::TPoint3Df& pt)
+            {
+                // x y z R G B [A]
+                obj->insertPoint({pt.x, pt.y, pt.z, 0, 0, 0});
+                for (int i = 0; i < 3; i++) hists[i].add(pt[i]);
+            };
 
             this->visitAllPoints(lambdaVisitPoints);
         }
@@ -339,18 +340,18 @@ void SparseVoxelPointCloud::getVisualizationInto(
     if (renderOptions.show_inner_grid_boxes)
     {
         auto lambdaForEachGrid =
-            [this, &outObj](const outer_index3d_t& idxs, const InnerGrid&) {
-                const mrpt::math::TPoint3Df voxelCenter =
-                    globalIdxToCoord(idxs);
+            [this, &outObj](const outer_index3d_t& idxs, const InnerGrid&)
+        {
+            const mrpt::math::TPoint3Df voxelCenter = globalIdxToCoord(idxs);
 
-                auto glBox = mrpt::opengl::CBox::Create();
-                glBox->setWireframe(true);
-                glBox->setBoxCorners(
-                    (voxelCenter - halfVoxel_).cast<double>(),
-                    (voxelCenter + gridSizeMinusHalf_).cast<double>());
+            auto glBox = mrpt::opengl::CBox::Create();
+            glBox->setWireframe(true);
+            glBox->setBoxCorners(
+                (voxelCenter - halfVoxel_).cast<double>(),
+                (voxelCenter + gridSizeMinusHalf_).cast<double>());
 
-                outObj.insert(glBox);
-            };
+            outObj.insert(glBox);
+        };
 
         this->visitAllGrids(lambdaForEachGrid);
     }
@@ -625,9 +626,8 @@ bool SparseVoxelPointCloud::saveToTextFile(const std::string& file) const
     FILE* f = mrpt::system::os::fopen(file.c_str(), "wt");
     if (!f) return false;
 
-    const auto lambdaVisitPoints = [f](const mrpt::math::TPoint3Df& pt) {
-        mrpt::system::os::fprintf(f, "%f %f %f\n", pt.x, pt.y, pt.z);
-    };
+    const auto lambdaVisitPoints = [f](const mrpt::math::TPoint3Df& pt)
+    { mrpt::system::os::fprintf(f, "%f %f %f\n", pt.x, pt.y, pt.z); };
 
     this->visitAllPoints(lambdaVisitPoints);
 
@@ -741,8 +741,9 @@ void SparseVoxelPointCloud::nn_radius_search(
         float /*distSqr*/, std::pair<mrpt::math::TPoint3Df, uint64_t /*id*/>>
         candidates;
 
-    auto lmbAddCandidate = [&](const float                  distSqr,
-                               const mrpt::math::TPoint3Df& pt, uint64_t id) {
+    auto lmbAddCandidate =
+        [&](const float distSqr, const mrpt::math::TPoint3Df& pt, uint64_t id)
+    {
         if (maxPoints != 0) { candidates[distSqr] = {pt, id}; }
         else
         {
@@ -752,7 +753,8 @@ void SparseVoxelPointCloud::nn_radius_search(
         }
     };
 
-    auto lambdaCheckCell = [&](const global_index3d_t& p) {
+    auto lambdaCheckCell = [&](const global_index3d_t& p)
+    {
         if (auto [v, grid] = voxelByGlobalIdxs(p, false);
             v && !v->points(*grid).empty())
         {
@@ -812,9 +814,9 @@ mrpt::math::TBoundingBoxf SparseVoxelPointCloud::boundingBox() const
             cached_.boundingBox_ =
                 mrpt::math::TBoundingBoxf::PlusMinusInfinity();
 
-            auto lambdaForEachGrid = [this](
-                                         const outer_index3d_t& idxs,
-                                         const InnerGrid&) {
+            auto lambdaForEachGrid =
+                [this](const outer_index3d_t& idxs, const InnerGrid&)
+            {
                 const mrpt::math::TPoint3Df voxelCenter =
                     globalIdxToCoord(idxs);
 

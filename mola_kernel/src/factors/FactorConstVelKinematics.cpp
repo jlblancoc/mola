@@ -34,7 +34,7 @@ mola::id_t FactorConstVelKinematics::edge_indices(const std::size_t i) const
 // Implementation of the CSerializable virtual interface:
 uint8_t FactorConstVelKinematics::serializeGetVersion() const { return 0; }
 void    FactorConstVelKinematics::serializeTo(
-    mrpt::serialization::CArchive& out) const
+       mrpt::serialization::CArchive& out) const
 {
     baseSerializeTo(out);
     out << from_kf_ << to_kf_ << deltaTime_;

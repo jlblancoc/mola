@@ -143,7 +143,8 @@ void RawDataSourceBase::sendObservationsToFrontEnds(
     if (export_to_rawlog_out_.is_open())
     {
         auto fut = worker_pool_export_rawlog_.enqueue(
-            [this](mrpt::obs::CObservation::Ptr o) {
+            [this](mrpt::obs::CObservation::Ptr o)
+            {
                 if (!o) return;
                 auto a = mrpt::serialization::archiveFrom(
                     this->export_to_rawlog_out_);
@@ -159,7 +160,8 @@ void RawDataSourceBase::sendObservationsToFrontEnds(
         // Create and enque the GUI update function, as a lambda:
         RawDataSourceBase::SensorViewerImpl* sv = &(*it_sen_gui->second);
 
-        auto func = [this, sv, obs]() {
+        auto func = [this, sv, obs]()
+        {
             try
             {
                 ProfilerEntry pe(profiler_, "send to viz lambda");

@@ -55,7 +55,8 @@ static void test_rotation_integration()
     // gtPose).norm(),1e-6);
 
     // Initial state:
-    auto lambdaAssertInitialState = [&ri]() {
+    auto lambdaAssertInitialState = [&ri]()
+    {
         const auto& s = ri.current_integration_state();
         ASSERT_LT_(
             (s.deltaRij_ - mrpt::math::CMatrixDouble33::Identity()).norm(),

@@ -110,7 +110,7 @@ IMPLEMENTS_SERIALIZABLE(SparseTreesPointCloud, CMetricMap, mola)
 
 uint8_t SparseTreesPointCloud::serializeGetVersion() const { return 0; }
 void    SparseTreesPointCloud::serializeTo(
-    mrpt::serialization::CArchive& out) const
+       mrpt::serialization::CArchive& out) const
 {
     // params:
     out << GLOBAL_ID_SUBVOXEL_BITCOUNT << grid_size_;
@@ -205,9 +205,8 @@ void SparseTreesPointCloud::getVisualizationInto(
         // Single color:
         auto obj = mrpt::opengl::CPointCloud::Create();
 
-        const auto lambdaVisitPoints = [&obj](const mrpt::math::TPoint3Df& pt) {
-            obj->insertPoint(pt);
-        };
+        const auto lambdaVisitPoints = [&obj](const mrpt::math::TPoint3Df& pt)
+        { obj->insertPoint(pt); };
         this->visitAllPoints(lambdaVisitPoints);
 
         obj->setColor(renderOptions.color);
@@ -234,11 +233,12 @@ void SparseTreesPointCloud::getVisualizationInto(
             mrpt::math::CHistogram(bb.min.z, bb.max.z, nBins)};
 
         const auto lambdaVisitPoints =
-            [&obj, &hists](const mrpt::math::TPoint3Df& pt) {
-                // x y z R G B [A]
-                obj->insertPoint({pt.x, pt.y, pt.z, 0, 0, 0});
-                for (int i = 0; i < 3; i++) hists[i].add(pt[i]);
-            };
+            [&obj, &hists](const mrpt::math::TPoint3Df& pt)
+        {
+            // x y z R G B [A]
+            obj->insertPoint({pt.x, pt.y, pt.z, 0, 0, 0});
+            for (int i = 0; i < 3; i++) hists[i].add(pt[i]);
+        };
 
         this->visitAllPoints(lambdaVisitPoints);
 
@@ -266,16 +266,17 @@ void SparseTreesPointCloud::getVisualizationInto(
     if (renderOptions.show_inner_grid_boxes)
     {
         auto lambdaForEachGrid =
-            [this, &outObj](const outer_index3d_t& idxs, const GridData&) {
-                const mrpt::math::TPoint3Df gridCenter = outerIdxToCoord(idxs);
+            [this, &outObj](const outer_index3d_t& idxs, const GridData&)
+        {
+            const mrpt::math::TPoint3Df gridCenter = outerIdxToCoord(idxs);
 
-                auto glBox = mrpt::opengl::CBox::Create();
-                glBox->setWireframe(true);
-                const auto org = gridCenter.cast<double>();
-                glBox->setBoxCorners(org, org + gridVector_);
+            auto glBox = mrpt::opengl::CBox::Create();
+            glBox->setWireframe(true);
+            const auto org = gridCenter.cast<double>();
+            glBox->setBoxCorners(org, org + gridVector_);
 
-                outObj.insert(glBox);
-            };
+            outObj.insert(glBox);
+        };
 
         this->visitAllGrids(lambdaForEachGrid);
     }
@@ -553,9 +554,8 @@ bool SparseTreesPointCloud::saveToTextFile(const std::string& file) const
     FILE* f = mrpt::system::os::fopen(file.c_str(), "wt");
     if (!f) return false;
 
-    const auto lambdaVisitPoints = [f](const mrpt::math::TPoint3Df& pt) {
-        mrpt::system::os::fprintf(f, "%f %f %f\n", pt.x, pt.y, pt.z);
-    };
+    const auto lambdaVisitPoints = [f](const mrpt::math::TPoint3Df& pt)
+    { mrpt::system::os::fprintf(f, "%f %f %f\n", pt.x, pt.y, pt.z); };
 
     this->visitAllPoints(lambdaVisitPoints);
 
@@ -672,7 +672,8 @@ void SparseTreesPointCloud::nn_radius_search(
         candidates[distSqr] = {pt, id};
     };
 
-    auto lambdaCheckCell = [&](const outer_index3d_t& p) {
+    auto lambdaCheckCell = [&](const outer_index3d_t& p)
+    {
         auto* g = gridByOuterIdxs(p, false);
         if (!g) return;
 
@@ -727,7 +728,8 @@ mrpt::math::TBoundingBoxf SparseTreesPointCloud::boundingBox() const
             cached_.boundingBox_ =
                 mrpt::math::TBoundingBoxf::PlusMinusInfinity();
 
-            auto lambdaForEachPt = [this](const mrpt::math::TPoint3Df& pt) {
+            auto lambdaForEachPt = [this](const mrpt::math::TPoint3Df& pt)
+            {
                 cached_.boundingBox_->updateWithPoint(pt);
                 cached_.boundingBox_->updateWithPoint(pt);
             };
@@ -970,7 +972,8 @@ void SparseTreesPointCloud::eraseGridsFartherThan(
 
     std::set<outer_index3d_t, index3d_hash<int32_t>> gridsToRemove;
 
-    auto lmbPerGrid = [&](const outer_index3d_t& idx, const GridData&) {
+    auto lmbPerGrid = [&](const outer_index3d_t& idx, const GridData&)
+    {
         if (idx.cx >= curIdxs0.cx && idx.cy >= curIdxs0.cy &&
             idx.cz >= curIdxs0.cz && idx.cx <= curIdxs1.cx &&
             idx.cy <= curIdxs1.cy && idx.cz <= curIdxs1.cz)

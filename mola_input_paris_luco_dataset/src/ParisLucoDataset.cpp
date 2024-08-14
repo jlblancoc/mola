@@ -274,9 +274,9 @@ void ParisLucoDataset::load_lidar(timestep_t step) const
     const float earliestTime = *std::min_element(Ts->cbegin(), Ts->cend());
     const float shiftTime    = -earliestTime - 0.5 * lidarPeriod_;
 
-    std::transform(Ts->cbegin(), Ts->cend(), Ts->begin(), [=](double t) {
-        return t + shiftTime;
-    });
+    std::transform(
+        Ts->cbegin(), Ts->cend(), Ts->begin(),
+        [=](double t) { return t + shiftTime; });
 
     // Fix missing RING_ID: ParisLuco does not have a RING_ID field,
     // but we can generate it from the timestamps + pitch angle:

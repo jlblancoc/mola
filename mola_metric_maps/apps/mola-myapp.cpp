@@ -11,23 +11,18 @@
  * @date   XXX
  */
 
-#include <mrpt/core/exceptions.h>
 #include <mrpt/3rdparty/tclap/CmdLine.h>
+#include <mrpt/core/exceptions.h>
+
 #include <iostream>
 
 // Declare supported cli switches ===========
 static TCLAP::CmdLine cmd("mola-myapp");
 
 static TCLAP::ValueArg<std::string> argParam1(
-    "p", "param",
-    "Explanation",
-    false, "", "", cmd);
+    "p", "param", "Explanation", false, "", "", cmd);
 
-static void do_my_app()
-{
-    using namespace std::string_literals;
-
-}
+static void do_my_app() { using namespace std::string_literals; }
 
 int main(int argc, char** argv)
 {

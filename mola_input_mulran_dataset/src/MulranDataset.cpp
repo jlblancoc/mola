@@ -468,7 +468,7 @@ void MulranDataset::load_lidar(timestep_t step) const
     // Pose:
     obs->sensorPose = ousterPoseOnVehicle_;
     obs->timestamp  = mrpt::Clock::fromDouble(
-        LidarFileNameToTimestamp(lstPointCloudFiles_[step]));
+         LidarFileNameToTimestamp(lstPointCloudFiles_[step]));
 
 #if 0  // Export clouds to txt for debugging externally (e.g. python, matlab)
     pts->saveXYZIRT_to_text_file(

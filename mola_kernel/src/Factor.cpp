@@ -21,7 +21,8 @@ FactorBase& mola::factor_get_base(Factor& f)
     std::visit(
         overloaded{
             [&ret](FactorBase& b) { ret = &b; },
-            [&ret](FactorOther& o) {
+            [&ret](FactorOther& o)
+            {
                 ASSERT_(o);
                 ret = o.get();
             },
@@ -39,7 +40,8 @@ const FactorBase& mola::factor_get_base(const Factor& f)
     std::visit(
         overloaded{
             [&ret](const FactorBase& b) { ret = &b; },
-            [&ret](const FactorOther& o) {
+            [&ret](const FactorOther& o)
+            {
                 ASSERT_(o);
                 ret = o.get();
             },

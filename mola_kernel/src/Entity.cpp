@@ -21,7 +21,8 @@ EntityBase& mola::entity_get_base(Entity& e)
     std::visit(
         overloaded{
             [&ret](EntityBase& b) { ret = &b; },
-            [&ret](EntityOther& o) {
+            [&ret](EntityOther& o)
+            {
                 ASSERT_(o);
                 ret = o.get();
             },
@@ -39,7 +40,8 @@ const EntityBase& mola::entity_get_base(const Entity& e)
     std::visit(
         overloaded{
             [&ret](const EntityBase& b) { ret = &b; },
-            [&ret](const EntityOther& o) {
+            [&ret](const EntityOther& o)
+            {
                 ASSERT_(o);
                 ret = o.get();
             },
@@ -56,7 +58,8 @@ void mola::entity_update_pose(mola::Entity& e, const mrpt::math::TPose3D& p)
 
     std::visit(
         overloaded{
-            [&](RefPose3&) {
+            [&](RefPose3&)
+            {
                 ASSERTMSG_(
                     p == mrpt::math::TPose3D::Identity(),
                     "RefPose3 cannot be assigned a pose != Identity()");
@@ -64,7 +67,8 @@ void mola::entity_update_pose(mola::Entity& e, const mrpt::math::TPose3D& p)
             [&](RelDynPose3KF& ee) { ee.relpose_value = p; },
             [&](RelPose3& ee) { ee.relpose_value = p; },
             [&](RelPose3KF& ee) { ee.relpose_value = p; },
-            []([[maybe_unused]] auto ee) {
+            []([[maybe_unused]] auto ee)
+            {
                 throw std::runtime_error(
                     mrpt::format("[updateEntityPose] Unknown Entity type!"));
             },
@@ -86,14 +90,16 @@ void mola::entity_update_vel(mola::Entity& e, const std::array<double, 3>& v)
                         "RefPose3 cannot be assigned a velocity!=0");
 #endif
             },
-            [&](RelDynPose3KF& ee) {
+            [&](RelDynPose3KF& ee)
+            {
                 ee.twist_value.vx = v[0];
                 ee.twist_value.vy = v[1];
                 ee.twist_value.vz = v[2];
             },
             [&](RelPose3&) {},
             [&](RelPose3KF&) {},
-            []([[maybe_unused]] auto ee) {
+            []([[maybe_unused]] auto ee)
+            {
                 throw std::runtime_error(
                     mrpt::format("[updateEntityPose] Unknown Entity type!"));
             },
@@ -113,7 +119,8 @@ mrpt::math::TTwist3D mola::entity_get_twist(const mola::Entity& e)
             [&](const RelDynPose3KF& ee) { ret = ee.twist_value; },
             [&](const RelPose3&) {},
             [&](const RelPose3KF&) {},
-            []([[maybe_unused]] auto ee) {
+            []([[maybe_unused]] auto ee)
+            {
                 throw std::runtime_error(
                     mrpt::format("[updateEntityPose] Unknown Entity type!"));
             },
@@ -134,7 +141,8 @@ mrpt::math::TPose3D mola::entity_get_pose(const mola::Entity& e)
             [&](const RelDynPose3KF& ee) { ret = ee.relpose_value; },
             [&](const RelPose3& ee) { ret = ee.relpose_value; },
             [&](const RelPose3KF& ee) { ret = ee.relpose_value; },
-            []([[maybe_unused]] auto ee) {
+            []([[maybe_unused]] auto ee)
+            {
                 throw std::runtime_error(
                     mrpt::format("[getEntityPose] Unknown Entity type!"));
             },
@@ -154,7 +162,8 @@ mrpt::Clock::time_point mola::entity_get_timestamp(const mola::Entity& e)
         overloaded{
             [&](const EntityBase& ee) { ret = ee.timestamp_; },
             [&](const EntityOther& ee) { ret = ee->timestamp_; },
-            [](std::monostate) {
+            [](std::monostate)
+            {
                 throw std::runtime_error(
                     mrpt::format("[getEntityTimeStamp] Unknown Entity type!"));
             },

@@ -43,7 +43,8 @@ void FilterBase::spinOnce()
 void FilterBase::onNewObservation(const CObservation::Ptr& o)
 {
     const auto obsFut = thread_pool_.enqueue(
-        [this](const CObservation::Ptr& in) {
+        [this](const CObservation::Ptr& in)
+        {
             try
             {
                 // Process the observation:

@@ -13,6 +13,7 @@
 #pragma once
 
 #include <mrpt/system/COutputLogger.h>
+
 #include <string>
 #include <vector>
 

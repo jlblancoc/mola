@@ -29,7 +29,7 @@ mola::id_t  FactorStereoProjectionPose::edge_indices(const std::size_t i) const
 // Implementation of the CSerializable virtual interface:
 uint8_t FactorStereoProjectionPose::serializeGetVersion() const { return 0; }
 void    FactorStereoProjectionPose::serializeTo(
-    mrpt::serialization::CArchive& out) const
+       mrpt::serialization::CArchive& out) const
 {
     baseSerializeTo(out);
     out << sigma_xleft_ << sigma_xright_ << sigma_y_ << observation_.x_left

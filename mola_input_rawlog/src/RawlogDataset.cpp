@@ -202,22 +202,23 @@ void RawlogDataset::doReadAheadFromFile()
                         std::dynamic_pointer_cast<mrpt::obs::CSensoryFrame>(
                             obj);
                     sf)
-            {
-                for (const auto& o : *sf)
-                    read_ahead_.emplace(o->getTimeStamp(), o);
-            }
-            else if (auto acts = std::dynamic_pointer_cast<
-                         mrpt::obs::CActionCollection>(obj);
-                     acts)
-            {
-                // odometry actions: ignore
-            }
-            else
-                THROW_EXCEPTION_FMT(
-                    "Rawlog file can contain classes: "
-                    "CObservation|CSensoryFrame|CActionCollection, but class "
-                    "'%s' found.",
-                    obj->GetRuntimeClass()->className);
+                {
+                    for (const auto& o : *sf)
+                        read_ahead_.emplace(o->getTimeStamp(), o);
+                }
+                else if (auto acts = std::dynamic_pointer_cast<
+                             mrpt::obs::CActionCollection>(obj);
+                         acts)
+                {
+                    // odometry actions: ignore
+                }
+                else
+                    THROW_EXCEPTION_FMT(
+                        "Rawlog file can contain classes: "
+                        "CObservation|CSensoryFrame|CActionCollection, but "
+                        "class "
+                        "'%s' found.",
+                        obj->GetRuntimeClass()->className);
         }
         catch (const mrpt::serialization::CExceptionEOF&)
         {
@@ -247,22 +248,22 @@ void RawlogDataset::doReadAheadFromEntireRawlog()
             if (auto sf =
                     std::dynamic_pointer_cast<mrpt::obs::CSensoryFrame>(obj);
                 sf)
-        {
-            for (const auto& o : *sf) read_ahead_.emplace(o->getTimeStamp(), o);
-        }
-        else if (auto acts =
-                     std::dynamic_pointer_cast<mrpt::obs::CActionCollection>(
-                         obj);
-                 acts)
-        {
-            // odometry actions: ignore
-        }
-        else
-            THROW_EXCEPTION_FMT(
-                "Rawlog file can contain classes: "
-                "CObservation|CSensoryFrame|CActionCollection, but class "
-                "'%s' found.",
-                obj->GetRuntimeClass()->className);
+            {
+                for (const auto& o : *sf)
+                    read_ahead_.emplace(o->getTimeStamp(), o);
+            }
+            else if (auto acts = std::dynamic_pointer_cast<
+                         mrpt::obs::CActionCollection>(obj);
+                     acts)
+            {
+                // odometry actions: ignore
+            }
+            else
+                THROW_EXCEPTION_FMT(
+                    "Rawlog file can contain classes: "
+                    "CObservation|CSensoryFrame|CActionCollection, but class "
+                    "'%s' found.",
+                    obj->GetRuntimeClass()->className);
     }
 }
 
@@ -331,17 +332,18 @@ mrpt::obs::CSensoryFrame::Ptr RawlogDataset::datasetGetObservations(
     else  //
         if (auto sf = std::dynamic_pointer_cast<mrpt::obs::CSensoryFrame>(obj);
             sf)
-    {
-        sfRet = sf;
+        {
+            sfRet = sf;
 
-        for (auto& o : *sf) unload_queue_.emplace(o->getTimeStamp(), o);
-    }
-    else if (auto acts =
-                 std::dynamic_pointer_cast<mrpt::obs::CActionCollection>(obj);
-             acts)
-    {
-        // odometry actions: ignore
-    }
+            for (auto& o : *sf) unload_queue_.emplace(o->getTimeStamp(), o);
+        }
+        else if (auto acts =
+                     std::dynamic_pointer_cast<mrpt::obs::CActionCollection>(
+                         obj);
+                 acts)
+        {
+            // odometry actions: ignore
+        }
 
     return sfRet;
 }

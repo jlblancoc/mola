@@ -26,7 +26,8 @@ void mola::pretty_print_exception(
 
     auto& o = use_std_cerr ? std::cerr : std::cout;
 
-    const auto setFormatRed = [=](const ConsoleTextStyle style) {
+    const auto setFormatRed = [=](const ConsoleTextStyle style)
+    {
 #if MRPT_VERSION >= 0x233
         consoleColorAndStyle(
             ConsoleForegroundColor::RED, ConsoleBackgroundColor::DEFAULT, style,
@@ -36,7 +37,8 @@ void mola::pretty_print_exception(
 #endif
     };
 
-    const auto resetFormat = [=]() {
+    const auto resetFormat = [=]()
+    {
 #if MRPT_VERSION >= 0x233
         consoleColorAndStyle(
             ConsoleForegroundColor::DEFAULT, ConsoleBackgroundColor::DEFAULT,

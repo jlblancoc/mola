@@ -116,10 +116,7 @@ static std::string parseEnvVars(
         // ${CURRENT_YAML_FILE_PATH}
         if (varname == "CURRENT_YAML_FILE_PATH")
             varvalue = opts.includesBasePath;
-        else if (!defaultValue.empty())
-        {
-            varvalue = defaultValue;
-        }
+        else if (!defaultValue.empty()) { varvalue = defaultValue; }
         else
         {
             THROW_EXCEPTION_FMT(

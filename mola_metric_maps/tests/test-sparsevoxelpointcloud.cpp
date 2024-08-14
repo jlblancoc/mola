@@ -65,9 +65,8 @@ void test_voxelmap_insert_2d_scan()
     {
         size_t nPts = 0;
 
-        const auto lambdaVisitPoints = [&nPts](const mrpt::math::TPoint3Df&) {
-            nPts++;
-        };
+        const auto lambdaVisitPoints = [&nPts](const mrpt::math::TPoint3Df&)
+        { nPts++; };
 
         map.visitAllPoints(lambdaVisitPoints);
 
@@ -82,10 +81,11 @@ void test_voxelmap_insert_2d_scan()
                 const mola::SparseVoxelPointCloud::outer_index3d_t&,
                 const mola::SparseVoxelPointCloud::inner_plain_index_t,
                 const mola::SparseVoxelPointCloud::VoxelData& v,
-                const mola::SparseVoxelPointCloud::InnerGrid& grid) {
-                // count them:
-                if (!v.points(grid).empty()) nVoxels++;
-            };
+                const mola::SparseVoxelPointCloud::InnerGrid& grid)
+        {
+            // count them:
+            if (!v.points(grid).empty()) nVoxels++;
+        };
         map.visitAllVoxels(lambdaVisitVoxels);
 
         ASSERT_EQUAL_(nVoxels, 96UL);

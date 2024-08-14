@@ -290,16 +290,17 @@ void EurocDataset::spinOnce()
 
         std::visit(
             overloaded{
-                [&](std::monostate&) {
-                    THROW_EXCEPTION("Un-initialized entry!");
-                },
-                [&](SensorCamera& cam) {
+                [&](std::monostate&)
+                { THROW_EXCEPTION("Un-initialized entry!"); },
+                [&](SensorCamera& cam)
+                {
                     build_dataset_entry_obs(cam);
                     cam.obs->timestamp = obs_tim;
                     this->sendObservationsToFrontEnds(cam.obs);
                     cam.obs.reset();  // free mem
                 },
-                [&](SensorIMU& imu) {
+                [&](SensorIMU& imu)
+                {
                     build_dataset_entry_obs(imu);
                     imu.obs->timestamp = obs_tim;
                     this->sendObservationsToFrontEnds(imu.obs);
@@ -330,9 +331,8 @@ void EurocDataset::spinOnce()
             //
             std::visit(
                 overloaded{
-                    [&](std::monostate&) {
-                        THROW_EXCEPTION("Un-initialized entry!");
-                    },
+                    [&](std::monostate&)
+                    { THROW_EXCEPTION("Un-initialized entry!"); },
                     [&](SensorCamera& cam) { build_dataset_entry_obs(cam); },
                     [&](SensorIMU& imu) { build_dataset_entry_obs(imu); }},
                 peeker->second);

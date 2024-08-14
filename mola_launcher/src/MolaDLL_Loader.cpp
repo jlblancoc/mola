@@ -11,8 +11,10 @@
  */
 
 #include "MolaDLL_Loader.h"
+
 #include <mrpt/core/exceptions.h>
 #include <mrpt/system/CDirectoryExplorer.h>
+
 #include <map>
 
 #if defined(__unix__)
