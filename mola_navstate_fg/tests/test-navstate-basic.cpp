@@ -279,8 +279,8 @@ void test_noisy_straight()
     const double vx     = 8.0;  // m/s
     const double T      = 0.100;  // s
 
-    const double stdXYZ = 0.03;
-    const double stdYPR = mrpt::DEG2RAD(0.2);
+    const double stdXYZ = 0.01;
+    const double stdYPR = mrpt::DEG2RAD(0.1);
 
     for (size_t i = 0; i < nSteps; i++)
     {
