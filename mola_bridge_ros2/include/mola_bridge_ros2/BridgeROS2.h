@@ -17,6 +17,7 @@
 #include <mola_kernel/interfaces/MapSourceBase.h>
 #include <mola_kernel/interfaces/RawDataConsumer.h>
 #include <mola_kernel/interfaces/RawDataSourceBase.h>
+#include <mola_kernel/interfaces/Relocalization.h>
 
 // MRPT:
 #include <mrpt/obs/CObservationGPS.h>
@@ -36,6 +37,10 @@
 #include <sensor_msgs/msg/laser_scan.hpp>
 #include <sensor_msgs/msg/nav_sat_fix.hpp>
 #include <sensor_msgs/msg/point_cloud2.hpp>
+
+// MOLA <-> ROS services:
+#include <mola_msgs/srv/relocalize_from_gnss.hpp>
+#include <mola_msgs/srv/relocalize_near_pose.hpp>
 
 namespace mola
 {
@@ -227,13 +232,31 @@ class BridgeROS2 : public RawDataSourceBase, public mola::RawDataConsumer
 
     struct MolaSubs
     {
+        // MOLA subscribers:
         std::set<mola::RawDataSourceBase::Ptr>                  dataSources;
         std::set<std::shared_ptr<mola::LocalizationSourceBase>> locSources;
         std::set<std::shared_ptr<mola::MapSourceBase>>          mapSources;
+        std::set<std::shared_ptr<mola::Relocalization>>         relocalization;
     };
 
     MolaSubs   molaSubs_;
     std::mutex molaSubsMtx_;
+
+    // ROS services:
+    rclcpp::Service<mola_msgs::srv::RelocalizeFromGNSS>::SharedPtr
+        srvRelocGNNS_;
+    rclcpp::Service<mola_msgs::srv::RelocalizeNearPose>::SharedPtr
+        srvRelocPose_;
+
+    void service_relocalize_from_gnss(
+        const std::shared_ptr<mola_msgs::srv::RelocalizeFromGNSS::Request>
+                                                                      request,
+        std::shared_ptr<mola_msgs::srv::RelocalizeFromGNSS::Response> response);
+
+    void service_relocalize_near_pose(
+        const std::shared_ptr<mola_msgs::srv::RelocalizeNearPose::Request>
+                                                                      request,
+        std::shared_ptr<mola_msgs::srv::RelocalizeNearPose::Response> response);
 
     void onNewLocalization(
         const mola::LocalizationSourceBase::LocalizationUpdate& l);

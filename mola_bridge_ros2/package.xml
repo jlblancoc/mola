@@ -27,6 +27,7 @@
   <!-- COMMON DEPS -->
   <depend>mola_common</depend>
   <depend>mola_kernel</depend>
+  <depend>mola_msgs</depend>
 
   <depend>mrpt2</depend>
 

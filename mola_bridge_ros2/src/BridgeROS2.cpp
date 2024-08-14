@@ -932,6 +932,80 @@ void BridgeROS2::doLookForNewMolaSubs()
             ms->subscribeToMapUpdates([this](const auto& m) { onNewMap(m); });
         }
     }
+
+    // relocalization
+    auto listRelog = this->findService<mola::Relocalization>();
+    for (auto& module : listRelog)
+    {
+        auto ms = std::dynamic_pointer_cast<mola::Relocalization>(module);
+        ASSERT_(ms);
+
+        if (molaSubs_.relocalization.count(ms) == 0)
+        {
+            MRPT_LOG_INFO_STREAM(
+                "Subscribing to MOLA relocalization module '"
+                << module->getModuleInstanceName() << "'");
+
+            // a new one:
+            molaSubs_.relocalization.insert(ms);
+        }
+    }
+
+    // Advertise relocalization ROS 2 service now if not done already:
+    if (!molaSubs_.relocalization.empty() && !srvRelocGNNS_)
+    {
+        using namespace std::placeholders;
+
+        srvRelocGNNS_ =
+            rosNode_->create_service<mola_msgs::srv::RelocalizeFromGNSS>(
+                "relocalize_from_gnss",
+                std::bind(
+                    &BridgeROS2::service_relocalize_from_gnss, this, _1, _2));
+
+        srvRelocPose_ =
+            rosNode_->create_service<mola_msgs::srv::RelocalizeNearPose>(
+                "relocalize_near_pose",
+                std::bind(
+                    &BridgeROS2::service_relocalize_near_pose, this, _1, _2));
+    }
+}
+
+void BridgeROS2::service_relocalize_from_gnss(
+    [[maybe_unused]] const std::shared_ptr<
+        mola_msgs::srv::RelocalizeFromGNSS::Request>
+                                                                  request,
+    std::shared_ptr<mola_msgs::srv::RelocalizeFromGNSS::Response> response)
+{
+    auto lck = mrpt::lockHelper(rosPubsMtx_);
+    if (molaSubs_.relocalization.empty())
+    {
+        response->accepted = false;
+        return;
+    }
+
+    for (auto m : molaSubs_.relocalization) { m->relocalize_from_gnss(); }
+    response->accepted = true;
+}
+
+void BridgeROS2::service_relocalize_near_pose(
+    const std::shared_ptr<mola_msgs::srv::RelocalizeNearPose::Request> request,
+    std::shared_ptr<mola_msgs::srv::RelocalizeNearPose::Response>      response)
+{
+    auto lck = mrpt::lockHelper(rosPubsMtx_);
+    if (molaSubs_.relocalization.empty())
+    {
+        response->accepted = false;
+        return;
+    }
+
+    for (auto m : molaSubs_.relocalization)
+    {
+        const mrpt::poses::CPose3DPDFGaussian p =
+            mrpt::ros2bridge::fromROS(request->pose.pose);
+        m->relocalize_near_pose_pdf(p);
+    }
+
+    response->accepted = true;
 }
 
 rclcpp::Time BridgeROS2::myNow(const mrpt::Clock::time_point& observationStamp)

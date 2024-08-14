@@ -28,6 +28,7 @@ endif()
 # Find MOLA pkgs:
 find_mola_package(mola_kernel)
 
+
 # Find ROS 2 pkgs:
 mola_find_package_or_return(ament_cmake REQUIRED)
 mola_find_package_or_return(geometry_msgs REQUIRED)
@@ -37,6 +38,9 @@ mola_find_package_or_return(sensor_msgs REQUIRED)
 mola_find_package_or_return(sensor_msgs)
 mola_find_package_or_return(tf2 REQUIRED)
 mola_find_package_or_return(tf2_geometry_msgs REQUIRED)
+
+# MOLA ROS2 services:
+mola_find_package_or_return(mola_msgs REQUIRED)
 
 # -----------------------
 # define lib:
@@ -63,6 +67,7 @@ ament_target_dependencies(${PROJECT_NAME} PUBLIC
   sensor_msgs
   tf2
   tf2_geometry_msgs
+  mola_msgs
 )
 
 ament_export_dependencies()
