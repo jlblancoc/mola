@@ -1,0 +1,12 @@
+# This service requests loading a map from a given map file(s).
+
+# Request.
+# File relative or absolute path. Do not add any file extension, since maps
+# may be loaded/saved to several files depending on implementation.
+string map_path
+---
+# Result. False if there was no MOLA map module accepting this request, or
+# there was an error loading the map.
+bool success
+# In case of no success, here is a human-readable error reason.
+string error_message
