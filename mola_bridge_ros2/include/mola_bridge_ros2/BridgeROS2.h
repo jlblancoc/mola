@@ -14,6 +14,7 @@
 // MOLA virtual interfaces:
 #include <mola_kernel/interfaces/ExecutableBase.h>
 #include <mola_kernel/interfaces/LocalizationSourceBase.h>
+#include <mola_kernel/interfaces/MapServer.h>
 #include <mola_kernel/interfaces/MapSourceBase.h>
 #include <mola_kernel/interfaces/RawDataConsumer.h>
 #include <mola_kernel/interfaces/RawDataSourceBase.h>
@@ -39,6 +40,8 @@
 #include <sensor_msgs/msg/point_cloud2.hpp>
 
 // MOLA <-> ROS services:
+#include <mola_msgs/srv/map_load.hpp>
+#include <mola_msgs/srv/map_save.hpp>
 #include <mola_msgs/srv/relocalize_from_gnss.hpp>
 #include <mola_msgs/srv/relocalize_near_pose.hpp>
 
@@ -228,6 +231,7 @@ class BridgeROS2 : public RawDataSourceBase, public mola::RawDataConsumer
         std::set<std::shared_ptr<mola::LocalizationSourceBase>> locSources;
         std::set<std::shared_ptr<mola::MapSourceBase>>          mapSources;
         std::set<std::shared_ptr<mola::Relocalization>>         relocalization;
+        std::set<std::shared_ptr<mola::MapServer>>              mapServers;
     };
 
     MolaSubs   molaSubs_;
@@ -236,6 +240,8 @@ class BridgeROS2 : public RawDataSourceBase, public mola::RawDataConsumer
     // ROS services:
     rclcpp::Service<mola_msgs::srv::RelocalizeFromGNSS>::SharedPtr srvRelocGNNS_;
     rclcpp::Service<mola_msgs::srv::RelocalizeNearPose>::SharedPtr srvRelocPose_;
+    rclcpp::Service<mola_msgs::srv::MapLoad>::SharedPtr            srvMapLoad_;
+    rclcpp::Service<mola_msgs::srv::MapSave>::SharedPtr            srvMapSave_;
 
     void service_relocalize_from_gnss(
         const std::shared_ptr<mola_msgs::srv::RelocalizeFromGNSS::Request> request,
@@ -244,6 +250,14 @@ class BridgeROS2 : public RawDataSourceBase, public mola::RawDataConsumer
     void service_relocalize_near_pose(
         const std::shared_ptr<mola_msgs::srv::RelocalizeNearPose::Request> request,
         std::shared_ptr<mola_msgs::srv::RelocalizeNearPose::Response>      response);
+
+    void service_map_load(
+        const std::shared_ptr<mola_msgs::srv::MapLoad::Request> request,
+        std::shared_ptr<mola_msgs::srv::MapLoad::Response>      response);
+
+    void service_map_save(
+        const std::shared_ptr<mola_msgs::srv::MapSave::Request> request,
+        std::shared_ptr<mola_msgs::srv::MapSave::Response>      response);
 
     void onNewLocalization(const mola::LocalizationSourceBase::LocalizationUpdate& l);
 

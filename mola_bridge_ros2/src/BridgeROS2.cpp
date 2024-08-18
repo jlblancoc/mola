@@ -929,6 +929,43 @@ void BridgeROS2::doLookForNewMolaSubs()
             "relocalize_near_pose",
             std::bind(&BridgeROS2::service_relocalize_near_pose, this, _1, _2));
     }
+
+    // Map server
+    auto listMapServers = this->findService<mola::MapServer>();
+    for (auto& module : listMapServers)
+    {
+        auto ms = std::dynamic_pointer_cast<mola::MapServer>(module);
+        ASSERT_(ms);
+
+        if (molaSubs_.mapServers.count(ms) == 0)
+        {
+            MRPT_LOG_INFO_STREAM(
+                "Subscribing to MOLA map server module '" << module->getModuleInstanceName()
+                                                          << "'");
+
+            if (molaSubs_.mapServers.size() > 1)
+            {
+                MRPT_LOG_WARN(
+                    "More than one MapServer MOLA modules seems to be running. ROS 2 requests will "
+                    "be forwarded to the first module only.");
+            }
+
+            // a new one:
+            molaSubs_.mapServers.insert(ms);
+        }
+    }
+
+    // Advertise map server ROS 2 services now if not done already:
+    if (!molaSubs_.mapServers.empty() && !srvMapLoad_)
+    {
+        using namespace std::placeholders;
+
+        srvMapLoad_ = rosNode_->create_service<mola_msgs::srv::MapLoad>(
+            "map_load", std::bind(&BridgeROS2::service_map_load, this, _1, _2));
+
+        srvMapSave_ = rosNode_->create_service<mola_msgs::srv::MapSave>(
+            "map_save", std::bind(&BridgeROS2::service_map_save, this, _1, _2));
+    }
 }
 
 void BridgeROS2::service_relocalize_from_gnss(
@@ -964,6 +1001,48 @@ void BridgeROS2::service_relocalize_near_pose(
     }
 
     response->accepted = true;
+}
+
+void BridgeROS2::service_map_load(
+    const std::shared_ptr<mola_msgs::srv::MapLoad::Request> request,
+    std::shared_ptr<mola_msgs::srv::MapLoad::Response>      response)
+{
+    auto lck = mrpt::lockHelper(rosPubsMtx_);
+    if (molaSubs_.relocalization.empty())
+    {
+        response->success       = false;
+        response->error_message = "No MOLA module with MapServer interface is running.";
+        MRPT_LOG_WARN(response->error_message);
+        return;
+    }
+
+    auto& m = *molaSubs_.mapServers.begin();
+    ASSERT_(m);
+    const auto& r = m->map_load(request->map_path);
+
+    response->success       = r.success;
+    response->error_message = r.error_message;
+}
+
+void BridgeROS2::service_map_save(
+    const std::shared_ptr<mola_msgs::srv::MapSave::Request> request,
+    std::shared_ptr<mola_msgs::srv::MapSave::Response>      response)
+{
+    auto lck = mrpt::lockHelper(rosPubsMtx_);
+    if (molaSubs_.relocalization.empty())
+    {
+        response->success       = false;
+        response->error_message = "No MOLA module with MapServer interface is running.";
+        MRPT_LOG_WARN(response->error_message);
+        return;
+    }
+
+    auto& m = *molaSubs_.mapServers.begin();
+    ASSERT_(m);
+    const auto& r = m->map_save(request->map_path);
+
+    response->success       = r.success;
+    response->error_message = r.error_message;
 }
 
 rclcpp::Time BridgeROS2::myNow(const mrpt::Clock::time_point& observationStamp)
