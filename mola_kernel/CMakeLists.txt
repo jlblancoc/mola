@@ -21,8 +21,77 @@ find_package(mola_yaml REQUIRED)
 find_package(MRPT 2.1.0 REQUIRED COMPONENTS gui obs maps)
 
 # define lib:
-file(GLOB_RECURSE LIB_SRCS src/*.cpp src/*.h)
-file(GLOB_RECURSE LIB_PUBLIC_HDRS include/*.h)
+set(LIB_SRCS
+  src/factors/FactorBase.cpp
+  src/factors/FactorRelativePose3.cpp
+  src/factors/SmartFactorIMU.cpp
+  src/factors/SmartFactorStereoProjectionPose.cpp
+  src/factors/FactorConstVelKinematics.cpp
+  src/factors/FactorStereoProjectionPose.cpp
+  src/register.cpp
+  src/WorldModel.cpp
+  src/interfaces/NavStateFilter.cpp
+  src/interfaces/RawDataSourceBase.cpp
+  src/interfaces/Dataset_UI.cpp
+  src/interfaces/FrontEndBase.cpp
+  src/interfaces/BackEndBase.cpp
+  src/interfaces/FilterBase.cpp
+  src/interfaces/ExecutableBase.cpp
+  src/interfaces/Relocalization.cpp
+  src/interfaces/MapServer.cpp
+  src/Entity.cpp
+  src/Factor.cpp
+  src/entities/RelPose3.cpp
+  src/entities/RefPose3.cpp
+  src/entities/RelDynPose3KF.cpp
+  src/entities/LandmarkPoint3.cpp
+  src/entities/EntityBase.cpp
+  src/entities/RelPose3KF.cpp
+  src/pretty_print_exception.cpp
+  src/LazyLoadResource.cpp
+)
+
+set(LIB_PUBLIC_HDRS
+  include/mola_kernel/factors/FactorConstVelKinematics.h
+  include/mola_kernel/factors/SmartFactorStereoProjectionPose.h
+  include/mola_kernel/factors/FactorStereoProjectionPose.h
+  include/mola_kernel/factors/SmartFactorIMU.h
+  include/mola_kernel/factors/FactorRelativePose3.h
+  include/mola_kernel/factors/factors-common.h
+  include/mola_kernel/factors/FactorBase.h
+  include/mola_kernel/LazyLoadResource.h
+  include/mola_kernel/pretty_print_exception.h
+  include/mola_kernel/WorldModel.h
+  include/mola_kernel/variant_helper.h
+  include/mola_kernel/FastAllocator.h
+  include/mola_kernel/Entity.h
+  include/mola_kernel/interfaces/BackEndBase.h
+  include/mola_kernel/interfaces/FrontEndBase.h
+  include/mola_kernel/interfaces/VizInterface.h
+  include/mola_kernel/interfaces/ExecutableBase.h
+  include/mola_kernel/interfaces/Relocalization.h
+  include/mola_kernel/interfaces/MapServer.h
+  include/mola_kernel/interfaces/NavStateFilter.h
+  include/mola_kernel/interfaces/FilterBase.h
+  include/mola_kernel/interfaces/RawDataSourceBase.h
+  include/mola_kernel/interfaces/RawDataConsumer.h
+  include/mola_kernel/interfaces/OfflineDatasetSource.h
+  include/mola_kernel/interfaces/LocalizationSourceBase.h
+  include/mola_kernel/interfaces/MapSourceBase.h
+  include/mola_kernel/interfaces/Dataset_UI.h
+  include/mola_kernel/Factor.h
+  include/mola_kernel/entities/KeyFrameBase.h
+  include/mola_kernel/entities/EntityBase.h
+  include/mola_kernel/entities/RelPose3KF.h
+  include/mola_kernel/entities/RelPose3.h
+  include/mola_kernel/entities/EntityRelativeBase.h
+  include/mola_kernel/entities/RelDynPose3KF.h
+  include/mola_kernel/entities/LandmarkPoint3.h
+  include/mola_kernel/entities/RefPose3.h
+  include/mola_kernel/entities/entities-common.h
+  include/mola_kernel/id.h
+  include/mola_kernel/Yaml.h
+)
 
 mola_add_library(
   TARGET ${PROJECT_NAME}
