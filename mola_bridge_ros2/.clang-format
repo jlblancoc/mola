@@ -36,7 +36,7 @@ AllowShortBlocksOnASingleLine: true
 BreakBeforeBraces: Allman
 #BreakBeforeTernaryOperators: true
 #BreakConstructorInitializersBeforeComma: false
-ColumnLimit: 80
+ColumnLimit: 100
 #CommentPragmas:  ''
 #ConstructorInitializerAllOnOneLineOrOnePerLine: true
 #ConstructorInitializerIndentWidth: 4

@@ -18,6 +18,8 @@ find_package(geometry_msgs REQUIRED)
 rosidl_generate_interfaces(${PROJECT_NAME}
   "srv/RelocalizeFromGNSS.srv"
   "srv/RelocalizeNearPose.srv"
+  "srv/MapLoad.srv"
+  "srv/MapSave.srv"
   DEPENDENCIES
   std_msgs
   geometry_msgs

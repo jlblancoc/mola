@@ -1,0 +1,12 @@
+# This service requests saving the current map to a given map file(s).
+
+# Request.
+# File relative or absolute path. Do not add any file extension, since maps
+# may be loaded/saved to several files depending on implementation.
+string map_path
+---
+# Result. False if there was no MOLA map module accepting this request, or
+# there was an error saving the map.
+bool success
+# In case of no success, here is a human-readable error reason.
+string error_message
