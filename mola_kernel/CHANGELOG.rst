@@ -2,6 +2,20 @@
 Changelog for package mola_kernel
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* add <mola_kernel/version.h> with a version-checking macro
+* Merge pull request `#65 <https://github.com/MOLAorg/mola/issues/65>`_ from MOLAorg/add-more-srvs
+  Add more Services
+* Avoid cmake file glob expressions
+* mola_kernel: add MapServer interface
+* mola_kernel: add public symbols MOLA\_{MAJOR,MINOR,PATCH}_VERSION
+* Update clang-format style; add reformat bash script
+* Merge pull request `#62 <https://github.com/MOLAorg/mola/issues/62>`_ from MOLAorg/docs-fixes
+  Docs fixes
+* Fix ament_xmllint warnings in package.xml
+* Contributors: Jose Luis Blanco-Claraco
+
 1.0.8 (2024-07-29)
 ------------------
 * mola_kernel: add C++ virtual interface for relocalization methods

@@ -2,6 +2,14 @@
 Changelog for package mola_metric_maps
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Update clang-format style; add reformat bash script
+* Merge pull request `#62 <https://github.com/MOLAorg/mola/issues/62>`_ from MOLAorg/docs-fixes
+  Docs fixes
+* Fix ament_xmllint warnings in package.xml
+* Contributors: Jose Luis Blanco-Claraco
+
 1.0.8 (2024-07-29)
 ------------------
 * Update robin-map to latest version (Fix cmake < 3.5 compatibility warning)

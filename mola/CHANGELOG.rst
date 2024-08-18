@@ -2,6 +2,14 @@
 Changelog for package mola
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Merge pull request `#62 <https://github.com/MOLAorg/mola/issues/62>`_ from MOLAorg/docs-fixes
+  Docs fixes
+* Fix ament_xmllint warnings in package.xml
+* change ament linters to apply in test builds
+* Contributors: Jose Luis Blanco-Claraco
+
 1.0.8 (2024-07-29)
 ------------------
 

@@ -3,6 +3,19 @@ Changelog for package mola_bridge_ros2
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
+Forthcoming
+-----------
+* Merge pull request `#65 <https://github.com/MOLAorg/mola/issues/65>`_ from MOLAorg/add-more-srvs
+  Add more Services
+* Offer ROS2 services for the new MOLA MapServer interface
+* clang-format: switch to 100 columns
+* ros2bridge: offer ROS2 services for relocalization
+* Merge pull request `#62 <https://github.com/MOLAorg/mola/issues/62>`_ from MOLAorg/docs-fixes
+  Docs fixes
+* Fix ament_xmllint warnings in package.xml
+* change ament linters to apply in test builds
+* Contributors: Jose Luis Blanco-Claraco
+
 1.0.8 (2024-07-29)
 ------------------
 * ament_lint_cmake: clean warnings
