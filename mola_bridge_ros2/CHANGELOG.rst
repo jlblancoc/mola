@@ -3,8 +3,8 @@ Changelog for package mola_bridge_ros2
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
-Forthcoming
------------
+1.1.0 (2024-08-18)
+------------------
 * Merge pull request `#65 <https://github.com/MOLAorg/mola/issues/65>`_ from MOLAorg/add-more-srvs
   Add more Services
 * Offer ROS2 services for the new MOLA MapServer interface

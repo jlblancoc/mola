@@ -2,8 +2,8 @@
 Changelog for package mola_kernel
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.1.0 (2024-08-18)
+------------------
 * add <mola_kernel/version.h> with a version-checking macro
 * Merge pull request `#65 <https://github.com/MOLAorg/mola/issues/65>`_ from MOLAorg/add-more-srvs
   Add more Services

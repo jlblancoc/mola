@@ -2,8 +2,8 @@
 Changelog for package mola_msgs
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.1.0 (2024-08-18)
+------------------
 * Merge pull request `#65 <https://github.com/MOLAorg/mola/issues/65>`_ from MOLAorg/add-more-srvs
   Add more Services
 * mola_msgs: add map save & load services
