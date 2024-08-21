@@ -45,6 +45,7 @@ MOLA
   mola_architecture
   tutorials
   supported-sensors
+  dataset-conversions
   modules
   doxygen-index
   bibliography
