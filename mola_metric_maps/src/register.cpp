@@ -30,6 +30,7 @@
  */
 
 #include <mola_metric_maps/HashedVoxelPointCloud.h>
+#include <mola_metric_maps/NDT.h>
 #include <mola_metric_maps/OccGrid.h>
 #include <mola_metric_maps/SparseTreesPointCloud.h>
 #include <mola_metric_maps/SparseVoxelPointCloud.h>
@@ -47,4 +48,5 @@ MRPT_INITIALIZER(do_register_mola_metric_maps)
     registerClass(CLASS_ID(mola::SparseVoxelPointCloud));
     registerClass(CLASS_ID(mola::SparseTreesPointCloud));
     registerClass(CLASS_ID(mola::HashedVoxelPointCloud));
+    registerClass(CLASS_ID(mola::NDT));
 }

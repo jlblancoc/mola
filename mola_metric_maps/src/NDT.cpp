@@ -1,0 +1,854 @@
+/* -------------------------------------------------------------------------
+ *   A Modular Optimization framework for Localization and mApping  (MOLA)
+ *
+ * Copyright (C) 2018-2024 Jose Luis Blanco, University of Almeria
+ * Licensed under the GNU GPL v3 for non-commercial applications.
+ *
+ * This file is part of MOLA.
+ * MOLA is free software: you can redistribute it and/or modify it under the
+ * terms of the GNU General Public License as published by the Free Software
+ * Foundation, either version 3 of the License, or (at your option) any later
+ * version.
+ *
+ * MOLA is distributed in the hope that it will be useful, but WITHOUT ANY
+ * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+ * A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * MOLA. If not, see <https://www.gnu.org/licenses/>.
+ * ------------------------------------------------------------------------- */
+
+/**
+ * @file   NDT.cpp
+ * @brief  NDT 3D map representation
+ * @author Jose Luis Blanco Claraco
+ * @date   Aug 22, 2024
+ */
+
+/* An implementation of:
+    Scan registration for autonomous mining vehicles using 3D-NDT,
+    Magnusson, Martin and Lilienthal, Achim and Duckett, Tom,
+    Journal of Field Robotics, 2007.
+*/
+
+#include <mola_metric_maps/NDT.h>
+#include <mrpt/config/CConfigFileBase.h>  // MRPT_LOAD_CONFIG_VAR
+#include <mrpt/maps/CSimplePointsMap.h>
+#include <mrpt/math/CHistogram.h>
+#include <mrpt/math/distributions.h>  // confidenceIntervals()
+#include <mrpt/obs/CObservation2DRangeScan.h>
+#include <mrpt/obs/CObservation3DRangeScan.h>
+#include <mrpt/obs/CObservationPointCloud.h>
+#include <mrpt/obs/CObservationVelodyneScan.h>
+#include <mrpt/opengl/CPointCloud.h>
+#include <mrpt/opengl/CPointCloudColoured.h>
+#include <mrpt/serialization/CArchive.h>  // serialization
+#include <mrpt/system/os.h>
+
+#include <cmath>
+
+//#define USE_DEBUG_PROFILER
+
+#ifdef USE_DEBUG_PROFILER
+#include <mrpt/system/CTimeLogger.h>
+static mrpt::system::CTimeLogger profiler(true, "NDT");
+#endif
+
+using namespace mola;
+
+//  =========== Begin of Map definition ============
+MAP_DEFINITION_REGISTER("mola::NDT,NDT", mola::NDT)
+
+NDT::TMapDefinition::TMapDefinition() = default;
+void NDT::TMapDefinition::loadFromConfigFile_map_specific(
+    const mrpt::config::CConfigFileBase& s, const std::string& sectionPrefix)
+{
+    using namespace std::string_literals;
+
+    // [<sectionNamePrefix>+"_creationOpts"]
+    const std::string sSectCreation = sectionPrefix + "_creationOpts"s;
+    MRPT_LOAD_CONFIG_VAR(voxel_size, float, s, sSectCreation);
+
+    ASSERT_(s.sectionExists(sectionPrefix + "_insertOpts"s));
+    insertionOpts.loadFromConfigFile(s, sectionPrefix + "_insertOpts"s);
+
+    if (s.sectionExists(sectionPrefix + "_likelihoodOpts"s))
+        likelihoodOpts.loadFromConfigFile(
+            s, sectionPrefix + "_likelihoodOpts"s);
+
+    if (s.sectionExists(sectionPrefix + "_renderOpts"s))
+        renderOpts.loadFromConfigFile(s, sectionPrefix + "_renderOpts"s);
+}
+
+void NDT::TMapDefinition::dumpToTextStream_map_specific(std::ostream& out) const
+{
+    LOADABLEOPTS_DUMP_VAR(voxel_size, float);
+
+    insertionOpts.dumpToTextStream(out);
+    likelihoodOpts.dumpToTextStream(out);
+    renderOpts.dumpToTextStream(out);
+}
+
+mrpt::maps::CMetricMap::Ptr NDT::internal_CreateFromMapDefinition(
+    const mrpt::maps::TMetricMapInitializer& _def)
+{
+    const NDT::TMapDefinition* def =
+        dynamic_cast<const NDT::TMapDefinition*>(&_def);
+    ASSERT_(def);
+    auto obj = NDT::Create(def->voxel_size);
+
+    obj->insertionOptions  = def->insertionOpts;
+    obj->likelihoodOptions = def->likelihoodOpts;
+    obj->renderOptions     = def->renderOpts;
+
+    return obj;
+}
+//  =========== End of Map definition Block =========
+
+IMPLEMENTS_SERIALIZABLE(NDT, CMetricMap, mola)
+
+// =====================================
+// Serialization
+// =====================================
+
+uint8_t NDT::serializeGetVersion() const { return 0; }
+void    NDT::serializeTo(mrpt::serialization::CArchive& out) const
+{
+    // params:
+    out << voxel_size_;
+    insertionOptions.writeToStream(out);
+    likelihoodOptions.writeToStream(out);
+    renderOptions.writeToStream(out);
+
+    // data:
+    out.WriteAs<uint32_t>(voxels_.size());
+    for (const auto& [idx, voxel] : voxels_)
+    {
+        out << idx.cx << idx.cy << idx.cz;
+        const auto&  pts = voxel.points();
+        const size_t N   = pts.size();
+        out.WriteAs<uint16_t>(N);
+        for (size_t j = 0; j < N; j++) out << pts[j];
+    }
+}
+void NDT::serializeFrom(mrpt::serialization::CArchive& in, uint8_t version)
+{
+    switch (version)
+    {
+        case 0:
+        {
+            // params:
+            in >> voxel_size_;
+
+            // clear contents and compute computed fields:
+            this->setVoxelProperties(voxel_size_);
+
+            insertionOptions.readFromStream(in);
+            likelihoodOptions.readFromStream(in);
+            renderOptions.readFromStream(in);
+
+            // data:
+            const auto nGrids = in.ReadAs<uint32_t>();
+            for (uint32_t i = 0; i < nGrids; i++)
+            {
+                global_index3d_t idx;
+                in >> idx.cx >> idx.cy >> idx.cz;
+
+                auto& grid = voxels_[idx];
+
+                const auto nPts = in.ReadAs<uint16_t>();
+                for (size_t j = 0; j < nPts; j++)
+                {
+                    mrpt::math::TPoint3Df pt;
+                    in >> pt;
+                    grid.insertPoint(pt);
+                }
+            }
+        }
+        break;
+        default:
+            MRPT_THROW_UNKNOWN_SERIALIZATION_VERSION(version);
+    };
+
+    // cache reset:
+    cached_.reset();
+}
+
+// VoxelData
+
+// Ctor:
+NDT::NDT(float voxel_size) { setVoxelProperties(voxel_size); }
+
+NDT::~NDT() = default;
+
+void NDT::setVoxelProperties(float voxel_size)
+{
+    voxel_size_ = voxel_size;
+
+    // calculated fields:
+    voxel_size_inv_ = 1.0f / voxel_size_;
+    voxel_size_sqr_ = voxel_size_ * voxel_size_;
+    voxelDiagonal_  = mrpt::math::TPoint3Df(1.0f, 1.0f, 1.0f) * voxel_size_;
+
+    // clear all:
+    NDT::internal_clear();
+}
+
+std::string NDT::asString() const
+{
+    return mrpt::format(
+        "NDT, resolution=%.03f bbox=%s", voxel_size_,
+        boundingBox().asString().c_str());
+}
+
+void NDT::getVisualizationInto(mrpt::opengl::CSetOfObjects& outObj) const
+{
+    MRPT_START
+    if (!genericMapParams.enableSaveAs3DObject) return;
+
+    if (renderOptions.colormap == mrpt::img::cmNONE)
+    {
+        // Single color:
+        auto obj = mrpt::opengl::CPointCloud::Create();
+
+        const auto lambdaVisitPoints = [&obj](const mrpt::math::TPoint3Df& pt)
+        { obj->insertPoint(pt); };
+        this->visitAllPoints(lambdaVisitPoints);
+
+        obj->setColor(renderOptions.color);
+        obj->setPointSize(renderOptions.point_size);
+        obj->enableColorFromZ(false);
+        outObj.insert(obj);
+    }
+    else
+    {
+        auto obj = mrpt::opengl::CPointCloudColoured::Create();
+
+        auto bb = this->boundingBox();
+
+        // handle planar maps (avoids error in histogram below):
+        for (int i = 0; i < 3; i++)
+            if (bb.max[i] - bb.min[i] < 0.1f) bb.max[i] = bb.min[i] + 0.1f;
+
+        // Use a histogram to discard outliers from the colormap extremes:
+        constexpr size_t nBins = 100;
+        // for x,y,z
+        std::array<mrpt::math::CHistogram, 3> hists = {
+            mrpt::math::CHistogram(bb.min.x, bb.max.x, nBins),
+            mrpt::math::CHistogram(bb.min.y, bb.max.y, nBins),
+            mrpt::math::CHistogram(bb.min.z, bb.max.z, nBins)};
+
+        size_t nPoints = 0;
+
+        const auto lambdaVisitPoints =
+            [&obj, &hists, &nPoints](const mrpt::math::TPoint3Df& pt)
+        {
+            // x y z R G B [A]
+            obj->insertPoint({pt.x, pt.y, pt.z, 0, 0, 0});
+            for (int i = 0; i < 3; i++) hists[i].add(pt[i]);
+            nPoints++;
+        };
+
+        this->visitAllPoints(lambdaVisitPoints);
+
+        obj->setPointSize(renderOptions.point_size);
+
+        if (nPoints)
+        {
+            // Analyze the histograms and get confidence intervals:
+            std::vector<double> coords;
+            std::vector<double> hits;
+
+            const int idx = renderOptions.recolorizeByCoordinateIndex;
+            ASSERT_(idx >= 0 && idx < 3);
+
+            float            min = .0, max = 1.f;
+            constexpr double confidenceInterval = 0.02;
+
+            hists[idx].getHistogramNormalized(coords, hits);
+            mrpt::math::confidenceIntervalsFromHistogram(
+                coords, hits, min, max, confidenceInterval);
+
+            obj->recolorizeByCoordinate(
+                min, max, renderOptions.recolorizeByCoordinateIndex,
+                renderOptions.colormap);
+        }
+        outObj.insert(obj);
+    }
+    MRPT_END
+}
+
+void NDT::internal_clear() { voxels_.clear(); }
+
+bool NDT::internal_insertObservation(
+    const mrpt::obs::CObservation&                   obs,
+    const std::optional<const mrpt::poses::CPose3D>& robotPose)
+{
+    MRPT_START
+
+    using namespace mrpt::obs;
+
+    mrpt::poses::CPose2D robotPose2D;
+    mrpt::poses::CPose3D robotPose3D;
+
+    if (robotPose)
+    {
+        robotPose2D = mrpt::poses::CPose2D(*robotPose);
+        robotPose3D = (*robotPose);
+    }
+    else
+    {
+        // Default values are (0,0,0)
+    }
+
+    if (insertionOptions.remove_voxels_farther_than > 0)
+    {
+        const int distInGrid = static_cast<int>(std::ceil(
+            insertionOptions.remove_voxels_farther_than * voxel_size_inv_));
+
+        const auto idxCurObs =
+            coordToGlobalIdx(robotPose3D.translation().cast<float>());
+
+        for (auto it = voxels_.begin(); it != voxels_.end();)
+        {
+            // manhattan distance:
+            const int dist = mrpt::max3(
+                std::abs(it->first.cx - idxCurObs.cx),
+                std::abs(it->first.cy - idxCurObs.cy),
+                std::abs(it->first.cz - idxCurObs.cz));
+
+            if (dist > distInGrid)
+                it = voxels_.erase(it);
+            else
+                ++it;
+        }
+    }
+
+    if (IS_CLASS(obs, CObservation2DRangeScan))
+    {
+        /********************************************************************
+                    OBSERVATION TYPE: CObservation2DRangeScan
+         ********************************************************************/
+        const auto& o = static_cast<const CObservation2DRangeScan&>(obs);
+
+        // Build (if not done before) the points map representation of this
+        // observation:
+        const auto* scanPoints = o.buildAuxPointsMap<mrpt::maps::CPointsMap>();
+
+        if (scanPoints->empty()) return 0;
+
+        const auto& xs = scanPoints->getPointsBufferRef_x();
+        const auto& ys = scanPoints->getPointsBufferRef_y();
+        const auto& zs = scanPoints->getPointsBufferRef_z();
+
+        internal_insertPointCloud3D(
+            robotPose3D, xs.data(), ys.data(), zs.data(), xs.size());
+
+        return true;
+    }
+    else if (IS_CLASS(obs, CObservation3DRangeScan))
+    {
+        /********************************************************************
+                    OBSERVATION TYPE: CObservation3DRangeScan
+         ********************************************************************/
+        const auto& o = static_cast<const CObservation3DRangeScan&>(obs);
+
+        mrpt::obs::T3DPointsProjectionParams pp;
+        pp.takeIntoAccountSensorPoseOnRobot = true;
+
+        // Empty point set, or load from XYZ in observation:
+        if (o.hasPoints3D)
+        {
+            for (size_t i = 0; i < o.points3D_x.size(); i++)
+                this->insertPoint(robotPose3D.composePoint(
+                    {o.points3D_x[i], o.points3D_y[i], o.points3D_z[i]}));
+
+            return true;
+        }
+        else if (o.hasRangeImage)
+        {
+            mrpt::maps::CSimplePointsMap pointMap;
+            const_cast<CObservation3DRangeScan&>(o).unprojectInto(pointMap, pp);
+
+            const auto& xs = pointMap.getPointsBufferRef_x();
+            const auto& ys = pointMap.getPointsBufferRef_y();
+            const auto& zs = pointMap.getPointsBufferRef_z();
+
+            internal_insertPointCloud3D(
+                robotPose3D, xs.data(), ys.data(), zs.data(), xs.size());
+
+            return true;
+        }
+        else
+            return false;
+    }
+    else if (IS_CLASS(obs, CObservationVelodyneScan))
+    {
+        /********************************************************************
+                    OBSERVATION TYPE: CObservationVelodyneScan
+         ********************************************************************/
+        const auto& o = static_cast<const CObservationVelodyneScan&>(obs);
+
+        // Automatically generate pointcloud if needed:
+        if (!o.point_cloud.size())
+            const_cast<CObservationVelodyneScan&>(o).generatePointCloud();
+
+        for (size_t i = 0; i < o.point_cloud.x.size(); i++)
+        {
+            insertPoint(robotPose3D.composePoint(
+                {o.point_cloud.x[i], o.point_cloud.y[i], o.point_cloud.z[i]}));
+        }
+
+        return true;
+    }
+    else if (IS_CLASS(obs, CObservationPointCloud))
+    {
+        const auto& o = static_cast<const CObservationPointCloud&>(obs);
+        ASSERT_(o.pointcloud);
+
+        const auto& xs = o.pointcloud->getPointsBufferRef_x();
+        const auto& ys = o.pointcloud->getPointsBufferRef_y();
+        const auto& zs = o.pointcloud->getPointsBufferRef_z();
+
+        for (size_t i = 0; i < xs.size(); i++)
+        {
+            insertPoint(robotPose3D.composePoint({xs[i], ys[i], zs[i]}));
+        }
+
+        return true;
+    }
+    else
+    {
+        /********************************************************************
+                    OBSERVATION TYPE: Unknown
+        ********************************************************************/
+        return false;
+    }
+
+    MRPT_END
+}
+
+double NDT::internal_computeObservationLikelihood(
+    const mrpt::obs::CObservation& obs,
+    const mrpt::poses::CPose3D&    takenFrom) const
+{
+    using namespace mrpt::obs;
+    using namespace mrpt::poses;
+    using namespace mrpt::maps;
+
+    if (isEmpty()) return 0;
+
+    // This function depends on the observation type:
+    // -----------------------------------------------------
+    if (IS_CLASS(obs, CObservation2DRangeScan))
+    {
+        // Observation is a laser range scan:
+        // -------------------------------------------
+        const auto& o = static_cast<const CObservation2DRangeScan&>(obs);
+
+        // Build (if not done before) the points map representation of this
+        // observation:
+        const auto* scanPoints = o.buildAuxPointsMap<CPointsMap>();
+
+        const size_t N = scanPoints->size();
+        if (!N) return 0;
+
+        const auto& xs = scanPoints->getPointsBufferRef_x();
+        const auto& ys = scanPoints->getPointsBufferRef_y();
+        const auto& zs = scanPoints->getPointsBufferRef_z();
+
+        return internal_computeObservationLikelihoodPointCloud3D(
+            takenFrom, xs.data(), ys.data(), zs.data(), N);
+    }
+    else if (IS_CLASS(obs, CObservationVelodyneScan))
+    {
+        const auto& o = dynamic_cast<const CObservationVelodyneScan&>(obs);
+
+        // Automatically generate pointcloud if needed:
+        if (!o.point_cloud.size())
+            const_cast<CObservationVelodyneScan&>(o).generatePointCloud();
+
+        const size_t N = o.point_cloud.size();
+        if (!N) return 0;
+
+        const CPose3D sensorAbsPose = takenFrom + o.sensorPose;
+
+        const auto& xs = o.point_cloud.x;
+        const auto& ys = o.point_cloud.y;
+        const auto& zs = o.point_cloud.z;
+
+        return internal_computeObservationLikelihoodPointCloud3D(
+            sensorAbsPose, xs.data(), ys.data(), zs.data(), N);
+    }
+    else if (IS_CLASS(obs, CObservationPointCloud))
+    {
+        const auto& o = dynamic_cast<const CObservationPointCloud&>(obs);
+
+        const size_t N = o.pointcloud->size();
+        if (!N) return 0;
+
+        const CPose3D sensorAbsPose = takenFrom + o.sensorPose;
+
+        auto xs = o.pointcloud->getPointsBufferRef_x();
+        auto ys = o.pointcloud->getPointsBufferRef_y();
+        auto zs = o.pointcloud->getPointsBufferRef_z();
+
+        return internal_computeObservationLikelihoodPointCloud3D(
+            sensorAbsPose, xs.data(), ys.data(), zs.data(), N);
+    }
+
+    return .0;
+}
+
+double NDT::internal_computeObservationLikelihoodPointCloud3D(
+    const mrpt::poses::CPose3D& pc_in_map, const float* xs, const float* ys,
+    const float* zs, const std::size_t num_pts) const
+{
+    MRPT_TRY_START
+
+    ASSERT_GT_(likelihoodOptions.sigma_dist, .0);
+
+    mrpt::math::TPoint3Df closest;
+    float                 closest_err;
+    uint64_t              closest_id;
+    const float max_sqr_err = mrpt::square(likelihoodOptions.max_corr_distance);
+    double      sumSqrDist  = .0;
+
+    std::size_t nPtsForAverage = 0;
+    for (std::size_t i = 0; i < num_pts;
+         i += likelihoodOptions.decimation, nPtsForAverage++)
+    {
+        // Transform the point from the scan reference to its global 3D
+        // position:
+        const auto gPt = pc_in_map.composePoint({xs[i], ys[i], zs[i]});
+
+        THROW_EXCEPTION("to-do");
+#if 0
+        const bool found =
+            nn_single_search(gPt, closest, closest_err, closest_id);
+        if (!found)
+#endif
+        continue;
+
+        // Put a limit:
+        mrpt::keep_min(closest_err, max_sqr_err);
+
+        sumSqrDist += static_cast<double>(closest_err);
+    }
+    if (nPtsForAverage) sumSqrDist /= nPtsForAverage;
+
+    // Log-likelihood:
+    return -sumSqrDist / likelihoodOptions.sigma_dist;
+
+    MRPT_TRY_END
+}
+
+bool NDT::internal_canComputeObservationLikelihood(
+    const mrpt::obs::CObservation& obs) const
+{
+    using namespace mrpt::obs;
+
+    return IS_CLASS(obs, CObservation2DRangeScan) ||
+           IS_CLASS(obs, CObservationVelodyneScan) ||
+           IS_CLASS(obs, CObservationPointCloud);
+}
+
+bool NDT::isEmpty() const
+{
+    // empty if no voxels exist:
+    return voxels_.empty();
+}
+
+void NDT::saveMetricMapRepresentationToFile(
+    const std::string& filNamePrefix) const
+{
+    using namespace std::string_literals;
+
+    const auto fil = filNamePrefix + ".txt"s;
+    saveToTextFile(fil);
+}
+
+bool NDT::saveToTextFile(const std::string& file) const
+{
+    FILE* f = mrpt::system::os::fopen(file.c_str(), "wt");
+    if (!f) return false;
+
+    const auto lambdaVisitPoints = [f](const mrpt::math::TPoint3Df& pt)
+    { mrpt::system::os::fprintf(f, "%f %f %f\n", pt.x, pt.y, pt.z); };
+
+    this->visitAllPoints(lambdaVisitPoints);
+
+    mrpt::system::os::fclose(f);
+    return true;
+}
+
+void NDT::insertPoint(const mrpt::math::TPoint3Df& pt)
+{
+    auto& v = *voxelByCoords(pt, true /*create if new*/);
+
+    const auto nPreviousPoints = v.points().size();
+
+    if (insertionOptions.max_points_per_voxel != 0 &&
+        nPreviousPoints >= insertionOptions.max_points_per_voxel)
+        return;  // skip, voxel is full
+
+    if (insertionOptions.min_distance_between_points > 0 &&
+        nPreviousPoints != 0)
+    {
+        // Look for the closest existing point in the voxel:
+        std::optional<float> curClosestDistSqr;
+
+        const auto& pts = v.points();
+        for (size_t i = 0; i < pts.size(); i++)
+        {
+            const float distSqr = pts[i].sqrDistanceTo(pt);
+            if (!curClosestDistSqr.has_value() ||
+                distSqr < curClosestDistSqr.value())
+                curClosestDistSqr = distSqr;
+        }
+        const float minDistSqr =
+            mrpt::square(insertionOptions.min_distance_between_points);
+
+        // Skip if the point is too close to existing ones:
+        if (curClosestDistSqr.value() < minDistSqr) return;
+    }
+
+    v.insertPoint(pt);
+
+    // Also, update bbox:
+    if (!cached_.boundingBox_.has_value())
+        cached_.boundingBox_.emplace(pt, pt);
+    else
+        cached_.boundingBox_->updateWithPoint(pt);
+}
+
+mrpt::math::TBoundingBoxf NDT::boundingBox() const
+{
+    if (!cached_.boundingBox_)
+    {
+        cached_.boundingBox_.emplace();
+        if (this->isEmpty())
+        {
+            cached_.boundingBox_->min = {0, 0, 0};
+            cached_.boundingBox_->max = {0, 0, 0};
+        }
+        else
+        {
+            cached_.boundingBox_ =
+                mrpt::math::TBoundingBoxf::PlusMinusInfinity();
+
+            auto lambdaForEachVoxel =
+                [this](const global_index3d_t& idxs, const VoxelData&)
+            {
+                const mrpt::math::TPoint3Df voxelCorner =
+                    globalIdxToCoord(idxs);
+
+                cached_.boundingBox_->updateWithPoint(voxelCorner);
+                cached_.boundingBox_->updateWithPoint(
+                    voxelCorner + voxelDiagonal_);
+            };
+
+            this->visitAllVoxels(lambdaForEachVoxel);
+        }
+    }
+
+    return cached_.boundingBox_.value();
+}
+
+void NDT::visitAllPoints(
+    const std::function<void(const mrpt::math::TPoint3Df&)>& f) const
+{
+    for (const auto& [idx, v] : voxels_)
+    {
+        const auto& pts = v.points();
+        for (size_t i = 0; i < pts.size(); i++) f(pts[i]);
+    }
+}
+
+void NDT::visitAllVoxels(
+    const std::function<void(const global_index3d_t&, const VoxelData&)>& f)
+    const
+{
+    for (const auto& [idx, v] : voxels_) f(idx, v);
+}
+
+// ========== Option structures ==========
+void NDT::TInsertionOptions::writeToStream(
+    mrpt::serialization::CArchive& out) const
+{
+    const int8_t version = 0;
+    out << version;
+    out << max_points_per_voxel << remove_voxels_farther_than
+        << min_distance_between_points;
+}
+
+void NDT::TInsertionOptions::readFromStream(mrpt::serialization::CArchive& in)
+{
+    int8_t version;
+    in >> version;
+    switch (version)
+    {
+        case 0:
+        {
+            in >> max_points_per_voxel >> remove_voxels_farther_than >>
+                min_distance_between_points;
+        }
+        break;
+        default:
+            MRPT_THROW_UNKNOWN_SERIALIZATION_VERSION(version);
+    }
+}
+
+void NDT::TLikelihoodOptions::writeToStream(
+    mrpt::serialization::CArchive& out) const
+{
+    const int8_t version = 0;
+    out << version;
+    out << sigma_dist << max_corr_distance << decimation;
+}
+
+void NDT::TLikelihoodOptions::readFromStream(mrpt::serialization::CArchive& in)
+{
+    int8_t version;
+    in >> version;
+    switch (version)
+    {
+        case 0:
+        {
+            in >> sigma_dist >> max_corr_distance >> decimation;
+        }
+        break;
+        default:
+            MRPT_THROW_UNKNOWN_SERIALIZATION_VERSION(version);
+    }
+}
+
+void NDT::TRenderOptions::writeToStream(
+    mrpt::serialization::CArchive& out) const
+{
+    const int8_t version = 0;
+    out << version;
+    out << point_size << color << int8_t(colormap)
+        << recolorizeByCoordinateIndex;
+}
+
+void NDT::TRenderOptions::readFromStream(mrpt::serialization::CArchive& in)
+{
+    int8_t version;
+    in >> version;
+    switch (version)
+    {
+        case 0:
+        {
+            in >> point_size;
+            in >> this->color;
+            in.ReadAsAndCastTo<int8_t>(this->colormap);
+            in >> recolorizeByCoordinateIndex;
+        }
+        break;
+        default:
+            MRPT_THROW_UNKNOWN_SERIALIZATION_VERSION(version);
+    }
+}
+
+void NDT::TInsertionOptions::dumpToTextStream(std::ostream& out) const
+{
+    out << "\n------ [NDT::TInsertionOptions] ------- "
+           "\n\n";
+
+    LOADABLEOPTS_DUMP_VAR(max_points_per_voxel, int);
+    LOADABLEOPTS_DUMP_VAR(remove_voxels_farther_than, double);
+    LOADABLEOPTS_DUMP_VAR(min_distance_between_points, float)
+}
+
+void NDT::TLikelihoodOptions::dumpToTextStream(std::ostream& out) const
+{
+    out << "\n------ [NDT::TLikelihoodOptions] ------- "
+           "\n\n";
+
+    LOADABLEOPTS_DUMP_VAR(sigma_dist, double);
+    LOADABLEOPTS_DUMP_VAR(max_corr_distance, double);
+    LOADABLEOPTS_DUMP_VAR(decimation, int);
+}
+
+void NDT::TRenderOptions::dumpToTextStream(std::ostream& out) const
+{
+    out << "\n------ [NDT::TRenderOptions] ------- \n\n";
+
+    LOADABLEOPTS_DUMP_VAR(point_size, float);
+    LOADABLEOPTS_DUMP_VAR(color.R, float);
+    LOADABLEOPTS_DUMP_VAR(color.G, float);
+    LOADABLEOPTS_DUMP_VAR(color.B, float);
+    LOADABLEOPTS_DUMP_VAR(colormap, int);
+    LOADABLEOPTS_DUMP_VAR(recolorizeByCoordinateIndex, int);
+}
+
+void NDT::TInsertionOptions::loadFromConfigFile(
+    const mrpt::config::CConfigFileBase& c, const std::string& s)
+{
+    MRPT_LOAD_CONFIG_VAR(max_points_per_voxel, int, c, s);
+    MRPT_LOAD_CONFIG_VAR(remove_voxels_farther_than, double, c, s);
+    MRPT_LOAD_CONFIG_VAR(min_distance_between_points, float, c, s);
+}
+
+void NDT::TLikelihoodOptions::loadFromConfigFile(
+    const mrpt::config::CConfigFileBase& c, const std::string& s)
+{
+    MRPT_LOAD_CONFIG_VAR(sigma_dist, double, c, s);
+    MRPT_LOAD_CONFIG_VAR(max_corr_distance, double, c, s);
+    MRPT_LOAD_CONFIG_VAR(decimation, int, c, s);
+}
+
+void NDT::TRenderOptions::loadFromConfigFile(
+    const mrpt::config::CConfigFileBase& c, const std::string& s)
+{
+    MRPT_LOAD_CONFIG_VAR(point_size, float, c, s);
+    MRPT_LOAD_CONFIG_VAR(color.R, float, c, s);
+    MRPT_LOAD_CONFIG_VAR(color.G, float, c, s);
+    MRPT_LOAD_CONFIG_VAR(color.B, float, c, s);
+    colormap = c.read_enum(s, "colormap", this->colormap);
+    MRPT_LOAD_CONFIG_VAR(recolorizeByCoordinateIndex, int, c, s);
+}
+
+void NDT::internal_insertPointCloud3D(
+    const mrpt::poses::CPose3D& pc_in_map, const float* xs, const float* ys,
+    const float* zs, const std::size_t num_pts)
+{
+    MRPT_TRY_START
+
+    voxels_.reserve(voxels_.size() + num_pts);
+
+    for (std::size_t i = 0; i < num_pts; i++)
+    {
+        // Transform the point from the scan reference to its global 3D
+        // position:
+        const auto gPt = pc_in_map.composePoint({xs[i], ys[i], zs[i]});
+        insertPoint(gPt);
+    }
+
+    MRPT_TRY_END
+}
+
+const mrpt::maps::CSimplePointsMap* NDT::getAsSimplePointsMap() const
+{
+    if (!cachedPoints_) cachedPoints_ = mrpt::maps::CSimplePointsMap::Create();
+
+    cachedPoints_->clear();
+
+    this->visitAllPoints([this](const mrpt::math::TPoint3Df& p)
+                         { cachedPoints_->insertPointFast(p.x, p.y, p.z); });
+
+    return cachedPoints_.get();
+}
+
+const std::optional<mp2p_icp::PointCloudEigen>& NDT::VoxelData::ndt() const
+{
+    if (has_ndt() || size() < 3) return ndt_;
+
+    ndt_.emplace();
+    *ndt_ = mp2p_icp::estimate_points_eigen(
+        points_.xs.data(), points_.ys.data(), points_.zs.data(), std::nullopt,
+        size());
+
+    return ndt_;
+}
