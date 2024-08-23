@@ -3,8 +3,8 @@ Changelog for package mola_relocalization
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
-Forthcoming
------------
+1.1.1 (2024-08-23)
+------------------
 * Test dataset pkg moved as <test_depend>
 * Contributors: Jose Luis Blanco Claraco
 
