@@ -70,51 +70,72 @@ Get started:
 
 .. humble badges ------
 
-.. |badgeHdev| image:: https://build.ros2.org/job/Hdev__mola__ubuntu_jammy_amd64/badge/icon
-   :scale: 100%
-   :align: middle
-   :target: https://build.ros2.org/job/Hdev__mola__ubuntu_jammy_amd64/
-
 .. |badgeHrel| image:: https://img.shields.io/ros/v/humble/mola
    :scale: 100%
    :align: middle
    :target: https://index.ros.org/search/?term=mola
 
-.. iron badges ------
-
-.. |badgeIdev| image:: https://build.ros2.org/job/Idev__mola__ubuntu_jammy_amd64/badge/icon
+.. |badgeHrel_LO| image:: https://img.shields.io/ros/v/humble/mola_lidar_odometry
    :scale: 100%
    :align: middle
-   :target: https://build.ros2.org/job/Idev__mola__ubuntu_jammy_amd64/
+   :target: https://index.ros.org/search/?term=mola_lidar_odometry
+
+.. |badgeHrel_MP| image:: https://img.shields.io/ros/v/humble/mp2p_icp
+   :scale: 100%
+   :align: middle
+   :target: https://index.ros.org/search/?term=mp2p_icp
+
+.. iron badges ------
 
 .. |badgeIrel| image:: https://img.shields.io/ros/v/iron/mola
    :scale: 100%
    :align: middle
    :target: https://index.ros.org/search/?term=mola
 
-.. jazzy badges ------
-
-.. |badgeJdev| image:: https://build.ros2.org/job/Jdev__mola__ubuntu_noble_amd64/badge/icon
+.. |badgeIrel_LO| image:: https://img.shields.io/ros/v/iron/mola_lidar_odometry
    :scale: 100%
    :align: middle
-   :target: https://build.ros2.org/job/Jdev__mola__ubuntu_noble_amd64/
+   :target: https://index.ros.org/search/?term=mola_lidar_odometry
+
+.. |badgeIrel_MP| image:: https://img.shields.io/ros/v/iron/mp2p_icp
+   :scale: 100%
+   :align: middle
+   :target: https://index.ros.org/search/?term=mp2p_icp
+
+.. jazzy badges ------
 
 .. |badgeJrel| image:: https://img.shields.io/ros/v/jazzy/mola
    :scale: 100%
    :align: middle
    :target: https://index.ros.org/search/?term=mola
 
-.. rolling badges ------
-
-.. |badgeRdev| image:: https://build.ros2.org/job/Rdev__mola__ubuntu_noble_amd64/badge/icon
+.. |badgeJrel_LO| image:: https://img.shields.io/ros/v/jazzy/mola_lidar_odometry
    :scale: 100%
    :align: middle
-   :target: https://build.ros2.org/job/Rdev__mola__ubuntu_noble_amd64/
+   :target: https://index.ros.org/search/?term=mola_lidar_odometry
+
+.. |badgeJrel_MP| image:: https://img.shields.io/ros/v/jazzy/mp2p_icp
+   :scale: 100%
+   :align: middle
+   :target: https://index.ros.org/search/?term=mp2p_icp
+
+
+.. rolling badges ------
 
 .. |badgeRrel| image:: https://img.shields.io/ros/v/rolling/mola
    :scale: 100%
    :align: middle
    :target: https://index.ros.org/search/?term=mola
+
+.. |badgeRrel_LO| image:: https://img.shields.io/ros/v/rolling/mola_lidar_odometry
+   :scale: 100%
+   :align: middle
+   :target: https://index.ros.org/search/?term=mola_lidar_odometry
+
+.. |badgeRrel_MP| image:: https://img.shields.io/ros/v/rolling/mp2p_icp
+   :scale: 100%
+   :align: middle
+   :target: https://index.ros.org/search/?term=mp2p_icp
 
 
 .. _installing:
@@ -135,15 +156,14 @@ How to install all MOLA modules:
 
     .. code-block:: bash
 
-        # Install core MOLA modules:
-        sudo apt install ros-$ROS_DISTRO-mola
+        # Install core MOLA modules and 3D LiDAR odometry:
+        sudo apt install ros-$ROS_DISTRO-mola ros-$ROS_DISTRO-mola-lidar-odometry
         
-        # Install the MOLA LIDAR odometry package:
-        # sudo apt install ros-$ROS_DISTRO-mola-lidar-odometry
-        # As of Jul 2024, this package is not available from apt yet! 
-        # Please see instructions below to clone and build it from sources
+        # As of Aug 2024, lidar_odometry is not available for all ROS distros yet!
+        # If the apt command above fails, please remove the "mola-lidar-odometry" part
+        # and see instructions below to clone and build the missing module from sources
 
-        # Install example small datasets to run demos/unit tests:
+        # (OPTIONAL) Install example small datasets to run demos/unit tests:
         sudo apt install ros-$ROS_DISTRO-mola-test-datasets
 
     Check if all new nodes and apps are visible:
@@ -154,19 +174,23 @@ How to install all MOLA modules:
         # If a GUI app is opened, it means installation was successful.
         mm-viewer
 
-    These are the versions available from ROS build farms:
+        # You can also test the mola LO cli interface:
+        mola-lidar-odometry-cli --help
 
-    +-------------------------+-----------------------------+------------------------------------+
-    | ROS distribution        | Development build status    | Last release (available via apt)   |
-    +=========================+=============================+====================================+
-    | ROS 2 Humble (u22.04)   |    |badgeHdev|              |     |badgeHrel|                    |
-    +-------------------------+-----------------------------+------------------------------------+
-    | ROS 2 Iron (u22.04)     |    |badgeIdev|              |     |badgeIrel|                    |
-    +-------------------------+-----------------------------+------------------------------------+
-    | ROS 2 Jazzy (u24.04)    |    |badgeJdev|              |     |badgeJrel|                    |
-    +-------------------------+-----------------------------+------------------------------------+
-    | ROS 2 Rolling (u24.04)  |    |badgeRdev|              |     |badgeRrel|                    |
-    +-------------------------+-----------------------------+------------------------------------+
+
+    These are the **versions available** from ROS build farms for each main MOLA component:
+
+    +-------------------------+---------------+---------------------+---------------------+
+    | ROS distribution        |      MOLA     | mola_lidar_odometry |   mp2p_icp          |
+    +=========================+===============+=====================+=====================+
+    | ROS 2 Humble (u22.04)   |  |badgeHrel|  |   |badgeHrel_LO|    |   |badgeHrel_MP|    |
+    +-------------------------+---------------+---------------------+---------------------+
+    | ROS 2 Iron (u22.04)     |  |badgeIrel|  |   |badgeIrel_LO|    |   |badgeIrel_MP|    |
+    +-------------------------+---------------+---------------------+---------------------+
+    | ROS 2 Jazzy (u24.04)    |  |badgeJrel|  |   |badgeJrel_LO|    |   |badgeJrel_MP|    |
+    +-------------------------+---------------+---------------------+---------------------+
+    | ROS 2 Rolling (u24.04)  |  |badgeRrel|  |   |badgeRrel_LO|    |   |badgeRrel_MP|    |
+    +-------------------------+---------------+---------------------+---------------------+
 
 
 .. dropdown:: Build from sources
