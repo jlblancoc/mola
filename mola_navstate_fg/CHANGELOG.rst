@@ -2,6 +2,9 @@
 Changelog for package mola_navstate_fg
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 1.1.0 (2024-08-18)
 ------------------
 * Update test-navstate-basic.cpp: less noisy test data for more predictable results
