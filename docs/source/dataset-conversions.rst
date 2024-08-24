@@ -41,6 +41,8 @@ Each robotic framework or library has defined its own formats over time:
 
 |
 
+.. _rosbag2rawlog:
+
 2. rosbag ⇒ rawlog
 ----------------------------
 To convert a ROS bag into a RawLog, you need two items: 
@@ -219,8 +221,40 @@ Write me!
 |
 
 
+.. _ros1_to_ros2:
+
+4. ROS1 ⇒ ROS2
+----------------------------
+One way to use rosbags from ROS 1 with MOLA is to port them to ROS 2 bags.
+
+You can use the Python package ``rosbags`` to `perform the conversion <https://ternaris.gitlab.io/rosbags/topics/convert.html>`_.
+
+An alternative is to use :ref:`rosbag2rawlog <rosbag2rawlog>` (the ROS 1 version!) to convert them to RawLogs, then use them as input to MOLA.
+
+|
+
 .. _mola-dataset-to-ros:
 
-4. MOLA data set module ⇒ ROS
+5. MOLA data set module ⇒ ROS
 ------------------------------
-Write me!
+
+All you need is to put together a :ref:`MOLA launch YAML file <yaml_slam_cfg_file>` with:
+
+- A dataset source module.
+- The ros2bridge module.
+
+and launch it using `mola-cli`. See existing ROS launch examples
+under `ros2-launch (mola_demos package) <https://github.com/MOLAorg/mola/tree/develop/mola_demos/ros2-launchs>`_,
+with corresponding MOLA cli launch files in the `mola-cli-launchs <https://github.com/MOLAorg/mola/tree/develop/mola_demos/mola-cli-launchs>`_ directory.
+
+.. dropdown:: Example: play back a KITTI dataset sequence to ROS 2
+  :open:
+
+  .. code-block:: bash
+
+    ros2 launch mola_demos ros-kitti-play.launch.py kitti_sequence:=01
+
+  Result: the mola_viz GUI + RViz.
+
+  .. figure:: https://mrpt.github.io/imgs/screenshot_mola_demo_kitti_replay_to_ros.jpg
+    :width: 600
