@@ -3,6 +3,11 @@ Changelog for package mola_input_rosbag2
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
+Forthcoming
+-----------
+* rosbag2 input: support for input directories for split bag datasets
+* Contributors: Jose Luis Blanco-Claraco
+
 1.1.1 (2024-08-23)
 ------------------
 
