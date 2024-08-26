@@ -103,24 +103,50 @@ void Rosbag2Dataset::initialize_rds(const Yaml& c)
     YAML_LOAD_MEMBER_OPT(read_ahead_length, size_t);
     paused_ = cfg.getOrDefault<bool>("start_paused", paused_);
 
-    ASSERT_FILE_EXISTS_(rosbag_filename_);
+    const bool isDir  = mrpt::system::directoryExists(rosbag_filename_);
+    const bool isFile = !isDir && mrpt::system::fileExists(rosbag_filename_);
+
+    ASSERTMSG_(
+        isFile || isDir, "'"s + rosbag_filename_ +
+                             "' is nether an existing directory or file."s);
 
     // auto guess rosbag_storage_id from rosbag2 extension:
     if (rosbag_storage_id_.empty())
     {
-        auto ext = mrpt::system::extractFileExtension(rosbag_filename_);
-        if (ext == "mcap")
-            rosbag_storage_id_ = "mcap";
-        else if (ext == "db3")
-            rosbag_storage_id_ = "sqlite3";
+        if (isFile)
+        {
+            auto ext = mrpt::system::extractFileExtension(rosbag_filename_);
+            if (ext == "mcap")
+                rosbag_storage_id_ = "mcap";
+            else if (ext == "db3")
+                rosbag_storage_id_ = "sqlite3";
+            else
+            {
+                THROW_EXCEPTION_FMT(
+                    "Argument 'rosbag_storage_id' was not provided and could "
+                    "not "
+                    "determine the rosbag2 format from unknown extension of "
+                    "file "
+                    "'%s'",
+                    rosbag_filename_.c_str());
+            }
+        }
         else
         {
-            THROW_EXCEPTION_FMT(
-                "Argument 'rosbag_storage_id' was not provided and could not "
-                "determine the rosbag2 format from unknown extension of file "
-                "'%s'",
-                rosbag_filename_.c_str());
+            const std::string metadata_yaml =
+                mrpt::system::pathJoin({rosbag_filename_, "metadata.yaml"});
+            ASSERT_FILE_EXISTS_(metadata_yaml);
+            const auto metadata =
+                mrpt::containers::yaml::FromFile(metadata_yaml);
+            ASSERT_(metadata.has("rosbag2_bagfile_information"));
+            ASSERT_(metadata["rosbag2_bagfile_information"].has(
+                "storage_identifier"));
+            rosbag_storage_id_ =
+                metadata["rosbag2_bagfile_information"]["storage_identifier"]
+                    .as<std::string>();
         }
+        MRPT_LOG_INFO_STREAM(
+            "Storage identifier auto-detected: " << rosbag_storage_id_);
     }
 
     // Open input ros bag:
