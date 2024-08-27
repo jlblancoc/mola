@@ -20,7 +20,6 @@ find_package(mola_common REQUIRED)
 find_package(mrpt-math) # for MRPT Eigen utilities
 find_package(mrpt-maps)
 find_package(mrpt-poses)
-find_package(mrpt-tclap)
 
 find_mola_package(mola_kernel)
 

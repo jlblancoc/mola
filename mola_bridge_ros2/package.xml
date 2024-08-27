@@ -29,7 +29,8 @@
   <depend>mola_kernel</depend>
   <depend>mola_msgs</depend>
 
-  <depend>mrpt2</depend>
+  <depend>mrpt_libmaps</depend>
+  <depend>mrpt_libros_bridge</depend>
 
   <depend>geometry_msgs</depend>
   <depend>nav_msgs</depend>

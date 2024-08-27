@@ -15,7 +15,10 @@
 
 
   <depend>mola_kernel</depend>
-  <depend>mrpt2</depend>
+
+  <depend>mrpt_libmaps</depend>
+  <depend>mrpt_libgui</depend>
+  <depend>mrpt_libopengl</depend>
 
   <doc_depend>doxygen</doc_depend>
 

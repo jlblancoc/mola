@@ -16,7 +16,10 @@
 
   <depend>mola_common</depend>
   <depend>mola_yaml</depend>
-  <depend>mrpt2</depend>
+
+  <depend>mrpt_libobs</depend>
+  <depend>mrpt_libmaps</depend>
+  <depend>mrpt_libgui</depend>
 
   <doc_depend>doxygen</doc_depend>
 

@@ -16,7 +16,9 @@
 
   <depend>mola_common</depend>
   <depend>mola_kernel</depend>
-  <depend>mrpt2</depend>
+
+  <depend>mrpt_libobs</depend>
+  <depend>mrpt_libmath</depend>
 
   <doc_depend>doxygen</doc_depend>
 
