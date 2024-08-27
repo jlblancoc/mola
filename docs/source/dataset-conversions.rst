@@ -16,8 +16,8 @@ the custom formats of popular robotics and computer vision datasets.
 
 1. Dataset formats
 ---------------------------------
-Robotics datasets comprises **sequences** of raw sensory data as captured by
-a mobile robot, a vehicle, or just a hand-held device, as it moves.
+Robotics datasets consist of **sequences** of raw sensory data as captured by
+a mobile robot, a vehicle, or just a hand-held device, as they move through the environment.
 
 Each robotic framework or library has defined its own formats over time:
 
