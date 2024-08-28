@@ -6,12 +6,16 @@ Tutorial: build a map
 
 This tutorial describes the steps for building metric maps using MOLA.
 
+____________________________________________
 
 .. contents::
    :depth: 1
    :local:
    :backlinks: none
 
+____________________________________________
+
+|
 
 1. Prepare the input data
 ---------------------------------
@@ -184,6 +188,7 @@ To verify that the generated simple-map is correct, you can use :ref:`sm-cli <ap
 
 |
 
+.. _building-maps_step_mm:
 
 4. Build metric maps and visualize them
 ------------------------------------------

@@ -20,14 +20,13 @@ Check out the tutorial: :ref:`building-maps`.
 2. Full 3D SLAM solution (GNSS, submapping, loop closures)
 ------------------------------------------------------------
 
-Build **geo-referenced** consistent global maps, even mixing indoor and outdoor scenarios.
+Build **georeferenced** consistent global maps, even mixing indoor and outdoor scenarios.
 This functionality is provided by:
 
-- ``mola_sm_loop_closure``: TO-DO: add docs.
-  At present, this package is not open-sourced, see: :ref:`mola_licenses`.
+- ``mola_sm_loop_closure``: At present, this package is not open-sourced, see: :ref:`mola_licenses`.
 
-  - **Geo-referencing** metric maps with consumer-grade GNSS sensors.
-  - Off-line **loop closure** for consistent global maps.
+  - **Geo-referencing** metric maps with consumer-grade GNSS sensors. See: :ref:`geo-referencing`.
+  - Off-line **loop closure** for consistent global maps. (TO-DO: Write docs!)
 
 - ``mola_3d_lidar_slam``: (Coming soon!)
 
@@ -40,7 +39,7 @@ This functionality is provided by:
 3. Full 2D SLAM solution
 ----------------------------
 
-Build **geo-referenced** consistent global 2D maps from 2D LiDARs.
+Build **georeferenced** consistent global 2D maps from 2D LiDARs.
 This functionality is provided by:
 
 - ``mola_2d_lidar_slam``: (Coming soon!)
@@ -69,6 +68,7 @@ The complete framework comprises these software repositories:
 .. _mola_lidar_odometry: https://github.com/MOLAorg/mola_lidar_odometry/
 .. |mola_lidar_odometry| replace:: **mola_lidar_odometry**
 
+
 .. list-table:: Software repositories and modules
    :widths: 75 25
    :header-rows: 1
@@ -77,17 +77,23 @@ The complete framework comprises these software repositories:
      - License
 
    * - |MRPT|_
-
+       
+       |
+       
        Underlying C++ data structures, algorithms, serialization, RawLog datasets, etc.
      - BSD-3
 
    * - |mp2p_icp|_
-
+       
+       |
+       
        Generic ICP algorithm, metric map pipelines.
      - BSD-3
 
    * - |mrpt_navigation|_
-
+       
+       |
+       
        ROS 2 nodes: ``*.mm`` `metric map server <https://github.com/mrpt-ros-pkg/mrpt_navigation/tree/ros2/mrpt_map_server>`_,
        `AMCL-like localization <https://github.com/mrpt-ros-pkg/mrpt_navigation/tree/ros2/mrpt_pf_localization>`_,
        `point cloud pipeline <https://github.com/mrpt-ros-pkg/mrpt_navigation/tree/ros2/mrpt_pointcloud_pipeline>`_,
@@ -95,17 +101,23 @@ The complete framework comprises these software repositories:
      - BSD-3
 
    * - |MOLA|_
-
+       
+       |
+       
        MOLA modules: kernel, mola_viz, kinematic state estimator, relocalization, etc.
      - GNU-GPLv3
 
    * - |mola_lidar_odometry|_
-
+       
+       |
+       
        :ref:`LiDAR odometry <mola_lidar_odometry>` for mapping and optimization-based localization.
      - GNU-GPLv3
 
    * - **mola_sm_loop_closure**
-
+       
+       |
+       
        Map geo-referencing, SLAM with loop-closure for consistent large maps.
      - Upon licensing only
 

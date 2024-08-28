@@ -12,9 +12,11 @@ MOLA
   :caption: Quickstart
 
   Home <index.html#http://>
-  solutions
   building-maps
+  localization
+  geo-referencing
   use-cases
+  solutions
 
 .. toctree::
   :maxdepth: 2
@@ -157,11 +159,9 @@ How to install all MOLA modules:
     .. code-block:: bash
 
         # Install core MOLA modules and 3D LiDAR odometry:
-        sudo apt install ros-$ROS_DISTRO-mola ros-$ROS_DISTRO-mola-lidar-odometry
-        
-        # As of Aug 2024, lidar_odometry is not available for all ROS distros yet!
-        # If the apt command above fails, please remove the "mola-lidar-odometry" part
-        # and see instructions below to clone and build the missing module from sources
+        sudo apt install \
+         ros-$ROS_DISTRO-mola \
+         ros-$ROS_DISTRO-mola-lidar-odometry
 
         # (OPTIONAL) Install example small datasets to run demos/unit tests:
         sudo apt install ros-$ROS_DISTRO-mola-test-datasets
