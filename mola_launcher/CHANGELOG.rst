@@ -2,8 +2,8 @@
 Changelog for package mola_launcher
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.1.3 (2024-08-28)
+------------------
 * Depend on new mrpt_lib packages (deprecate mrpt2)
 * Contributors: Jose Luis Blanco-Claraco
 
