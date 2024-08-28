@@ -3,6 +3,11 @@ Changelog for package mola_input_paris_luco_dataset
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
+Forthcoming
+-----------
+* Depend on new mrpt_lib packages (deprecate mrpt2)
+* Contributors: Jose Luis Blanco-Claraco
+
 1.1.2 (2024-08-26)
 ------------------
 
