@@ -24,15 +24,12 @@
   <buildtool_depend>ament_cmake_gmock</buildtool_depend>
   <buildtool_depend>ament_cmake</buildtool_depend>
 
-  <!-- COMMON DEPS -->
+  <depend>geometry_msgs</depend>
   <depend>mola_common</depend>
   <depend>mola_kernel</depend>
   <depend>mola_msgs</depend>
-
   <depend>mrpt_libmaps</depend>
   <depend>mrpt_libros_bridge</depend>
-
-  <depend>geometry_msgs</depend>
   <depend>nav_msgs</depend>
   <depend>rclcpp</depend>
   <depend>sensor_msgs</depend>

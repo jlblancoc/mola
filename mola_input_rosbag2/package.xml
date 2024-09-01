@@ -13,18 +13,16 @@
 
   <url type="website">https://github.com/MOLAorg/mola/tree/develop/mola_input_rosbag2</url>
 
-
-  <depend>mola_kernel</depend>
-  <depend>tf2_ros</depend>
-  <depend>rosbag2_cpp</depend>
-  <depend>tf2_msgs</depend>
   <depend>cv_bridge</depend>
-  <depend>tf2_geometry_msgs</depend>
-  <depend>sensor_msgs</depend>
-
+  <depend>mola_kernel</depend>
   <depend>mrpt_libobs</depend>
   <depend>mrpt_libros_bridge</depend>
-
+  <depend>rosbag2_cpp</depend>
+  <depend>sensor_msgs</depend>
+  <depend>tf2_geometry_msgs</depend>
+  <depend>tf2_msgs</depend>
+  <depend>tf2_ros</depend>
+  
   <doc_depend>doxygen</doc_depend>
 
   <!-- Minimum entries to release non-catkin pkgs: -->
