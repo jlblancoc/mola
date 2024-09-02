@@ -34,9 +34,21 @@ items_to_remove = ['scripts', 'docs',
                    '.vscode', '.github', '.circleci', '.git']
 pattern_text = \
     "| {name} | "\
-    "[![Build Status](https://build.ros2.org/job/Hbin_uJ64__{name}__ubuntu_jammy_amd64__binary/badge/icon)](https://build.ros2.org/job/Hbin_uJ64__{name}__ubuntu_jammy_amd64__binary/) | " \
-    "[![Build Status](https://build.ros2.org/job/Ibin_uJ64__{name}__ubuntu_jammy_amd64__binary/badge/icon)](https://build.ros2.org/job/Ibin_uJ64__{name}__ubuntu_jammy_amd64__binary/) | " \
-    "[![Build Status](https://build.ros2.org/job/Jbin_uN64__{name}__ubuntu_noble_amd64__binary/badge/icon)](https://build.ros2.org/job/Jbin_uN64__{name}__ubuntu_noble_amd64__binary/) | " \
-    "[![Build Status](https://build.ros2.org/job/Rbin_uN64__{name}__ubuntu_noble_amd64__binary/badge/icon)](https://build.ros2.org/job/Rbin_uN64__{name}__ubuntu_noble_amd64__binary/) |"
+    "[![Build Status](https://build.ros2.org/job/Hbin_uJ64__{name}__ubuntu_jammy_amd64__binary/badge/icon)](https://build.ros2.org/job/Hbin_uJ64__{name}__ubuntu_jammy_amd64__binary/) " \
+    "<br> " \
+    "[![Build Status](https://build.ros2.org/job/Hbin_ujv8_uJv8__{name}__ubuntu_jammy_arm64__binary/badge/icon)](https://build.ros2.org/job/Hbin_ujv8_uJv8__{name}__ubuntu_jammy_arm64__binary/) " \
+    " | " \
+    "[![Build Status](https://build.ros2.org/job/Ibin_uJ64__{name}__ubuntu_jammy_amd64__binary/badge/icon)](https://build.ros2.org/job/Ibin_uJ64__{name}__ubuntu_jammy_amd64__binary/) " \
+    "<br> " \
+    "[![Build Status](https://build.ros2.org/job/Ibin_ujv8_uJv8__{name}__ubuntu_jammy_arm64__binary/badge/icon)](https://build.ros2.org/job/Ibin_ujv8_uJv8__{name}__ubuntu_jammy_arm64__binary/) " \
+    " | " \
+    "[![Build Status](https://build.ros2.org/job/Jbin_uN64__{name}__ubuntu_noble_amd64__binary/badge/icon)](https://build.ros2.org/job/Jbin_uN64__{name}__ubuntu_noble_amd64__binary/) " \
+    "<br> " \
+    "[![Build Status](https://build.ros2.org/job/Jbin_unv8_uNv8__{name}__ubuntu_noble_arm64__binary/badge/icon)](https://build.ros2.org/job/Jbin_unv8_uNv8__{name}__ubuntu_noble_arm64__binary/) " \
+    " | " \
+    "[![Build Status](https://build.ros2.org/job/Rbin_uN64__{name}__ubuntu_noble_amd64__binary/badge/icon)](https://build.ros2.org/job/Rbin_uN64__{name}__ubuntu_noble_amd64__binary/)" \
+    "<br> " \
+    "[![Build Status](https://build.ros2.org/job/Rbin_unv8_uNv8__{name}__ubuntu_noble_arm64__binary/badge/icon)](https://build.ros2.org/job/Rbin_unv8_uNv8__{name}__ubuntu_noble_arm64__binary/)" \
+    " | "
 
 process_directories(path_to_search, items_to_remove, pattern_text)
