@@ -26,6 +26,7 @@ MOLA
   mola_lidar_odometry
   mola_lo_apps
   mola_lo_pipelines
+  wrappers_3rd_party
 
 .. toctree::
   :maxdepth: 2
@@ -241,7 +242,7 @@ How to install all MOLA modules:
     .. code-block:: bash
 
         cd ~/ros2_mola_ws/
-        colcon  build --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=Release
+        colcon  build --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=RelWithDebInfo
 
 
     Next, activate the new environment and check if all new modules are visible:
