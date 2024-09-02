@@ -23,7 +23,7 @@ find_package(mrpt-slam REQUIRED)
 find_package(mp2p_icp REQUIRED)
 find_package(mola_pose_list REQUIRED)
 
-find_package(mola_test_datasets) # optional
+find_package(mola_test_datasets QUIET) # optional (for testing builds only)
 
 # -----------------------
 # define lib:
