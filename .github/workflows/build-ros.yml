@@ -62,6 +62,7 @@ jobs:
       - name: setup ROS environment
         uses: ros-tooling/setup-ros@v0.7
         with:
+          use-ros2-testing: true
           required-ros-distributions: ${{ matrix.ros_distribution }}
 
       - name: Install rosdep dependencies
