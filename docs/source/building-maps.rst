@@ -90,6 +90,7 @@ or from the :ref:`UI controls <mola_lo_gui_common_parts>` in the ``mola_lidar_od
                 MOLA_LIDAR_TOPIC=/ouster/points \
                 MOLA_GENERATE_SIMPLEMAP=true \
                 MOLA_SIMPLEMAP_OUTPUT=myMap.simplemap \
+                MOLA_SIMPLEMAP_GENERATE_LAZY_LOAD=true \
                   mola-lo-gui-rosbag2 /path/to/your/dataset.mcap
 
             .. note::
@@ -99,6 +100,7 @@ or from the :ref:`UI controls <mola_lo_gui_common_parts>` in the ``mola_lidar_od
 
             .. code-block:: bash
 
+                MOLA_SIMPLEMAP_GENERATE_LAZY_LOAD=true \
                 mola-lidar-odometry-cli \
                   -c $(ros2 pkg prefix mola_lidar_odometry)/share/mola_lidar_odometry/pipelines/lidar3d-default.yaml \
                   --input-rosbag2 /path/to/your/dataset.mcap \
