@@ -111,6 +111,25 @@ or from the :ref:`UI controls <mola_lo_gui_common_parts>` in the ``mola_lidar_od
             .. note::
                 Remember changing ``--lidar-sensor-label /ouster/points`` to your actual raw (unfiltered) LiDAR topic (``sensor_msgs/PointCloud2``).
 
+        .. tab-item:: From a rosbag2 (CLI) (Large datasets)
+
+            For maps large enough such as the final `.simplemap` does not fit in RAM, you can enable
+            lazy-load simplemap generation in the CLI with:
+
+            .. code-block:: bash
+
+                MOLA_GENERATE_SIMPLEMAP=true \
+                MOLA_SIMPLEMAP_GENERATE_LAZY_LOAD=true \
+                MOLA_SIMPLEMAP_OUTPUT=myMap.simplemap \
+                mola-lidar-odometry-cli \
+                  -c $(ros2 pkg prefix mola_lidar_odometry)/share/mola_lidar_odometry/pipelines/lidar3d-default.yaml \
+                  --input-rosbag2 /path/to/your/dataset.mcap \
+                  --lidar-sensor-label /ouster/points \
+                  --output-tum-path trajectory.tum
+
+            .. note::
+                Remember changing ``--lidar-sensor-label /ouster/points`` to your actual raw (unfiltered) LiDAR topic (``sensor_msgs/PointCloud2``).
+
 
 .. hint::
 
