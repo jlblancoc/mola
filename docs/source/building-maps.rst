@@ -231,13 +231,16 @@ Afterwards, visualizing :ref:`metric map files <mp2p_icp_basics>` (``*.mm``) can
         .. tab-item:: Build an aggregated 3D point cloud
           :selected:
 
-            Download the example pipeline `sm2mm_pointcloud_voxelize.yaml <https://github.com/MOLAorg/mp2p_icp/raw/master/demos/sm2mm_pointcloud_voxelize.yaml>`_
+            Download the example pipeline `sm2mm_pointcloud_voxelize_no_deskew.yaml <https://github.com/MOLAorg/mp2p_icp/raw/master/demos/sm2mm_pointcloud_voxelize_no_deskew.yaml>`_
             and then run:
 
             .. code-block:: bash
 
                 # Build metric map (mm) from simplemap (sm):
-                sm2mm -i mvsim-warehouse01.simplemap -o mvsim-warehouse01.mm -p sm2mm_pointcloud_voxelize.yaml
+                sm2mm \
+                 -i mvsim-warehouse01.simplemap \
+                 -o mvsim-warehouse01.mm \
+                 -p sm2mm_pointcloud_voxelize_no_deskew.yaml
 
                 # View mm:
                 mm-viewer mvsim-warehouse01.mm
@@ -246,13 +249,16 @@ Afterwards, visualizing :ref:`metric map files <mp2p_icp_basics>` (``*.mm``) can
 
         .. tab-item:: Build a voxel map + 2D grid map
 
-            Download the example pipeline `sm2mm_bonxai_voxelmap_gridmap.yaml <https://github.com/MOLAorg/mp2p_icp/raw/master/demos/sm2mm_pointcloud_voxelize.yaml>`_
+            Download the example pipeline `sm2mm_bonxai_voxelmap_gridmap_no_deskew.yaml <https://github.com/MOLAorg/mp2p_icp/raw/master/demos/sm2mm_bonxai_voxelmap_gridmap_no_deskew.yaml>`_
             and then run:
 
             .. code-block:: bash
 
                 # Build metric map (mm) from simplemap (sm):
-                sm2mm -i mvsim-warehouse01.simplemap -o mvsim-warehouse01.mm -p sm2mm_bonxai_voxelmap_gridmap.yaml
+                sm2mm \
+                  -i mvsim-warehouse01.simplemap \
+                  -o mvsim-warehouse01.mm \
+                  -p sm2mm_bonxai_voxelmap_gridmap_no_deskew.yaml
 
                 # View mm:
                 mm-viewer mvsim-warehouse01.mm
