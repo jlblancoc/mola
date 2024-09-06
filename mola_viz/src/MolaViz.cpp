@@ -43,7 +43,6 @@
 #include <mrpt/obs/CObservationPointCloud.h>
 #include <mrpt/obs/CObservationRotatingScan.h>
 #include <mrpt/obs/CObservationVelodyneScan.h>
-#include <mrpt/opengl/CGridPlaneXY.h>
 #include <mrpt/opengl/COpenGLScene.h>
 #include <mrpt/opengl/CPointCloudColoured.h>
 #include <mrpt/opengl/stock_objects.h>
@@ -703,8 +702,6 @@ mrpt::gui::CDisplayWindowGUI::Ptr MolaViz::create_and_add_window(
 
     // Add a background scene:
     auto scene = mrpt::opengl::COpenGLScene::Create();
-
-    scene->insert(mrpt::opengl::CGridPlaneXY::Create());
 
     {
         std::lock_guard<std::mutex> lck(win->background_scene_mtx);
