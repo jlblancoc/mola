@@ -294,16 +294,43 @@ Please, read carefully `its documentation <https://github.com/mrpt-ros-pkg/mrpt_
 
   .. image:: https://mrpt.github.io/imgs/screenshot-rviz2-mrpt-map-server-demo-warehouse.png
 
+|
+
+6. See the inner workings of ICP
+----------------------------------------
+If you are interested in learning about the internal workings of each ICP optimization,
+or if there is something wrong at some particular timestamp and want to **debug it**,
+you can enable the generation of :ref:`ICP log files <pipeline_icp_log_files>`
+and then visualize them with the GUI app :ref:`icp-log-viewer <app_icp-log-viewer>`.
+
+.. dropdown:: Debug ICP
+
+  First, re-run MOLA LO enabling the generation of ICP log files (see :ref:`all the available options <pipeline_icp_log_files>`):
+
+  .. code-block:: bash
+
+      # Generate ICP log files:
+      MP2P_ICP_GENERATE_DEBUG_FILES=1 \
+      MP2P_ICP_LOG_FILES_DECIMATION=1 \
+      mola-lo-gui-rosbag  [...]  # the rest remains the same
+
+  You should now have a directory ``icp-logs`` with as many files as times ICP invocations.
+  Then, visualize the logs in the GUI with:
+
+  .. code-block:: bash
+
+      # Open the logs:
+      icp-log-viewer -d icp-logs/ -l libmola_metric_maps.so
+
 
 |
 
 
-6. What's next?
+7. What's next?
 ----------------------------------------
+Once you have a map, here are some next steps:
 
-Write me:
-
-- georeferencing
-- loop closure
-- Use for localization
+- loop closure (Write me!)
+- :ref:`geo-referencing`.
+- :ref:`Use for localization <localization-only>`.
 
