@@ -41,6 +41,7 @@ mola_add_library(
 #    mrpt::maps
   CMAKE_DEPENDENCIES
     mrpt-maps
+    robin_map
 )
 
 # -----------------------
