@@ -42,6 +42,7 @@ pose in the environment:
 
 |
 
+----
 
 2. Localization with LiDAR odometry
 --------------------------------------
@@ -50,6 +51,8 @@ Write me!
 
 |
 
+
+----
 
 3. Localization with particle filtering
 ----------------------------------------
@@ -71,11 +74,27 @@ To localize with a particle filter (PF) you will need:
 ================
 A complete demonstration has been put together on: https://github.com/MOLAorg/mola_warehouse_pf_tutorial
 
-.. dropdown:: Run tutorial
-  :open:
+.. raw:: html
 
-    Clone the tutorial package (which already includes a prebuilt ``.mm``), make sure of having all dependencies,
-    build and run it:
+   <div style="width: 100%; overflow: hidden;">
+     <video controls autoplay loop muted style="width: 512px;">
+       <source src="https://mrpt.github.io/videos/mola-localization-pf-demo-warehouse.mp4" type="video/mp4">
+     </video>
+   </div>
+
+Key points of this tutorial:
+
+- The ROS 2 `launch file <https://github.com/MOLAorg/mola_warehouse_pf_tutorial/blob/develop/launch/tutorial_launch.py>`_.
+- A `custom sm2mm pipeline file <https://github.com/MOLAorg/mola_warehouse_pf_tutorial/tree/develop/sm2mm-config>`_ to create
+  a reference point cloud map sparse enough so localizing with a PF is not too slow.
+- A `pipeline for mrpt_pointcloud_pipeline <https://github.com/MOLAorg/mola_warehouse_pf_tutorial/blob/develop/params/point-cloud-pipeline.yaml>`_
+  to decimate the input raw 3D scan as input to the PF.
+
+
+.. dropdown:: How to run the tutorial
+
+   Clone the tutorial package (which already includes a prebuilt ``.mm``), make sure of having all dependencies,
+   build and run it:
 
    .. code-block:: bash
 
