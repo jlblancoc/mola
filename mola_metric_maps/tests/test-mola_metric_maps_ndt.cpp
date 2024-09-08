@@ -37,7 +37,7 @@ void test_voxelmap_basic_ops()
     mola::NDT map;
     ASSERT_(map.isEmpty());
 
-    map.insertPoint({1.0f, 2.0f, 3.0f});
+    map.insertPoint({1.0f, 2.0f, 3.0f}, {.0f, .0f, .0f});
     ASSERT_(!map.isEmpty());
 }
 

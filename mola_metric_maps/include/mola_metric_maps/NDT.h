@@ -59,7 +59,7 @@ class NDT : public mrpt::maps::CMetricMap
     /** @name Indices and coordinates
      *  @{ */
 
-    constexpr static size_t MAX_POINTS_PER_VOXEL = 32;
+    constexpr static size_t MAX_POINTS_PER_VOXEL = 16;
 
     inline global_index3d_t coordToGlobalIdx(
         const mrpt::math::TPoint3Df& pt) const
@@ -107,6 +107,10 @@ class NDT : public mrpt::maps::CMetricMap
         std::array<float, MAX_POINTS_PER_VOXEL> xs, ys, zs;
     };
 
+    /// Returns true if the fitted Gaussian fulfills the requirements of being
+    /// planar enough, according to the insertionOptions parameters
+    bool ndt_is_plane(const mp2p_icp::PointCloudEigen& ndt) const;
+
     struct VoxelData
     {
        public:
@@ -137,7 +141,9 @@ class NDT : public mrpt::maps::CMetricMap
             return PointSpan(points_, nPoints_);
         }
 
-        void insertPoint(const mrpt::math::TPoint3Df& p)
+        void insertPoint(
+            const mrpt::math::TPoint3Df& p,
+            const mrpt::math::TPoint3Df& sensorPose)
         {
             if (nPoints_ < MAX_POINTS_PER_VOXEL)
             {
@@ -145,11 +151,13 @@ class NDT : public mrpt::maps::CMetricMap
                 points_.ys[nPoints_] = p.y;
                 points_.zs[nPoints_] = p.z;
                 nPoints_++;
+                ndt_.reset();
             }
+            if (!was_seen_from_.has_value()) was_seen_from_ = sensorPose;
         }
 
         /// Gets cached NDT for this voxel, or computes it right now.
-        /// If there are no points enough, nullopt is
+        /// If there are no points enough, nullopt is returned
         const std::optional<mp2p_icp::PointCloudEigen>& ndt() const;
 
         bool has_ndt() const { return ndt_.has_value(); }
@@ -157,10 +165,13 @@ class NDT : public mrpt::maps::CMetricMap
         // for serialization, do not use in normal use:
         size_t size() const { return nPoints_; }
 
+        const auto& was_seen_from() const { return was_seen_from_; }
+
        private:
-        point_vector_t                                   points_;
-        uint32_t                                         nPoints_ = 0;
         mutable std::optional<mp2p_icp::PointCloudEigen> ndt_;
+        point_vector_t                                   points_;
+        std::optional<mrpt::math::TPoint3Df>             was_seen_from_;
+        uint32_t                                         nPoints_ = 0;
     };
 
     using grids_map_t =
@@ -253,8 +264,11 @@ class NDT : public mrpt::maps::CMetricMap
         return const_cast<NDT*>(this)->voxelByCoords(pt, false);
     }
 
-    /** Insert one point into the dual voxel map */
-    void insertPoint(const mrpt::math::TPoint3Df& pt);
+    /** Insert one point into the map. The sensor pose is used to estimate the
+     * outward surface normal */
+    void insertPoint(
+        const mrpt::math::TPoint3Df& pt,
+        const mrpt::math::TPoint3Df& sensorPose);
 
     const grids_map_t& voxels() const { return voxels_; }
 
@@ -323,7 +337,8 @@ class NDT : public mrpt::maps::CMetricMap
         void writeToStream(mrpt::serialization::CArchive& out) const;
         void readFromStream(mrpt::serialization::CArchive& in);
 
-        /** Maximum number of points per voxel. 0 means no limit.
+        /** Maximum number of points per voxel. 0 means no limit further than
+         * the hard compile-time limit.
          */
         uint32_t max_points_per_voxel = 0;
 
@@ -334,6 +349,8 @@ class NDT : public mrpt::maps::CMetricMap
         /** If !=0 skip the insertion of points that are closer than this
          * distance to any other already in the voxel. */
         float min_distance_between_points = .0f;
+
+        double max_eigen_ratio_for_planes = 0.01;
     };
     TInsertionOptions insertionOptions;
 
@@ -384,18 +401,13 @@ class NDT : public mrpt::maps::CMetricMap
         /** Binary dump to stream - used in derived classes' serialization */
         void readFromStream(mrpt::serialization::CArchive& in);
 
-        float point_size = 1.0f;
-
-        /** Color of points. Superseded by colormap if the latter is set. */
-        mrpt::img::TColorf color{.0f, .0f, 1.0f};
-
-        /** Colormap for points (index is "z" coordinates) */
-        mrpt::img::TColormap colormap = mrpt::img::cmHOT;
-
-        /** If colormap!=mrpt::img::cmNONE, use this coordinate
-         *  as color index: 0=x  1=y  2=z
-         */
-        uint8_t recolorizeByCoordinateIndex = 2;
+        bool               points_visible = false;
+        float              point_size     = 1.0f;
+        mrpt::img::TColorf points_color{.0f, .0f, 1.0f};
+        bool               planes_visible = true;
+        mrpt::img::TColorf planes_color{1.0f, .0f, 1.0f};
+        bool               normals_visible = true;
+        mrpt::img::TColorf normals_color{1.0f, 0.0f, 0.0f};
     };
     TRenderOptions renderOptions;
 

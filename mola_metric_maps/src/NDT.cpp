@@ -42,6 +42,8 @@
 #include <mrpt/obs/CObservationVelodyneScan.h>
 #include <mrpt/opengl/CPointCloud.h>
 #include <mrpt/opengl/CPointCloudColoured.h>
+#include <mrpt/opengl/CSetOfLines.h>
+#include <mrpt/opengl/CSetOfTriangles.h>
 #include <mrpt/serialization/CArchive.h>  // serialization
 #include <mrpt/system/os.h>
 
@@ -128,6 +130,9 @@ void    NDT::serializeTo(mrpt::serialization::CArchive& out) const
         const auto&  pts = voxel.points();
         const size_t N   = pts.size();
         out.WriteAs<uint16_t>(N);
+        out.WriteAs<bool>(voxel.was_seen_from().has_value());
+        if (voxel.was_seen_from()) out << *voxel.was_seen_from();
+
         for (size_t j = 0; j < N; j++) out << pts[j];
     }
 }
@@ -156,12 +161,15 @@ void NDT::serializeFrom(mrpt::serialization::CArchive& in, uint8_t version)
 
                 auto& grid = voxels_[idx];
 
-                const auto nPts = in.ReadAs<uint16_t>();
+                const auto            nPts = in.ReadAs<uint16_t>();
+                mrpt::math::TPoint3Df sensorPose(0, 0, 0);
+                if (in.ReadAs<bool>()) in >> sensorPose;
+
                 for (size_t j = 0; j < nPts; j++)
                 {
                     mrpt::math::TPoint3Df pt;
                     in >> pt;
-                    grid.insertPoint(pt);
+                    grid.insertPoint(pt, sensorPose);
                 }
             }
         }
@@ -194,6 +202,14 @@ void NDT::setVoxelProperties(float voxel_size)
     NDT::internal_clear();
 }
 
+bool NDT::ndt_is_plane(const mp2p_icp::PointCloudEigen& ndt) const
+{
+    // e0/e1 (and hence, e0/e2) must be < planeEigenThreshold:
+    return (
+        ndt.eigVals[0] <
+        insertionOptions.max_eigen_ratio_for_planes * ndt.eigVals[1]);
+}
+
 std::string NDT::asString() const
 {
     return mrpt::format(
@@ -206,75 +222,96 @@ void NDT::getVisualizationInto(mrpt::opengl::CSetOfObjects& outObj) const
     MRPT_START
     if (!genericMapParams.enableSaveAs3DObject) return;
 
-    if (renderOptions.colormap == mrpt::img::cmNONE)
+    if (renderOptions.points_visible)
     {
-        // Single color:
         auto obj = mrpt::opengl::CPointCloud::Create();
 
         const auto lambdaVisitPoints = [&obj](const mrpt::math::TPoint3Df& pt)
         { obj->insertPoint(pt); };
         this->visitAllPoints(lambdaVisitPoints);
 
-        obj->setColor(renderOptions.color);
+        obj->setColor(renderOptions.points_color);
         obj->setPointSize(renderOptions.point_size);
         obj->enableColorFromZ(false);
         outObj.insert(obj);
     }
-    else
+
+    if (renderOptions.planes_visible)
     {
-        auto obj = mrpt::opengl::CPointCloudColoured::Create();
+        auto obj = mrpt::opengl::CSetOfTriangles::Create();
 
-        auto bb = this->boundingBox();
-
-        // handle planar maps (avoids error in histogram below):
-        for (int i = 0; i < 3; i++)
-            if (bb.max[i] - bb.min[i] < 0.1f) bb.max[i] = bb.min[i] + 0.1f;
-
-        // Use a histogram to discard outliers from the colormap extremes:
-        constexpr size_t nBins = 100;
-        // for x,y,z
-        std::array<mrpt::math::CHistogram, 3> hists = {
-            mrpt::math::CHistogram(bb.min.x, bb.max.x, nBins),
-            mrpt::math::CHistogram(bb.min.y, bb.max.y, nBins),
-            mrpt::math::CHistogram(bb.min.z, bb.max.z, nBins)};
-
-        size_t nPoints = 0;
-
-        const auto lambdaVisitPoints =
-            [&obj, &hists, &nPoints](const mrpt::math::TPoint3Df& pt)
+        const auto lambdaVisitVoxel =
+            [&obj, this](
+                [[maybe_unused]] const global_index3d_t& idx,
+                const VoxelData&                         v)
         {
-            // x y z R G B [A]
-            obj->insertPoint({pt.x, pt.y, pt.z, 0, 0, 0});
-            for (int i = 0; i < 3; i++) hists[i].add(pt[i]);
-            nPoints++;
+            // get or evaluate its NDT:
+            const auto& ndt = v.ndt();
+            if (!ndt.has_value()) return;
+
+            // flat enough to be a plane?
+            if (!ndt_is_plane(*ndt)) return;
+
+            const auto center = ndt->meanCov.mean.asTPoint().cast<float>();
+
+            // eigenVector[0] is the plane normal.
+            // [1] and [2] are parallel to the plane surface:
+            const float s  = voxel_size_ * 0.5f;
+            const auto  vx = ndt->eigVectors.at(1).cast<float>() * s;
+            const auto  vy = ndt->eigVectors.at(2).cast<float>() * s;
+
+            mrpt::opengl::TTriangle t;
+            t.setColor(renderOptions.planes_color);
+            t.vertices[0].xyzrgba.pt = center + vx + vy;
+            t.vertices[1].xyzrgba.pt = center - vx - vy;
+            t.vertices[2].xyzrgba.pt = center + vx - vy;
+            t.computeNormals();
+            obj->insertTriangle(t);
+
+            t.vertices[0].xyzrgba.pt = center + vx + vy;
+            t.vertices[1].xyzrgba.pt = center - vx + vy;
+            t.vertices[2].xyzrgba.pt = center - vx - vy;
+            t.computeNormals();
+            obj->insertTriangle(t);
         };
 
-        this->visitAllPoints(lambdaVisitPoints);
-
-        obj->setPointSize(renderOptions.point_size);
-
-        if (nPoints)
-        {
-            // Analyze the histograms and get confidence intervals:
-            std::vector<double> coords;
-            std::vector<double> hits;
-
-            const int idx = renderOptions.recolorizeByCoordinateIndex;
-            ASSERT_(idx >= 0 && idx < 3);
-
-            float            min = .0, max = 1.f;
-            constexpr double confidenceInterval = 0.02;
-
-            hists[idx].getHistogramNormalized(coords, hits);
-            mrpt::math::confidenceIntervalsFromHistogram(
-                coords, hits, min, max, confidenceInterval);
-
-            obj->recolorizeByCoordinate(
-                min, max, renderOptions.recolorizeByCoordinateIndex,
-                renderOptions.colormap);
-        }
+        this->visitAllVoxels(lambdaVisitVoxel);
         outObj.insert(obj);
     }
+
+    if (renderOptions.normals_visible)
+    {
+        auto obj = mrpt::opengl::CSetOfLines::Create();
+
+        const auto lambdaVisitVoxel =
+            [&obj, this](
+                [[maybe_unused]] const global_index3d_t& idx,
+                const VoxelData&                         v)
+        {
+            // get or evaluate its NDT:
+            const auto& ndt = v.ndt();
+            if (!ndt.has_value()) return;
+
+            // flat enough to be a plane?
+            if (!ndt_is_plane(*ndt)) return;
+
+            const auto center = ndt->meanCov.mean.asTPoint().cast<float>();
+
+            // eigenVector[0] is the plane normal.
+            // [1] and [2] are parallel to the plane surface:
+            const float s  = voxel_size_ * 0.5f;
+            const auto  vz = ndt->eigVectors.at(0).cast<float>() * s;
+
+            const auto p1 = center;
+            const auto p2 = center + vz;
+
+            obj->appendLine(p1, p2);
+        };
+
+        this->visitAllVoxels(lambdaVisitVoxel);
+        outObj.insert(obj);
+    }
+
     MRPT_END
 }
 
@@ -300,6 +337,7 @@ bool NDT::internal_insertObservation(
     {
         // Default values are (0,0,0)
     }
+    const auto sensorPt = robotPose3D.translation().cast<float>();
 
     if (insertionOptions.remove_voxels_farther_than > 0)
     {
@@ -360,8 +398,10 @@ bool NDT::internal_insertObservation(
         if (o.hasPoints3D)
         {
             for (size_t i = 0; i < o.points3D_x.size(); i++)
-                this->insertPoint(robotPose3D.composePoint(
-                    {o.points3D_x[i], o.points3D_y[i], o.points3D_z[i]}));
+                this->insertPoint(
+                    robotPose3D.composePoint(
+                        {o.points3D_x[i], o.points3D_y[i], o.points3D_z[i]}),
+                    sensorPt);
 
             return true;
         }
@@ -395,8 +435,11 @@ bool NDT::internal_insertObservation(
 
         for (size_t i = 0; i < o.point_cloud.x.size(); i++)
         {
-            insertPoint(robotPose3D.composePoint(
-                {o.point_cloud.x[i], o.point_cloud.y[i], o.point_cloud.z[i]}));
+            insertPoint(
+                robotPose3D.composePoint(
+                    {o.point_cloud.x[i], o.point_cloud.y[i],
+                     o.point_cloud.z[i]}),
+                sensorPt);
         }
 
         return true;
@@ -412,7 +455,8 @@ bool NDT::internal_insertObservation(
 
         for (size_t i = 0; i < xs.size(); i++)
         {
-            insertPoint(robotPose3D.composePoint({xs[i], ys[i], zs[i]}));
+            insertPoint(
+                robotPose3D.composePoint({xs[i], ys[i], zs[i]}), sensorPt);
         }
 
         return true;
@@ -582,7 +626,8 @@ bool NDT::saveToTextFile(const std::string& file) const
     return true;
 }
 
-void NDT::insertPoint(const mrpt::math::TPoint3Df& pt)
+void NDT::insertPoint(
+    const mrpt::math::TPoint3Df& pt, const mrpt::math::TPoint3Df& sensorPose)
 {
     auto& v = *voxelByCoords(pt, true /*create if new*/);
 
@@ -613,7 +658,7 @@ void NDT::insertPoint(const mrpt::math::TPoint3Df& pt)
         if (curClosestDistSqr.value() < minDistSqr) return;
     }
 
-    v.insertPoint(pt);
+    v.insertPoint(pt, sensorPose);
 
     // Also, update bbox:
     if (!cached_.boundingBox_.has_value())
@@ -679,7 +724,7 @@ void NDT::TInsertionOptions::writeToStream(
     const int8_t version = 0;
     out << version;
     out << max_points_per_voxel << remove_voxels_farther_than
-        << min_distance_between_points;
+        << min_distance_between_points << max_eigen_ratio_for_planes;
 }
 
 void NDT::TInsertionOptions::readFromStream(mrpt::serialization::CArchive& in)
@@ -691,7 +736,7 @@ void NDT::TInsertionOptions::readFromStream(mrpt::serialization::CArchive& in)
         case 0:
         {
             in >> max_points_per_voxel >> remove_voxels_farther_than >>
-                min_distance_between_points;
+                min_distance_between_points >> max_eigen_ratio_for_planes;
         }
         break;
         default:
@@ -728,8 +773,9 @@ void NDT::TRenderOptions::writeToStream(
 {
     const int8_t version = 0;
     out << version;
-    out << point_size << color << int8_t(colormap)
-        << recolorizeByCoordinateIndex;
+    out << points_visible << point_size << points_color;
+    out << planes_visible << planes_color;
+    out << normals_visible << normals_color;
 }
 
 void NDT::TRenderOptions::readFromStream(mrpt::serialization::CArchive& in)
@@ -740,10 +786,9 @@ void NDT::TRenderOptions::readFromStream(mrpt::serialization::CArchive& in)
     {
         case 0:
         {
-            in >> point_size;
-            in >> this->color;
-            in.ReadAsAndCastTo<int8_t>(this->colormap);
-            in >> recolorizeByCoordinateIndex;
+            in >> points_visible >> point_size >> points_color;
+            in >> planes_visible >> planes_color;
+            in >> normals_visible >> normals_color;
         }
         break;
         default:
@@ -759,6 +804,7 @@ void NDT::TInsertionOptions::dumpToTextStream(std::ostream& out) const
     LOADABLEOPTS_DUMP_VAR(max_points_per_voxel, int);
     LOADABLEOPTS_DUMP_VAR(remove_voxels_farther_than, double);
     LOADABLEOPTS_DUMP_VAR(min_distance_between_points, float)
+    LOADABLEOPTS_DUMP_VAR(max_eigen_ratio_for_planes, double);
 }
 
 void NDT::TLikelihoodOptions::dumpToTextStream(std::ostream& out) const
@@ -775,12 +821,21 @@ void NDT::TRenderOptions::dumpToTextStream(std::ostream& out) const
 {
     out << "\n------ [NDT::TRenderOptions] ------- \n\n";
 
+    LOADABLEOPTS_DUMP_VAR(points_visible, bool);
     LOADABLEOPTS_DUMP_VAR(point_size, float);
-    LOADABLEOPTS_DUMP_VAR(color.R, float);
-    LOADABLEOPTS_DUMP_VAR(color.G, float);
-    LOADABLEOPTS_DUMP_VAR(color.B, float);
-    LOADABLEOPTS_DUMP_VAR(colormap, int);
-    LOADABLEOPTS_DUMP_VAR(recolorizeByCoordinateIndex, int);
+    LOADABLEOPTS_DUMP_VAR(points_color.R, float);
+    LOADABLEOPTS_DUMP_VAR(points_color.G, float);
+    LOADABLEOPTS_DUMP_VAR(points_color.B, float);
+
+    LOADABLEOPTS_DUMP_VAR(planes_visible, bool);
+    LOADABLEOPTS_DUMP_VAR(planes_color.R, float);
+    LOADABLEOPTS_DUMP_VAR(planes_color.G, float);
+    LOADABLEOPTS_DUMP_VAR(planes_color.B, float);
+
+    LOADABLEOPTS_DUMP_VAR(normals_visible, bool);
+    LOADABLEOPTS_DUMP_VAR(normals_color.R, float);
+    LOADABLEOPTS_DUMP_VAR(normals_color.G, float);
+    LOADABLEOPTS_DUMP_VAR(normals_color.B, float);
 }
 
 void NDT::TInsertionOptions::loadFromConfigFile(
@@ -789,6 +844,7 @@ void NDT::TInsertionOptions::loadFromConfigFile(
     MRPT_LOAD_CONFIG_VAR(max_points_per_voxel, int, c, s);
     MRPT_LOAD_CONFIG_VAR(remove_voxels_farther_than, double, c, s);
     MRPT_LOAD_CONFIG_VAR(min_distance_between_points, float, c, s);
+    MRPT_LOAD_CONFIG_VAR(max_eigen_ratio_for_planes, double, c, s);
 }
 
 void NDT::TLikelihoodOptions::loadFromConfigFile(
@@ -802,12 +858,21 @@ void NDT::TLikelihoodOptions::loadFromConfigFile(
 void NDT::TRenderOptions::loadFromConfigFile(
     const mrpt::config::CConfigFileBase& c, const std::string& s)
 {
+    MRPT_LOAD_CONFIG_VAR(points_visible, bool, c, s);
     MRPT_LOAD_CONFIG_VAR(point_size, float, c, s);
-    MRPT_LOAD_CONFIG_VAR(color.R, float, c, s);
-    MRPT_LOAD_CONFIG_VAR(color.G, float, c, s);
-    MRPT_LOAD_CONFIG_VAR(color.B, float, c, s);
-    colormap = c.read_enum(s, "colormap", this->colormap);
-    MRPT_LOAD_CONFIG_VAR(recolorizeByCoordinateIndex, int, c, s);
+    MRPT_LOAD_CONFIG_VAR(points_color.R, float, c, s);
+    MRPT_LOAD_CONFIG_VAR(points_color.G, float, c, s);
+    MRPT_LOAD_CONFIG_VAR(points_color.B, float, c, s);
+
+    MRPT_LOAD_CONFIG_VAR(planes_visible, bool, c, s);
+    MRPT_LOAD_CONFIG_VAR(planes_color.R, float, c, s);
+    MRPT_LOAD_CONFIG_VAR(planes_color.G, float, c, s);
+    MRPT_LOAD_CONFIG_VAR(planes_color.B, float, c, s);
+
+    MRPT_LOAD_CONFIG_VAR(normals_visible, bool, c, s);
+    MRPT_LOAD_CONFIG_VAR(normals_color.R, float, c, s);
+    MRPT_LOAD_CONFIG_VAR(normals_color.G, float, c, s);
+    MRPT_LOAD_CONFIG_VAR(normals_color.B, float, c, s);
 }
 
 void NDT::internal_insertPointCloud3D(
@@ -818,12 +883,14 @@ void NDT::internal_insertPointCloud3D(
 
     voxels_.reserve(voxels_.size() + num_pts);
 
+    const auto sensorPose = pc_in_map.translation().cast<float>();
+
     for (std::size_t i = 0; i < num_pts; i++)
     {
         // Transform the point from the scan reference to its global 3D
         // position:
         const auto gPt = pc_in_map.composePoint({xs[i], ys[i], zs[i]});
-        insertPoint(gPt);
+        insertPoint(gPt, sensorPose);
     }
 
     MRPT_TRY_END
@@ -843,12 +910,24 @@ const mrpt::maps::CSimplePointsMap* NDT::getAsSimplePointsMap() const
 
 const std::optional<mp2p_icp::PointCloudEigen>& NDT::VoxelData::ndt() const
 {
-    if (has_ndt() || size() < 3) return ndt_;
+    if (has_ndt() || size() < 4) return ndt_;
 
     ndt_.emplace();
     *ndt_ = mp2p_icp::estimate_points_eigen(
         points_.xs.data(), points_.ys.data(), points_.zs.data(), std::nullopt,
         size());
+
+    // Fix z normal such that it points towards the observer (outwards):
+    ASSERT_(was_seen_from_);
+    const float r = mrpt::math::dotProduct<3, float>(
+        ndt_->eigVectors.at(0),
+        *was_seen_from_ - ndt_->meanCov.mean.asTPoint());
+
+    if (r < 0)
+    {
+        for (int i = 0; i < 3; i++)
+            ndt_->eigVectors.at(i) = -ndt_->eigVectors.at(i);
+    }
 
     return ndt_;
 }
