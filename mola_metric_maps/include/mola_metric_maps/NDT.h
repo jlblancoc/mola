@@ -70,7 +70,9 @@ class NDT : public mrpt::maps::CMetricMap,
     /** @name Indices and coordinates
      *  @{ */
 
-    constexpr static size_t MAX_POINTS_PER_VOXEL = 16;
+    constexpr static size_t      MAX_POINTS_PER_VOXEL        = 16;
+    constexpr static std::size_t GLOBAL_ID_SUBVOXEL_BITCOUNT = 5;
+    static_assert(MAX_POINTS_PER_VOXEL <= (1 << GLOBAL_ID_SUBVOXEL_BITCOUNT));
 
     inline global_index3d_t coordToGlobalIdx(
         const mrpt::math::TPoint3Df& pt) const
@@ -91,6 +93,23 @@ class NDT : public mrpt::maps::CMetricMap,
             idx.cz * voxel_size_};
     }
 
+    /// collapsed plain unique ID for global indices
+    using global_plain_index_t = uint64_t;
+
+    static inline global_plain_index_t g2plain(
+        const global_index3d_t& g, int subVoxelIndex = 0)
+    {
+        constexpr uint64_t SUBVOXEL_MASK =
+            ((1 << GLOBAL_ID_SUBVOXEL_BITCOUNT) - 1);
+        constexpr auto     OFF   = GLOBAL_ID_SUBVOXEL_BITCOUNT;
+        constexpr int      FBITS = 20;  // (64 - OFF)/3, rounded if needed
+        constexpr uint64_t FMASK = (1 << FBITS) - 1;
+
+        return (static_cast<uint64_t>(subVoxelIndex) & SUBVOXEL_MASK) |
+               (static_cast<uint64_t>(g.cx & FMASK) << (OFF + FBITS * 0)) |
+               (static_cast<uint64_t>(g.cy & FMASK) << (OFF + FBITS * 1)) |
+               (static_cast<uint64_t>(g.cz & FMASK) << (OFF + FBITS * 2));
+    }
     /** @} */
 
     /** @name Basic API for construction and main parameters
@@ -305,7 +324,51 @@ class NDT : public mrpt::maps::CMetricMap,
 
     /** @name API of the NearestNeighborsCapable virtual interface
     @{ */
+    [[nodiscard]] bool   nn_has_indices_or_ids() const override;
+    [[nodiscard]] size_t nn_index_count() const override;
+    [[nodiscard]] bool   nn_single_search(
+          const mrpt::math::TPoint3Df& query, mrpt::math::TPoint3Df& result,
+          float& out_dist_sqr, uint64_t& resultIndexOrID) const override;
+    [[nodiscard]] bool nn_single_search(
+        const mrpt::math::TPoint2Df& query, mrpt::math::TPoint2Df& result,
+        float& out_dist_sqr, uint64_t& resultIndexOrID) const override;
+    void nn_multiple_search(
+        const mrpt::math::TPoint3Df& query, const size_t N,
+        std::vector<mrpt::math::TPoint3Df>& results,
+        std::vector<float>&                 out_dists_sqr,
+        std::vector<uint64_t>&              resultIndicesOrIDs) const override;
+    void nn_multiple_search(
+        const mrpt::math::TPoint2Df& query, const size_t N,
+        std::vector<mrpt::math::TPoint2Df>& results,
+        std::vector<float>&                 out_dists_sqr,
+        std::vector<uint64_t>&              resultIndicesOrIDs) const override;
+    void nn_radius_search(
+        const mrpt::math::TPoint3Df& query, const float search_radius_sqr,
+        std::vector<mrpt::math::TPoint3Df>& results,
+        std::vector<float>&                 out_dists_sqr,
+        std::vector<uint64_t>&              resultIndicesOrIDs,
+        size_t                              maxPoints) const override;
+    void nn_radius_search(
+        const mrpt::math::TPoint2Df& query, const float search_radius_sqr,
+        std::vector<mrpt::math::TPoint2Df>& results,
+        std::vector<float>&                 out_dists_sqr,
+        std::vector<uint64_t>&              resultIndicesOrIDs,
+        size_t                              maxPoints) const override;
 
+    template <size_t MAX_KNN>
+    void nn_multiple_search_impl(
+        const mrpt::math::TPoint3Df& query, const size_t N,
+        std::vector<mrpt::math::TPoint3Df>& results,
+        std::vector<float>&                 out_dists_sqr,
+        std::vector<uint64_t>&              resultIndicesOrIDs) const;
+
+    /** @} */
+
+    /** @name Public virtual methods implementation for NearestPlaneCapable
+     *  @{ */
+    NearestPlaneResult nn_search_pt2pl(
+        const mrpt::math::TPoint3Df& point,
+        const float                  max_search_distance) const override;
     /** @} */
 
     /** @name Public virtual methods implementation for CMetricMap

@@ -56,6 +56,8 @@
 static mrpt::system::CTimeLogger profiler(true, "NDT");
 #endif
 
+constexpr size_t HARD_MAX_MATCHES = 3;
+
 using namespace mola;
 
 //  =========== Begin of Map definition ============
@@ -931,4 +933,300 @@ const std::optional<mp2p_icp::PointCloudEigen>& NDT::VoxelData::ndt() const
     mrpt::math::crossProduct3D(ev[0], ev[1], ev[2]);
 
     return ndt_;
+}
+
+bool NDT::nn_has_indices_or_ids() const
+{  // false: IDs, not contiguous indices
+    return false;
+}
+
+size_t NDT::nn_index_count() const
+{  // Not used.
+    return 0;
+}
+
+bool NDT::nn_single_search(
+    [[maybe_unused]] const mrpt::math::TPoint2Df& query,
+    [[maybe_unused]] mrpt::math::TPoint2Df&       result,
+    [[maybe_unused]] float&                       out_dist_sqr,
+    [[maybe_unused]] uint64_t&                    resultIndexOrID) const
+{
+    THROW_EXCEPTION("Cannot run a 2D search on a NDT");
+}
+void NDT::nn_multiple_search(
+    [[maybe_unused]] const mrpt::math::TPoint2Df&        query,
+    [[maybe_unused]] const size_t                        N,
+    [[maybe_unused]] std::vector<mrpt::math::TPoint2Df>& results,
+    [[maybe_unused]] std::vector<float>&                 out_dists_sqr,
+    [[maybe_unused]] std::vector<uint64_t>& resultIndicesOrIDs) const
+{
+    THROW_EXCEPTION("Cannot run a 2D search on a NDT");
+}
+void NDT::nn_radius_search(
+    [[maybe_unused]] const mrpt::math::TPoint2Df&        query,
+    [[maybe_unused]] const float                         search_radius_sqr,
+    [[maybe_unused]] std::vector<mrpt::math::TPoint2Df>& results,
+    [[maybe_unused]] std::vector<float>&                 out_dists_sqr,
+    [[maybe_unused]] std::vector<uint64_t>&              resultIndicesOrIDs,
+    [[maybe_unused]] size_t                              maxPoints) const
+{
+    THROW_EXCEPTION("Cannot run a 2D search on a NDT");
+}
+
+mp2p_icp::NearestPlaneCapable::NearestPlaneResult NDT::nn_search_pt2pl(
+    const mrpt::math::TPoint3Df& query, const float max_search_distance) const
+{
+    NearestPlaneCapable::NearestPlaneResult ret;
+
+    const int nn_search_margin =
+        static_cast<int>(std::ceil(max_search_distance * voxel_size_inv_));
+
+    const global_index3d_t idxs0 =
+        coordToGlobalIdx(query) -
+        global_index3d_t(nn_search_margin, nn_search_margin, nn_search_margin);
+    const global_index3d_t idxs1 =
+        coordToGlobalIdx(query) +
+        global_index3d_t(nn_search_margin, nn_search_margin, nn_search_margin);
+
+    auto lambdaCheckCell = [&](const global_index3d_t& p)
+    {
+        auto* v = voxelByGlobalIdxs(p);
+        if (!v) return;
+        const auto& ndt = v->ndt();
+        if (!ndt) return;
+        if (!ndt_is_plane(*ndt)) return;
+
+        const auto&                normal        = ndt->eigVectors[0];
+        const mrpt::math::TPoint3D planeCentroid = ndt->meanCov.mean.asTPoint();
+        const auto   thePlane    = mrpt::math::TPlane(planeCentroid, normal);
+        const double ptPlaneDist = std::abs(thePlane.distance(query));
+
+        // Better than the current one? replace:
+        if (!ret.pairing || ptPlaneDist < ret.distance)
+        {
+            auto& pa              = ret.pairing.emplace();
+            pa.pt_local           = query;
+            pa.pl_global.centroid = planeCentroid;
+            pa.pl_global.plane    = thePlane;
+
+            ret.distance = static_cast<float>(ptPlaneDist);
+        }
+    };
+
+    for (int32_t cx = idxs0.cx; cx <= idxs1.cx; cx++)
+        for (int32_t cy = idxs0.cy; cy <= idxs1.cy; cy++)
+            for (int32_t cz = idxs0.cz; cz <= idxs1.cz; cz++)
+                lambdaCheckCell({cx, cy, cz});
+
+    return ret;
+}
+
+bool NDT::nn_single_search(
+    const mrpt::math::TPoint3Df& query, mrpt::math::TPoint3Df& result,
+    float& out_dist_sqr, uint64_t& resultIndexOrID) const
+{
+    std::vector<mrpt::math::TPoint3Df> r;
+    std::vector<float>                 dist_sqr;
+    std::vector<uint64_t>              resultIndices;
+    nn_multiple_search_impl<1>(query, 1, r, dist_sqr, resultIndices);
+    if (r.empty()) return false;  // none found
+    result          = r[0];
+    out_dist_sqr    = dist_sqr[0];
+    resultIndexOrID = resultIndices[0];
+    return true;
+}
+
+void NDT::nn_multiple_search(
+    const mrpt::math::TPoint3Df& query, const size_t N,
+    std::vector<mrpt::math::TPoint3Df>& results,
+    std::vector<float>&                 out_dists_sqr,
+    std::vector<uint64_t>&              resultIndicesOrIDs) const
+{
+    nn_multiple_search_impl<HARD_MAX_MATCHES>(
+        query, N, results, out_dists_sqr, resultIndicesOrIDs);
+}
+
+template <size_t MAX_KNN>
+void NDT::nn_multiple_search_impl(
+    const mrpt::math::TPoint3Df& query, const size_t N,
+    std::vector<mrpt::math::TPoint3Df>& results,
+    std::vector<float>&                 out_dists_sqr,
+    std::vector<uint64_t>&              resultIndicesOrIDs) const
+{
+    results.clear();
+    out_dists_sqr.clear();
+    resultIndicesOrIDs.clear();
+
+    ASSERT_(N > 0);
+
+    const global_index3d_t idxs0 =
+        coordToGlobalIdx(query) - global_index3d_t(1, 1, 1);
+    const global_index3d_t idxs1 =
+        coordToGlobalIdx(query) + global_index3d_t(1, 1, 1);
+
+    // Data structures to avoid ANY heap memory allocation and keep working
+    // on the stack at all time:
+    struct Match
+    {
+        mrpt::math::TPoint3Df globalPt;
+        float                 sqrDist;
+        uint64_t              id;
+    };
+    std::array<Match, MAX_KNN> matches;  // sorted by sqrDist!
+    size_t                     foundMatches = 0;
+
+    auto lambdaProcessCandidate = [&](const float                  sqrDist,
+                                      const mrpt::math::TPoint3Df& pt,
+                                      const global_plain_index_t&  id)
+    {
+        // bubble sort (yes, really!)
+        // found its position in the list:
+        size_t i = 0;
+        for (i = 0; i < foundMatches; i++)
+        {
+            if (sqrDist < matches[i].sqrDist) break;
+        }
+        if (i >= MAX_KNN) return;
+
+        // insert new one at [i], shift [i+1:end] one position.
+        const size_t last = std::min(foundMatches + 1, MAX_KNN);
+        for (size_t j = i + 1; j < last; j++) matches[j] = matches[j - 1];
+
+        matches[i].globalPt = pt;
+        matches[i].id       = id;
+        matches[i].sqrDist  = sqrDist;
+
+        if (foundMatches < MAX_KNN) foundMatches++;
+    };
+
+    auto lambdaCheckCell = [&](const global_index3d_t& p)
+    {
+        if (auto* v = voxelByGlobalIdxs(p); v && !v->points().empty())
+        {
+            const auto& pts = v->points();
+            for (size_t i = 0; i < pts.size(); i++)
+            {
+                const auto& pt      = pts[i];
+                float       distSqr = (pt - query).sqrNorm();
+                const auto  id      = g2plain(p, i);
+
+                lambdaProcessCandidate(distSqr, pt, id);
+            }
+        }
+    };
+
+    for (int32_t cx = idxs0.cx; cx <= idxs1.cx; cx++)
+        for (int32_t cy = idxs0.cy; cy <= idxs1.cy; cy++)
+            for (int32_t cz = idxs0.cz; cz <= idxs1.cz; cz++)
+                lambdaCheckCell({cx, cy, cz});
+
+    for (size_t i = 0; i < std::min<size_t>(N, foundMatches); i++)
+    {
+        const auto& m = matches[i];
+
+        out_dists_sqr.push_back(m.sqrDist);
+        results.push_back(m.globalPt);
+        resultIndicesOrIDs.push_back(m.id);
+    }
+}
+
+void NDT::nn_radius_search(
+    const mrpt::math::TPoint3Df& query, const float search_radius_sqr,
+    std::vector<mrpt::math::TPoint3Df>& results,
+    std::vector<float>&                 out_dists_sqr,
+    std::vector<uint64_t>& resultIndicesOrIDs, size_t maxPoints) const
+{
+    results.clear();
+    out_dists_sqr.clear();
+    resultIndicesOrIDs.clear();
+
+    if (search_radius_sqr <= 0) return;
+
+    const float radius   = std::sqrt(search_radius_sqr);
+    const auto  diagonal = mrpt::math::TPoint3Df(1.0f, 1.0f, 1.0f) * radius;
+
+    const global_index3d_t idxs0 = coordToGlobalIdx(query - diagonal);
+    const global_index3d_t idxs1 = coordToGlobalIdx(query + diagonal);
+
+    // Data structures to avoid ANY heap memory allocation and keep working
+    // on the stack at all time:
+    struct Match
+    {
+        mrpt::math::TPoint3Df globalPt;
+        float                 sqrDist;
+        uint64_t              id;
+    };
+    std::array<Match, HARD_MAX_MATCHES> matches;  // sorted by sqrDist!
+    size_t                              foundMatches = 0;
+
+    auto lambdaProcessCandidate = [&](const float                  sqrDist,
+                                      const mrpt::math::TPoint3Df& pt,
+                                      const global_plain_index_t&  id)
+    {
+        // bubble sort (yes, really!)
+        // found its position in the list:
+        size_t i = 0;
+        for (i = 0; i < foundMatches; i++)
+        {
+            if (sqrDist < matches[i].sqrDist) break;
+        }
+        if (i >= HARD_MAX_MATCHES) return;
+
+        // insert new one at [i], shift [i+1:end] one position.
+        const size_t last = std::min(foundMatches + 1, HARD_MAX_MATCHES);
+        for (size_t j = i + 1; j < last; j++) matches[j] = matches[j - 1];
+
+        matches[i].globalPt = pt;
+        matches[i].id       = id;
+        matches[i].sqrDist  = sqrDist;
+
+        if (foundMatches < HARD_MAX_MATCHES) foundMatches++;
+    };
+
+    auto lambdaCheckCell = [&](const global_index3d_t& p)
+    {
+        if (auto* v = voxelByGlobalIdxs(p); v && !v->points().empty())
+        {
+            const auto& pts = v->points();
+            for (size_t i = 0; i < pts.size(); i++)
+            {
+                const auto& pt      = pts[i];
+                float       distSqr = (pt - query).sqrNorm();
+                if (distSqr > search_radius_sqr) continue;
+
+                const auto id = g2plain(p, i);
+
+                if (maxPoints != 0)
+                {
+                    // temporary list:
+                    lambdaProcessCandidate(distSqr, pt, id);
+                }
+                else
+                {
+                    // directly save output:
+                    out_dists_sqr.push_back(distSqr);
+                    results.push_back(pt);
+                    resultIndicesOrIDs.push_back(id);
+                }
+            }
+        }
+    };
+
+    for (int32_t cx = idxs0.cx; cx <= idxs1.cx; cx++)
+        for (int32_t cy = idxs0.cy; cy <= idxs1.cy; cy++)
+            for (int32_t cz = idxs0.cz; cz <= idxs1.cz; cz++)
+                lambdaCheckCell({cx, cy, cz});
+
+    if (maxPoints != 0)
+    {
+        // we saved results in a temporary buffer, save them out now:
+        for (size_t i = 0; i < std::min<size_t>(maxPoints, foundMatches); i++)
+        {
+            const auto& m = matches[i];
+
+            out_dists_sqr.push_back(m.sqrDist);
+            results.push_back(m.globalPt);
+            resultIndicesOrIDs.push_back(m.id);
+        }
+    }
 }
