@@ -222,6 +222,7 @@ void NDT::getVisualizationInto(mrpt::opengl::CSetOfObjects& outObj) const
     MRPT_START
     if (!genericMapParams.enableSaveAs3DObject) return;
 
+    MRPT_TODO("option to hide points already with NDT");
     if (renderOptions.points_visible)
     {
         auto obj = mrpt::opengl::CPointCloud::Create();
@@ -919,15 +920,15 @@ const std::optional<mp2p_icp::PointCloudEigen>& NDT::VoxelData::ndt() const
 
     // Fix z normal such that it points towards the observer (outwards):
     ASSERT_(was_seen_from_);
-    const float r = mrpt::math::dotProduct<3, float>(
-        ndt_->eigVectors.at(0),
-        *was_seen_from_ - ndt_->meanCov.mean.asTPoint());
+    auto&       ev = ndt_->eigVectors;
+    const float r  = mrpt::math::dotProduct<3, float>(
+        ev.at(0), *was_seen_from_ - ndt_->meanCov.mean.asTPoint());
 
-    if (r < 0)
-    {
-        for (int i = 0; i < 3; i++)
-            ndt_->eigVectors.at(i) = -ndt_->eigVectors.at(i);
-    }
+    // +z must point outwards:
+    if (r < 0) ev.at(0) = -ev.at(0);
+
+    // Ensure CCW axes:
+    mrpt::math::crossProduct3D(ev[0], ev[1], ev[2]);
 
     return ndt_;
 }

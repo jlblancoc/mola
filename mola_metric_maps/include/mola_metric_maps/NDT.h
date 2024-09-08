@@ -17,6 +17,7 @@
  * You should have received a copy of the GNU General Public License along with
  * MOLA. If not, see <https://www.gnu.org/licenses/>.
  * ------------------------------------------------------------------------- */
+
 /**
  * @file   NDT.h
  * @brief  NDT 3D map representation
@@ -26,8 +27,8 @@
 #pragma once
 
 #include <mola_metric_maps/index3d_t.h>
+#include <mp2p_icp/NearestPlaneCapable.h>
 #include <mp2p_icp/estimate_points_eigen.h>  // PointCloudEigen
-//#include <mp2p_icp/metricmap.h> --> TODO: NN-planes
 #include <mrpt/core/round.h>
 #include <mrpt/img/TColor.h>
 #include <mrpt/img/color_maps.h>
@@ -47,10 +48,20 @@
 namespace mola
 {
 /** 3D NDT maps: Voxels with points approximated by Gaussians.
- * Implementation of \cite magnusson2007scan
+ * Implementation of \cite magnusson2007scan.
+ *
+ * This implements two nearest-neighbor virtual APIs:
+ * - mrpt::maps::NearestNeighborsCapable: It will return pairings of local
+ *   points against global (this map) points in voxels that do not conform
+ *   planes.
+ *
+ * - mp2p_icp::NearestPlaneCapable: It will return points-to-plane pairings,
+ *   if the local point falls within a voxel with points conforming a plane.
+ *
  */
-class NDT : public mrpt::maps::CMetricMap
-// public mrpt::maps::NearestNeighborsCapable => TODO: NN-planes
+class NDT : public mrpt::maps::CMetricMap,
+            public mrpt::maps::NearestNeighborsCapable,
+            public mp2p_icp::NearestPlaneCapable
 {
     DEFINE_SERIALIZABLE(NDT, mola)
    public:
@@ -153,7 +164,7 @@ class NDT : public mrpt::maps::CMetricMap
                 nPoints_++;
                 ndt_.reset();
             }
-            if (!was_seen_from_.has_value()) was_seen_from_ = sensorPose;
+            was_seen_from_ = sensorPose;
         }
 
         /// Gets cached NDT for this voxel, or computes it right now.
