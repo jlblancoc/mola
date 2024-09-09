@@ -200,6 +200,9 @@ void SparseTreesPointCloud::getVisualizationInto(
     MRPT_START
     if (!genericMapParams.enableSaveAs3DObject) return;
 
+    // TODO(jlbc): convert into one CPointCloud per voxel to better scale huge
+    // maps.
+
     if (renderOptions.colormap == mrpt::img::cmNONE)
     {
         // Single color:
