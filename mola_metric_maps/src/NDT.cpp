@@ -548,8 +548,11 @@ double NDT::internal_computeObservationLikelihood(
 }
 
 double NDT::internal_computeObservationLikelihoodPointCloud3D(
-    const mrpt::poses::CPose3D& pc_in_map, const float* xs, const float* ys,
-    const float* zs, const std::size_t num_pts) const
+    [[maybe_unused]] const mrpt::poses::CPose3D& pc_in_map,
+    [[maybe_unused]] const float*                xs,  //
+    [[maybe_unused]] const float*                ys,  //
+    [[maybe_unused]] const float*                zs,  //
+    [[maybe_unused]] const std::size_t           num_pts) const
 {
     MRPT_TRY_START
 
