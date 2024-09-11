@@ -105,6 +105,7 @@ Key points of this tutorial:
          rosdep install --from-paths src --ignore-src -r -y
 
          colcon build --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=RelWithDebInfo
+         . install/setup.bash
 
          ros2 launch mola_warehouse_pf_tutorial tutorial_launch.py
 
