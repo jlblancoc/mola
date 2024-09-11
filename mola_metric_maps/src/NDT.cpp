@@ -555,6 +555,8 @@ double NDT::internal_computeObservationLikelihoodPointCloud3D(
 
     ASSERT_GT_(likelihoodOptions.sigma_dist, .0);
 
+    THROW_EXCEPTION("to-do");
+#if 0
     mrpt::math::TPoint3Df closest;
     float                 closest_err;
     uint64_t              closest_id;
@@ -569,12 +571,9 @@ double NDT::internal_computeObservationLikelihoodPointCloud3D(
         // position:
         const auto gPt = pc_in_map.composePoint({xs[i], ys[i], zs[i]});
 
-        THROW_EXCEPTION("to-do");
-#if 0
         const bool found =
             nn_single_search(gPt, closest, closest_err, closest_id);
         if (!found)
-#endif
         continue;
 
         // Put a limit:
@@ -586,6 +585,7 @@ double NDT::internal_computeObservationLikelihoodPointCloud3D(
 
     // Log-likelihood:
     return -sumSqrDist / likelihoodOptions.sigma_dist;
+#endif
 
     MRPT_TRY_END
 }
