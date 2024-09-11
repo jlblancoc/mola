@@ -19,6 +19,7 @@
 #include <mrpt/img/TCamera.h>  // TODO: Remove after unused below
 #include <mrpt/math/CMatrixFixed.h>
 #include <mrpt/obs/CSensoryFrame.h>
+#include <mrpt/version.h>
 
 #include <future>
 #include <optional>
@@ -32,7 +33,11 @@ namespace mola
  * \ingroup mola_kernel_grp */
 class BackEndBase : public ExecutableBase
 {
+#if MRPT_VERSION < 0x020e00
     DEFINE_VIRTUAL_MRPT_OBJECT(BackEndBase)
+#else
+    DEFINE_VIRTUAL_MRPT_OBJECT(BackEndBase, mola)
+#endif
 
    public:
     BackEndBase();

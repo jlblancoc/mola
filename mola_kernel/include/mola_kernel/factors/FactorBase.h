@@ -13,6 +13,7 @@
 
 #include <mola_kernel/id.h>
 #include <mrpt/serialization/CSerializable.h>
+#include <mrpt/version.h>
 
 namespace mola
 {
@@ -35,7 +36,11 @@ enum class Robust : uint8_t
  */
 class FactorBase : public mrpt::serialization::CSerializable
 {
+#if MRPT_VERSION < 0x020e00
     DEFINE_VIRTUAL_SERIALIZABLE(FactorBase)
+#else
+    DEFINE_VIRTUAL_SERIALIZABLE(FactorBase, mola)
+#endif
 
    public:
     FactorBase() = default;

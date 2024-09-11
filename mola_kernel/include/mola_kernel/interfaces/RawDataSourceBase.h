@@ -19,6 +19,7 @@
 #include <mrpt/core/pimpl.h>
 #include <mrpt/io/CFileGZOutputStream.h>
 #include <mrpt/obs/CObservation.h>
+#include <mrpt/version.h>
 
 namespace mola
 {
@@ -29,7 +30,11 @@ using timestep_t = std::size_t;
  * parsers,...) \ingroup mola_kernel_grp */
 class RawDataSourceBase : public mola::ExecutableBase
 {
+#if MRPT_VERSION < 0x020e00
     DEFINE_VIRTUAL_MRPT_OBJECT(RawDataSourceBase)
+#else
+    DEFINE_VIRTUAL_MRPT_OBJECT(RawDataSourceBase, mola)
+#endif
 
    public:
     RawDataSourceBase();

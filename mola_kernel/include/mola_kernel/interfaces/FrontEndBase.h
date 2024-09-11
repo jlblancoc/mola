@@ -16,6 +16,7 @@
 #include <mola_kernel/interfaces/ExecutableBase.h>
 #include <mola_kernel/interfaces/RawDataConsumer.h>
 #include <mola_kernel/interfaces/VizInterface.h>
+#include <mrpt/version.h>
 
 namespace mola
 {
@@ -33,7 +34,11 @@ namespace mola
  * \ingroup mola_kernel_grp */
 class FrontEndBase : public ExecutableBase, public RawDataConsumer
 {
+#if MRPT_VERSION < 0x020e00
     DEFINE_VIRTUAL_MRPT_OBJECT(FrontEndBase)
+#else
+    DEFINE_VIRTUAL_MRPT_OBJECT(FrontEndBase, mola)
+#endif
 
    public:
     FrontEndBase();

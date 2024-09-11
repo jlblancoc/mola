@@ -15,6 +15,7 @@
 #include <mola_kernel/interfaces/RawDataSourceBase.h>
 #include <mrpt/core/WorkerThreadsPool.h>
 #include <mrpt/system/COutputLogger.h>
+#include <mrpt/version.h>
 
 namespace mola
 {
@@ -24,8 +25,11 @@ namespace mola
  * \ingroup mola_kernel_grp */
 class FilterBase : public RawDataSourceBase, RawDataConsumer
 {
+#if MRPT_VERSION < 0x020e00
     DEFINE_VIRTUAL_MRPT_OBJECT(FilterBase)
-
+#else
+    DEFINE_VIRTUAL_MRPT_OBJECT(FilterBase, mola)
+#endif
    public:
     FilterBase();
 

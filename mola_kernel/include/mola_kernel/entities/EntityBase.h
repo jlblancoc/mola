@@ -15,6 +15,7 @@
 #include <mola_kernel/id.h>
 #include <mrpt/core/Clock.h>
 #include <mrpt/serialization/CSerializable.h>
+#include <mrpt/version.h>
 
 #include <map>
 
@@ -32,15 +33,19 @@ using annotations_data_t = std::map<std::string, LazyLoadResource>;
  */
 class EntityBase : public mrpt::serialization::CSerializable
 {
+#if MRPT_VERSION < 0x020e00
     DEFINE_VIRTUAL_SERIALIZABLE(EntityBase);
+#else
+    DEFINE_VIRTUAL_SERIALIZABLE(EntityBase, mola);
+#endif
 
    public:
     EntityBase();
     virtual ~EntityBase();
 
     /** The unique ID of this entity in the world model.
-     * Stored here for convenience, notice that it is redundant since entities
-     * are already stored in the WorldModel indexed by ID.
+     * Stored here for convenience, notice that it is redundant since
+     * entities are already stored in the WorldModel indexed by ID.
      */
     mola::id_t my_id_{mola::INVALID_ID};
 
@@ -55,8 +60,8 @@ class EntityBase : public mrpt::serialization::CSerializable
     bool is_unloaded() const;
 
    protected:
-    // Derived classes mus call these methods to serialize the common data in
-    // this base class:
+    // Derived classes mus call these methods to serialize the common data
+    // in this base class:
     void baseSerializeTo(mrpt::serialization::CArchive& out) const;
     void baseSerializeFrom(mrpt::serialization::CArchive& in);
 };
