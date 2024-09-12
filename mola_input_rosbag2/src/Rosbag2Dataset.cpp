@@ -531,9 +531,6 @@ void Rosbag2Dataset::spinOnce()
             }
         }
 
-        // Free memory in read-ahead buffer:
-        read_ahead_.at(rosbag_next_idx_).reset();
-
         // Move on:
         rosbag_next_idx_++;
     }
@@ -575,6 +572,8 @@ void Rosbag2Dataset::doReadAhead(
 
     for (size_t idx = startIdx; idx <= endIdx; idx++)
     {
+        unload_queue_.push_back(idx);  // mark as recently accessed
+
         if (read_ahead_.at(idx).has_value()) continue;  // already read:
 
         // serialized data
@@ -597,6 +596,9 @@ void Rosbag2Dataset::doReadAhead(
             de.timestamp = sf->getObservationByIndex(0)->timestamp;
         }
     }
+
+    // and also, unload() very old observations.
+    autoUnloadOldEntries();
 
     MRPT_END
 }
@@ -982,5 +984,20 @@ Rosbag2Dataset::Obs Rosbag2Dataset::catchExceptions(
             "stops later one, e.g. missing /tf):\n"
             << e.what());
         return {};
+    }
+}
+
+void Rosbag2Dataset::autoUnloadOldEntries() const
+{
+    const size_t MAX_UNLOAD_LEN = std::max<size_t>(10, 2 * read_ahead_length_);
+
+    // unload() very old observations.
+    while (unload_queue_.size() > MAX_UNLOAD_LEN)
+    {
+        const auto idx = unload_queue_.front();
+        unload_queue_.erase(unload_queue_.begin());
+
+        // Free memory in read-ahead buffer:
+        read_ahead_.at(idx).reset();
     }
 }
