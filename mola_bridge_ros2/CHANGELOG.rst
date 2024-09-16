@@ -3,8 +3,8 @@ Changelog for package mola_bridge_ros2
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
-Forthcoming
------------
+1.2.0 (2024-09-16)
+------------------
 * sort <depend> entries
 * Contributors: Jose Luis Blanco-Claraco
 
