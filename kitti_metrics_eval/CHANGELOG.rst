@@ -3,6 +3,9 @@ Changelog for package kitti_metrics_eval
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
+Forthcoming
+-----------
+
 1.1.3 (2024-08-28)
 ------------------
 * Depend on new mrpt_lib packages (deprecate mrpt2)

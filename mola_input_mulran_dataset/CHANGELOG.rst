@@ -3,6 +3,9 @@ Changelog for package mola_input_mulran_dataset
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
+Forthcoming
+-----------
+
 1.1.3 (2024-08-28)
 ------------------
 * Depend on new mrpt_lib packages (deprecate mrpt2)

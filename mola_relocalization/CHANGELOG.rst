@@ -3,6 +3,11 @@ Changelog for package mola_relocalization
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
+Forthcoming
+-----------
+* Fix cmake warning on missing mola_test_datasets for non-test builds
+* Contributors: Jose Luis Blanco-Claraco
+
 1.1.3 (2024-08-28)
 ------------------
 * Depend on new mrpt_lib packages (deprecate mrpt2)

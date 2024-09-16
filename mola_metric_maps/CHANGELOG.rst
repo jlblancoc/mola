@@ -2,6 +2,17 @@
 Changelog for package mola_metric_maps
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* gcc warning fix
+* Avoid gcc warning
+* Merge pull request `#69 <https://github.com/MOLAorg/mola/issues/69>`_ from MOLAorg/new-map-ndt
+  New NDT-3D metric map
+* Add NDT-3D map class
+* Remove leftover dead .cpp file from MOLA package template
+* FIX BUG: missing cmake dependency on robin_map in exported targets
+* Contributors: Jose Luis Blanco-Claraco
+
 1.1.3 (2024-08-28)
 ------------------
 * Depend on new mrpt_lib packages (deprecate mrpt2)

@@ -3,6 +3,14 @@ Changelog for package mola_input_rosbag2
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
+Forthcoming
+-----------
+* Merge pull request `#70 <https://github.com/MOLAorg/mola/issues/70>`_ from MOLAorg/fix/rosbag2-memory-free
+  BUGFIX: read ahead cache memory for rosbag2 was not freed
+* BUGFIX: read ahead cache memory for rosbag2 was not freed if invoked via Dataset access API only
+* sort <depend> entries
+* Contributors: Jose Luis Blanco-Claraco
+
 1.1.3 (2024-08-28)
 ------------------
 * Depend on new mrpt_lib packages (deprecate mrpt2)
