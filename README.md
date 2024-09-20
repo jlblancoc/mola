@@ -17,6 +17,11 @@ Refer to the [official documentation](https://docs.mola-slam.org/latest/) for bu
 
 ![kitti_demo_06](https://github.com/MOLAorg/mola/assets/5497818/76cf07e2-ab20-41a3-abc6-df5c5ba74b97)
 
+## ROSCon Talk introducing MOLA
+
+[Slides](https://docs.google.com/presentation/d/1Zg1saZCxlE49jZ4SxPBLaRh7WUYGmfC0fiKUunJg-dA/edit?usp=drivesdk)
+
+Video: TBD
 
 ## Individual package build status
 
