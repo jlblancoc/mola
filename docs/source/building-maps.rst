@@ -130,6 +130,24 @@ or from the :ref:`UI controls <mola_lo_gui_common_parts>` in the ``mola_lidar_od
             .. note::
                 Remember changing ``--lidar-sensor-label /ouster/points`` to your actual raw (unfiltered) LiDAR topic (``sensor_msgs/PointCloud2``).
 
+.. dropdown:: Building 2D maps
+
+    Until ``mola_2d_mapper`` is released, you can also use the generic LiDAR odometry module to 
+    build 2D maps from range finder (2D scanners).
+
+    Just set the ``PIPELINE_YAML`` environment variable pointing to the 2D mapping pipeline (`lidar2d.yaml <https://github.com/MOLAorg/mola_lidar_odometry/blob/develop/pipelines/lidar2d.yaml>`_)
+    shipped with the ``mola_lidar_odometry`` package:
+
+    .. code-block:: bash
+
+        MOLA_LIDAR_TOPIC=/scan1 \
+        PIPELINE_YAML=$(ros2 pkg prefix mola_lidar_odometry)/share/mola_lidar_odometry/pipelines/lidar2d.yaml \
+        MOLA_GENERATE_SIMPLEMAP=true \
+        MOLA_SIMPLEMAP_OUTPUT=myMap.simplemap \
+          mola-lo-gui-rosbag2 /path/to/your/dataset.mcap
+
+    Remember to change ``/scan1`` to your actual topic name of type ``sensor_msgs/LaserScan``.
+
 
 .. hint::
 

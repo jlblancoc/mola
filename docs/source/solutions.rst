@@ -28,7 +28,7 @@ This functionality is provided by:
   - **Geo-referencing** metric maps with consumer-grade GNSS sensors. See: :ref:`geo-referencing`.
   - Off-line **loop closure** for consistent global maps. (TO-DO: Write docs!)
 
-- ``mola_3d_lidar_slam``: (Coming soon!)
+- ``mola_3d_mapper``: Full SLAM solution. (Coming soon!)
 
 
 .. image:: https://mrpt.github.io/imgs/kaist01_georef_sample.png
@@ -42,7 +42,7 @@ This functionality is provided by:
 Build **georeferenced** consistent global 2D maps from 2D LiDARs.
 This functionality is provided by:
 
-- ``mola_2d_lidar_slam``: (Coming soon!)
+- ``mola_2d_mapper``: Full SLAM solution for 2D LiDARs. (Coming soon!)
 
 
 |
