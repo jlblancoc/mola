@@ -917,7 +917,9 @@ void BridgeROS2::doLookForNewMolaSubs()
     }
 
     // Advertise relocalization ROS 2 service now if not done already:
-    if (!molaSubs_.relocalization.empty() && !srvRelocGNNS_)
+    auto lckNode = mrpt::lockHelper(rosNodeMtx_);
+
+    if (!molaSubs_.relocalization.empty() && !srvRelocGNNS_ && rosNode_)
     {
         using namespace std::placeholders;
 
@@ -956,7 +958,7 @@ void BridgeROS2::doLookForNewMolaSubs()
     }
 
     // Advertise map server ROS 2 services now if not done already:
-    if (!molaSubs_.mapServers.empty() && !srvMapLoad_)
+    if (!molaSubs_.mapServers.empty() && !srvMapLoad_ && rosNode_)
     {
         using namespace std::placeholders;
 
