@@ -3,6 +3,11 @@ Changelog for package mola_bridge_ros2
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
+Forthcoming
+-----------
+* BUGFIX: Prevent potential race condition
+* Contributors: Jose Luis Blanco-Claraco
+
 1.2.0 (2024-09-16)
 ------------------
 * sort <depend> entries

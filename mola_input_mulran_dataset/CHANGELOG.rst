@@ -3,6 +3,9 @@ Changelog for package mola_input_mulran_dataset
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
+Forthcoming
+-----------
+
 1.2.0 (2024-09-16)
 ------------------
 

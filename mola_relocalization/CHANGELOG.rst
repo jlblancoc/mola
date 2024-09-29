@@ -3,6 +3,9 @@ Changelog for package mola_relocalization
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
+Forthcoming
+-----------
+
 1.2.0 (2024-09-16)
 ------------------
 * Fix cmake warning on missing mola_test_datasets for non-test builds

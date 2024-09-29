@@ -2,6 +2,9 @@
 Changelog for package mola_metric_maps
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 1.2.0 (2024-09-16)
 ------------------
 * gcc warning fix

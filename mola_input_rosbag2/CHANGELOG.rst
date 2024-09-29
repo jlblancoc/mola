@@ -3,6 +3,9 @@ Changelog for package mola_input_rosbag2
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
+Forthcoming
+-----------
+
 1.2.0 (2024-09-16)
 ------------------
 * Merge pull request `#70 <https://github.com/MOLAorg/mola/issues/70>`_ from MOLAorg/fix/rosbag2-memory-free

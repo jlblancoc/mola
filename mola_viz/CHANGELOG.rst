@@ -2,6 +2,9 @@
 Changelog for package mola_viz
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 1.2.0 (2024-09-16)
 ------------------
 * mola_viz: do not add a XY ground grid by default to all GUIs

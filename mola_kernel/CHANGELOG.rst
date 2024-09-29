@@ -2,6 +2,9 @@
 Changelog for package mola_kernel
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 1.2.0 (2024-09-16)
 ------------------
 * Update RTTI macros for upcoming MRPT 2.14.0
