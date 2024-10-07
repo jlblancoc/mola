@@ -18,7 +18,7 @@ find_package(mola_common REQUIRED)
 find_package(mola_yaml REQUIRED)
 
 # find dependencies:
-find_package(MRPT 2.1.0 REQUIRED COMPONENTS gui obs maps)
+find_package(MRPT 2.1.0 REQUIRED COMPONENTS gui obs maps topography)
 
 # define lib:
 set(LIB_SRCS
@@ -99,11 +99,13 @@ mola_add_library(
   PUBLIC_LINK_LIBRARIES
     mrpt::obs
     mrpt::gui
+    mrpt::topography
     mola::mola_yaml
 #  PRIVATE_LINK_LIBRARIES
   CMAKE_DEPENDENCIES
     mrpt-obs
     mrpt-gui
+    mrpt-topography
     mola_yaml
 )
 

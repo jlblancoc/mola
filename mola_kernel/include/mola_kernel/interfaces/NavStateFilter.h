@@ -15,8 +15,10 @@
 #include <mrpt/core/Clock.h>
 #include <mrpt/math/TTwist3D.h>
 #include <mrpt/obs/obs_frwds.h>
+#include <mrpt/poses/CPose3DPDFGaussian.h>
 #include <mrpt/poses/CPose3DPDFGaussianInf.h>
 #include <mrpt/system/COutputLogger.h>
+#include <mrpt/topography/data_types.h>
 
 #pragma once
 
@@ -85,6 +87,9 @@ class NavStateFilter : public mrpt::system::COutputLogger
     /** Integrates new IMU observations into the estimator */
     virtual void fuse_imu(const mrpt::obs::CObservationIMU& imu) = 0;
 
+    /** Integrates new GNSS observations into the estimator */
+    virtual void fuse_gnss(const mrpt::obs::CObservationGPS& gps) = 0;
+
     /** Integrates new twist estimation (in the odom frame) */
     virtual void fuse_twist(
         const mrpt::Clock::time_point&     timestamp,
@@ -99,6 +104,36 @@ class NavStateFilter : public mrpt::system::COutputLogger
     virtual std::optional<NavState> estimated_navstate(
         const mrpt::Clock::time_point& timestamp,
         const std::string&             frame_id) = 0;
+
+    /** Must be invoked with the mp2p_icp metric map geo-referencing information
+     *  of the map in order to have GNSS observations correctly fused.
+     */
+    void set_georeferencing_params(
+        /** The geodetic coordinates (on WGS-84) of the metric map ENU frame of
+         * reference. */
+        mrpt::topography::TGeodeticCoords geo_coord,
+        /** The SE(3) transformation from the ENU (earth-north-up) frame
+         * to the metric map local frame of reference.
+         * If this is the identity (default) it means the map is already in
+         * ENU coordinates (i.e. +X is East, +Y is North, +Z is up) and
+         * the point (0,0,0) is the one having the geodetic coordinates
+         * geo_coord
+         */
+        mrpt::poses::CPose3DPDFGaussian T_enu_to_map)
+    {
+        auto& g = geoRefParams_.emplace();
+
+        g.geo_coord    = geo_coord;
+        g.T_enu_to_map = T_enu_to_map;
+    }
+
+   protected:
+    struct GeoReferenceParams
+    {
+        mrpt::topography::TGeodeticCoords geo_coord;
+        mrpt::poses::CPose3DPDFGaussian   T_enu_to_map;
+    };
+    std::optional<GeoReferenceParams> geoRefParams_;
 };
 
 }  // namespace mola
