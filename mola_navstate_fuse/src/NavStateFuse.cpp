@@ -70,6 +70,12 @@ void NavStateFuse::fuse_imu(const mrpt::obs::CObservationIMU& imu)
     (void)imu;
 }
 
+void NavStateFuse::fuse_gnss(const mrpt::obs::CObservationGPS& gps)
+{
+    // TODO(jlbc)
+    (void)gps;
+}
+
 void NavStateFuse::fuse_pose(
     const mrpt::Clock::time_point&         timestamp,
     const mrpt::poses::CPose3DPDFGaussian& pose,

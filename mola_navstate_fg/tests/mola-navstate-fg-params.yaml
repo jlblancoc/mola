@@ -1,0 +1,10 @@
+# Config for NavStateFGParams
+sliding_window_length: 5.0 # [s]
+max_time_to_use_velocity_model: 2.0  # [s]
+time_between_frames_to_warning: 2.0  # [s]
+sigma_random_walk_acceleration_linear: 1.0 # [m/s²]
+sigma_random_walk_acceleration_angular: 1.0 # [rad/s²]
+sigma_integrator_position: 0.10 # [m]
+sigma_integrator_orientation: 0.10 # [rad]
+robust_param: 0
+max_rmse: 2

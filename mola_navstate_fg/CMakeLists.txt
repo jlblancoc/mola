@@ -46,6 +46,15 @@ mola_add_library(
 target_include_directories(${PROJECT_NAME} PRIVATE ".")
 
 # -----------------------
+# define cli apps:
+mola_add_executable(
+  TARGET  mola-navstate-cli
+  SOURCES apps/mola-navstate-cli.cpp
+  LINK_LIBRARIES
+    ${PROJECT_NAME}
+)
+
+# -----------------------
 # define tests:
 enable_testing()
 add_subdirectory(tests)

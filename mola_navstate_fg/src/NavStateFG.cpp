@@ -154,6 +154,14 @@ void NavStateFG::fuse_imu(const mrpt::obs::CObservationIMU& imu)
     delete_too_old_entries();
 }
 
+void NavStateFG::fuse_gnss(const mrpt::obs::CObservationGPS& gps)
+{
+    THROW_EXCEPTION("TODO");
+    (void)gps;
+
+    delete_too_old_entries();
+}
+
 void NavStateFG::fuse_pose(
     const mrpt::Clock::time_point&         timestamp,
     const mrpt::poses::CPose3DPDFGaussian& pose, const std::string& frame_id)

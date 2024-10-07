@@ -128,6 +128,9 @@ class NavStateFG : public mola::NavStateFilter
     /** Integrates new IMU observations into the estimator */
     void fuse_imu(const mrpt::obs::CObservationIMU& imu) override;
 
+    /** Integrates new GNSS observations into the estimator */
+    void fuse_gnss(const mrpt::obs::CObservationGPS& gps) override;
+
     /** Integrates new twist estimation (in the odom frame) */
     void fuse_twist(
         const mrpt::Clock::time_point&     timestamp,
