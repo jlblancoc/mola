@@ -43,7 +43,7 @@ MOLA
 .. toctree::
   :maxdepth: 2
   :hidden:
-  :caption: Details
+  :caption: Learn more
 
   mola_architecture
   tutorials

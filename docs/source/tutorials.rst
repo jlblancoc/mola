@@ -21,4 +21,5 @@ tools.
 
   tutorial-mola-main-cli-tools
   tutorial-mola-cmake-commands
+  tutorial-mulran-replay-to-ros2
 
