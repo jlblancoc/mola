@@ -20,6 +20,9 @@ modules:
       - raw_sensor_label: gps
         decimation: 1
         win_pos: 5 400 400 400
+      - raw_sensor_label: imu
+        decimation: 10
+        win_pos: 5 550 400 400
     params:
       base_dir: ${MULRAN_BASE_DIR}
       sequence: ${MULRAN_SEQ}
@@ -27,6 +30,8 @@ modules:
       start_paused: ${MOLA_DATASET_START_PAUSED|false}
       publish_lidar: true
       publish_ground_truth: true
+      publish_imu: true
+      publish_gps: true
       #lidar_to_ground_truth_1to1: false
 
   # =====================

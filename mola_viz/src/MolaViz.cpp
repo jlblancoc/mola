@@ -39,6 +39,7 @@
 #include <mrpt/obs/CObservation2DRangeScan.h>
 #include <mrpt/obs/CObservation3DRangeScan.h>
 #include <mrpt/obs/CObservationGPS.h>
+#include <mrpt/obs/CObservationIMU.h>
 #include <mrpt/obs/CObservationImage.h>
 #include <mrpt/obs/CObservationPointCloud.h>
 #include <mrpt/obs/CObservationRotatingScan.h>
@@ -482,6 +483,71 @@ void gui_handler_gps(
     }
 }
 
+// CObservationIMU
+void gui_handler_imu(
+    const mrpt::rtti::CObject::Ptr& o, nanogui::Window* w,
+    MolaViz::window_name_t parentWin, MolaViz* instance)
+{
+    auto obj = std::dynamic_pointer_cast<mrpt::obs::CObservationIMU>(o);
+    if (!obj) return;
+
+    mrpt::gui::MRPT2NanoguiGLCanvas* glControl;
+    // mrpt::opengl::CSetOfObjects::Ptr            glCornerRef, glCornerSensor;
+    std::optional<mrpt::LockHelper<std::mutex>> lck;
+
+    if (w->children().size() == 1)
+    {
+        // Create on first use:
+        w->setLayout(new nanogui::GridLayout(
+            nanogui::Orientation::Horizontal, 1, nanogui::Alignment::Fill, 2,
+            2));
+
+        glControl = w->add<mrpt::gui::MRPT2NanoguiGLCanvas>();
+
+        lck.emplace(&glControl->scene_mtx);
+
+        glControl->scene = mrpt::opengl::COpenGLScene::Create();
+
+        // glCornerRef    = mrpt::opengl::stock_objects::CornerXYZ(1.0f);
+        // glControl->scene->insert(glCornerRef);
+
+        const int winW = 400, winH = 125;
+        glControl->setSize({winW, winH});
+        glControl->setFixedSize({winW, winH});
+
+        instance->markWindowForReLayout(parentWin);
+    }
+    else
+    {
+        // Reuse from past iterations:
+        glControl =
+            dynamic_cast<mrpt::gui::MRPT2NanoguiGLCanvas*>(w->children().at(1));
+        lck.emplace(&glControl->scene_mtx);
+
+        // glCornerRef
+        // =glControl->scene->getByClass<mrpt::opengl::CSetOfObjects>(0);
+    }
+    ASSERT_(glControl != nullptr);
+
+    std::vector<std::string> txts;
+
+    if (obj->has(mrpt::obs::IMU_WX))
+        txts.push_back(mrpt::format(
+            "omega=(%7.04f,%7.04f,%7.04f)", obj->get(mrpt::obs::IMU_WX),
+            obj->get(mrpt::obs::IMU_WY), obj->get(mrpt::obs::IMU_WZ)));
+    else
+        txts.push_back("omega=None");
+
+    if (obj->has(mrpt::obs::IMU_X_ACC))
+        txts.push_back(mrpt::format(
+            "acc=(%7.04f,%7.04f,%7.04f)", obj->get(mrpt::obs::IMU_X_ACC),
+            obj->get(mrpt::obs::IMU_Y_ACC), obj->get(mrpt::obs::IMU_Z_ACC)));
+    else
+        txts.push_back("acc=None");
+
+    gui_handler_show_common_sensor_info(*obj, w, txts);
+}
+
 }  // namespace
 
 MRPT_INITIALIZER(do_register_MolaViz)
@@ -493,6 +559,7 @@ MRPT_INITIALIZER(do_register_MolaViz)
     // clang-format off
     MolaViz::register_gui_handler("mrpt::obs::CObservationImage", &gui_handler_images);
     MolaViz::register_gui_handler("mrpt::obs::CObservationGPS", &gui_handler_gps);
+    MolaViz::register_gui_handler("mrpt::obs::CObservationIMU", &gui_handler_imu);
     MolaViz::register_gui_handler("mrpt::obs::CObservationPointCloud",   &gui_handler_point_cloud);
     MolaViz::register_gui_handler("mrpt::obs::CObservation3DRangeScan",  &gui_handler_point_cloud);
     MolaViz::register_gui_handler("mrpt::obs::CObservation3DRangeScan",  &gui_handler_images);
