@@ -19,6 +19,7 @@
 #include <mrpt/math/CMatrixDynamic.h>
 #include <mrpt/math/TPose3D.h>
 #include <mrpt/obs/CObservationGPS.h>
+#include <mrpt/obs/CObservationIMU.h>
 #include <mrpt/obs/CObservationPointCloud.h>
 #include <mrpt/obs/obs_frwds.h>
 
@@ -41,7 +42,7 @@ namespace mola
  *            HDOP in that struct is computed as reported standard deviation
  *            from the dataset, divided by HDOP_REFERENCE_METERS.
  * - `radar`: Navtech CIR204-H (Not implemented yet).
- * - `imu`  : (TBD) (Not implemented yet).
+ * - `imu`  : As mrpt::obs::CObservationIMU.
  * - Ground truth poses
  *
  * Point clouds are published as mrpt::obs::CObservationPointCloud
@@ -105,6 +106,7 @@ class MulranDataset : public RawDataSourceBase,
      */
     mrpt::obs::CObservationPointCloud::Ptr getPointCloud(timestep_t step) const;
     mrpt::obs::CObservationGPS::Ptr        getGPS(timestep_t step) const;
+    mrpt::obs::CObservationIMU::Ptr        getIMU(timestep_t step) const;
 
     // See docs in base class:
     size_t datasetSize() const override;
@@ -156,9 +158,11 @@ class MulranDataset : public RawDataSourceBase,
     std::string base_dir_;  //!< base dir for "sequences/*".
     std::string sequence_;  //!< "00", "01", ...
     bool        lidar_to_ground_truth_1to1_ = true;
-    bool        publish_lidar_{true};
-    bool        publish_gps_{true};
-    bool        publish_ground_truth_{true};
+
+    bool publish_lidar_        = true;
+    bool publish_gps_          = true;
+    bool publish_imu_          = true;
+    bool publish_ground_truth_ = true;
 
     std::optional<mrpt::Clock::time_point> last_play_wallclock_time_;
     double                                 last_dataset_time_ = 0;
@@ -169,6 +173,7 @@ class MulranDataset : public RawDataSourceBase,
         Lidar,
         GNSS,
         GroundTruth,
+        IMU,
     };
 
     struct Entry
@@ -179,6 +184,7 @@ class MulranDataset : public RawDataSourceBase,
         timestep_t lidarIdx = 0;  // idx in lstPointCloudFiles_
         timestep_t gpsIdx   = 0;  // row indices in gpsCsvData_
         timestep_t gtIdx    = 0;  // idx in groundTruthTrajectory_
+        timestep_t imuIdx   = 0;  // idx in imuCsvData_
     };
 
     std::multimap<double, Entry>           datasetEntries_;
@@ -191,16 +197,29 @@ class MulranDataset : public RawDataSourceBase,
         read_ahead_lidar_obs_;
 
     mrpt::math::CMatrixDouble gpsCsvData_;
-
-    // I found no extrinsics for the GPS sensor in this dataset web (?):
+    /** I found no extrinsics for the GPS sensor in this dataset web, but it
+     * *seems* it's the same system than in "Complex Urban Dataset":
+     * https://sites.google.com/view/complex-urban-dataset/system?authuser=0
+     */
     mrpt::poses::CPose3D gpsPoseOnVehicle_ = mrpt::poses::CPose3D::Identity();
     mrpt::poses::CPose3D ousterPoseOnVehicle_;
+
+    mrpt::math::CMatrixDouble imuCsvData_;
+
+    /** It *seems* authors used the same system than in "Complex Urban Dataset":
+     * https://sites.google.com/view/complex-urban-dataset/system?authuser=0
+     *
+     * So IMU should be aligned XYZ with the vehicle, and 7cm backwards.
+     */
+    mrpt::poses::CPose3D imuPoseOnVehicle_ =
+        mrpt::poses::CPose3D::FromTranslation(-0.07, .0, .0);
 
     double      replay_time_ = .0;
     std::string seq_dir_;
 
     void                            load_lidar(timestep_t step) const;
     mrpt::obs::CObservationGPS::Ptr get_gps_by_row_index(size_t row) const;
+    mrpt::obs::CObservationIMU::Ptr get_imu_by_row_index(size_t row) const;
 
     void autoUnloadOldEntries() const;
 

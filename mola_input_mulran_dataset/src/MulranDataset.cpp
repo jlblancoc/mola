@@ -95,6 +95,7 @@ void MulranDataset::initialize_rds(const Yaml& c)
 
     YAML_LOAD_MEMBER_OPT(publish_lidar, bool);
     YAML_LOAD_MEMBER_OPT(publish_gps, bool);
+    YAML_LOAD_MEMBER_OPT(publish_imu, bool);
     YAML_LOAD_MEMBER_OPT(publish_ground_truth, bool);
 
     // Make list of all existing files and preload everything we may need later
@@ -160,6 +161,40 @@ void MulranDataset::initialize_rds(const Yaml& c)
     else
     {
         MRPT_LOG_INFO_FMT("No GPS file found, expected: '%s'", gpsFile.c_str());
+    }
+
+    // Load IMU data, if found:
+    const auto imuFile = mrpt::system::pathJoin({seq_dir_, "xsens_imu.csv"});
+    if (mrpt::system::fileExists(imuFile))
+    {
+        try
+        {
+            imuCsvData_.loadFromTextFile(imuFile);
+            ASSERT_(imuCsvData_.cols() == 17 || imuCsvData_.cols() == 18);
+        }
+        catch (const std::exception& e)
+        {
+            MRPT_LOG_ERROR_STREAM(
+                "Error parsing IMU file: '" << imuFile << "':\n"
+                                            << e.what());
+            throw;
+        }
+
+        MRPT_LOG_INFO_STREAM(
+            "IMU found: " << imuCsvData_.rows() << " entries.");
+
+        // Parse into the unified container:
+        for (int row = 0; row < imuCsvData_.rows(); row++)
+        {
+            const double t     = 1e-9 * imuCsvData_(row, 0);
+            Entry        entry = {EntryType::IMU};
+            entry.imuIdx       = row;
+            datasetEntries_.emplace(t, entry);
+        }
+    }
+    else
+    {
+        MRPT_LOG_INFO_FMT("No IMU file found, expected: '%s'", imuFile.c_str());
     }
 
     // Load ground truth poses, if available:
@@ -367,6 +402,15 @@ void MulranDataset::spinOnce()
             }
             break;
 
+            case EntryType::IMU:
+            {
+                if (!publish_imu_) break;
+
+                auto o = get_imu_by_row_index(de.imuIdx);
+                this->sendObservationsToFrontEnds(o);
+            }
+            break;
+
             case EntryType::GroundTruth:
             {
                 if (!publish_ground_truth_) break;
@@ -563,6 +607,19 @@ mrpt::obs::CObservationGPS::Ptr MulranDataset::getGPS(timestep_t step) const
     return get_gps_by_row_index(it->second.gpsIdx);
 }
 
+mrpt::obs::CObservationIMU::Ptr MulranDataset::getIMU(timestep_t step) const
+{
+    ASSERT_(initialized_);
+    ASSERT_LT_(step, datasetEntries_.size());
+
+    auto it = datasetEntries_.begin();
+    std::advance(it, step);
+
+    if (it->second.type != EntryType::IMU) return {};
+
+    return get_imu_by_row_index(it->second.imuIdx);
+}
+
 mrpt::obs::CObservationGPS::Ptr MulranDataset::get_gps_by_row_index(
     size_t row) const
 {
@@ -572,6 +629,7 @@ mrpt::obs::CObservationGPS::Ptr MulranDataset::get_gps_by_row_index(
     auto obs         = mrpt::obs::CObservationGPS::Create();
     obs->sensorLabel = "gps";
     obs->timestamp   = mrpt::Clock::fromDouble(1e-9 * gpsCsvData_(row, 0));
+    obs->sensorPose  = gpsPoseOnVehicle_;
 
     // clang-format off
     // column order:
@@ -607,6 +665,52 @@ mrpt::obs::CObservationGPS::Ptr MulranDataset::get_gps_by_row_index(
     return obs;
 }
 
+mrpt::obs::CObservationIMU::Ptr MulranDataset::get_imu_by_row_index(
+    size_t row) const
+{
+    ASSERT_(initialized_);
+    ASSERT_LT_(row, static_cast<size_t>(imuCsvData_.rows()));
+
+    auto obs         = mrpt::obs::CObservationIMU::Create();
+    obs->sensorLabel = "imu";
+    obs->sensorPose  = imuPoseOnVehicle_;
+    obs->timestamp   = mrpt::Clock::fromDouble(1e-9 * imuCsvData_(row, 0));
+
+    // clang-format off
+    // column order: (length is either 8 or 17)
+    //   0        1    2    3   4      5 6  7    8    9   10    11   12  13     14   15   16
+    // &stamp,  &q_x,&q_y,&q_z,&q_w,  &x,&y,&z, &g_x,&g_y,&g_z, &a_x,&a_y,&a_z, &m_x,&m_y,&m_z
+    // clang-format on
+
+    using namespace mrpt::obs;
+
+    obs->set(mrpt::obs::IMU_ORI_QUAT_X, imuCsvData_(row, 1));
+    obs->set(mrpt::obs::IMU_ORI_QUAT_Y, imuCsvData_(row, 2));
+    obs->set(mrpt::obs::IMU_ORI_QUAT_Z, imuCsvData_(row, 3));
+    obs->set(mrpt::obs::IMU_ORI_QUAT_W, imuCsvData_(row, 4));
+
+    obs->set(mrpt::obs::IMU_X, imuCsvData_(row, 5));
+    obs->set(mrpt::obs::IMU_Y, imuCsvData_(row, 6));
+    obs->set(mrpt::obs::IMU_Z, imuCsvData_(row, 7));
+
+    if (imuCsvData_.cols() == 17)
+    {
+        obs->set(mrpt::obs::IMU_WX, imuCsvData_(row, 8));
+        obs->set(mrpt::obs::IMU_WY, imuCsvData_(row, 9));
+        obs->set(mrpt::obs::IMU_WZ, imuCsvData_(row, 10));
+
+        obs->set(mrpt::obs::IMU_X_ACC, imuCsvData_(row, 11));
+        obs->set(mrpt::obs::IMU_Y_ACC, imuCsvData_(row, 12));
+        obs->set(mrpt::obs::IMU_Z_ACC, imuCsvData_(row, 13));
+
+        obs->set(mrpt::obs::IMU_MAG_X, imuCsvData_(row, 14));
+        obs->set(mrpt::obs::IMU_MAG_Y, imuCsvData_(row, 15));
+        obs->set(mrpt::obs::IMU_MAG_Z, imuCsvData_(row, 16));
+    }
+
+    return obs;
+}
+
 size_t MulranDataset::datasetSize() const
 {
     ASSERT_(initialized_);
@@ -630,6 +734,10 @@ mrpt::obs::CSensoryFrame::Ptr MulranDataset::datasetGetObservations(
     if (publish_gps_)
     {
         if (auto o = getGPS(timestep); o) sf->insert(o);
+    }
+    if (publish_imu_)
+    {
+        if (auto o = getIMU(timestep); o) sf->insert(o);
     }
 
     return sf;
