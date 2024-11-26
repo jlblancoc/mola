@@ -55,11 +55,9 @@ Visualization Manager:
           Value: true
         gps:
           Value: true
+        imu:
+          Value: true
         lidar:
-          Value: true
-        map:
-          Value: true
-        odom:
           Value: true
       Marker Scale: 1
       Name: TF
@@ -70,10 +68,9 @@ Visualization Manager:
         base_link:
           gps:
             {}
-          lidar:
+          imu:
             {}
-        map:
-          odom:
+          lidar:
             {}
       Update Interval: 0
       Value: true
@@ -235,10 +232,24 @@ Visualization Manager:
         Reliability Policy: Reliable
         Value: /pf_pose
       Value: true
+    - Alpha: 1
+      Class: rviz_plugin_tutorials/Imu
+      Color: 204; 51; 204
+      Enabled: true
+      History Length: 1
+      Name: Imu
+      Topic:
+        Depth: 5
+        Durability Policy: Volatile
+        Filter size: 10
+        History Policy: Keep Last
+        Reliability Policy: Reliable
+        Value: /imu
+      Value: true
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48
-    Fixed Frame: map
+    Fixed Frame: base_link
     Frame Rate: 30
   Name: root
   Tools:
@@ -318,4 +329,4 @@ Window Geometry:
     collapsed: true
   Width: 1850
   X: 70
-  Y: 534
+  Y: 27
