@@ -518,6 +518,10 @@ void BridgeROS2::onNewObservation(const CObservation::Ptr& o)
     {
         return internalOn(*oGPS);
     }
+    else if (auto oIMU = std::dynamic_pointer_cast<CObservationIMU>(o); oIMU)
+    {
+        return internalOn(*oIMU);
+    }
     else
     {
         MRPT_LOG_THROTTLE_WARN_FMT(
@@ -830,6 +834,59 @@ void BridgeROS2::internalOn(const mrpt::obs::CObservationGPS& obs)
         mrpt::ros2bridge::toROS(obs, header, msg);
 
         pubGPS->publish(msg);
+    }
+}
+
+void BridgeROS2::internalOn(const mrpt::obs::CObservationIMU& obs)
+{
+    auto lck = mrpt::lockHelper(rosPubsMtx_);
+
+    // Create the publisher the first time an observation arrives:
+    const bool is_1st_pub =
+        rosPubs_.pub_sensors.find(obs.sensorLabel) == rosPubs_.pub_sensors.end();
+    auto& pub = rosPubs_.pub_sensors[obs.sensorLabel];
+
+    if (is_1st_pub)
+    {
+        // REP-2003: Sensor sources should use SystemDefaultsQoS
+        // See: https://ros.org/reps/rep-2003.html
+        pub = rosNode()->create_publisher<sensor_msgs::msg::Imu>(
+            obs.sensorLabel, rclcpp::SystemDefaultsQoS());
+    }
+    lck.unlock();
+
+    rclcpp::Publisher<sensor_msgs::msg::Imu>::SharedPtr pubImu =
+        std::dynamic_pointer_cast<rclcpp::Publisher<sensor_msgs::msg::Imu>>(pub);
+    ASSERT_(pubImu);
+
+    const std::string sSensorFrameId = obs.sensorLabel;
+
+    // Send TF:
+    mrpt::poses::CPose3D sensorPose;
+    obs.getSensorPose(sensorPose);
+
+    tf2::Transform transform = mrpt::ros2bridge::toROS_tfTransform(sensorPose);
+
+    geometry_msgs::msg::TransformStamped tfStmp;
+    tfStmp.transform       = tf2::toMsg(transform);
+    tfStmp.child_frame_id  = sSensorFrameId;
+    tfStmp.header.frame_id = params_.base_link_frame;
+    tfStmp.header.stamp    = myNow(obs.timestamp);
+    tf_bc_->sendTransform(tfStmp);
+
+    // Send observation:
+    {
+        obs.load();
+
+        // Convert observation MRPT -> ROS
+        std_msgs::msg::Header header;
+        header.stamp    = myNow(obs.timestamp);
+        header.frame_id = sSensorFrameId;
+
+        sensor_msgs::msg::Imu imu;
+        mrpt::ros2bridge::toROS(obs, header, imu);
+
+        pubImu->publish(imu);
     }
 }
 
