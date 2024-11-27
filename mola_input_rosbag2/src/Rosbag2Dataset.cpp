@@ -981,7 +981,7 @@ Rosbag2Dataset::Obs Rosbag2Dataset::catchExceptions(
     {
         MRPT_LOG_ERROR_STREAM(
             "Exception while processing topic message (ignore if the error "
-            "stops later one, e.g. missing /tf):\n"
+            "stops later on, e.g. missing /tf):\n"
             << e.what());
         return {};
     }
