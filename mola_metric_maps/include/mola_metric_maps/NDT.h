@@ -482,6 +482,15 @@ class NDT : public mrpt::maps::CMetricMap,
         mrpt::img::TColorf planes_color{1.0f, .0f, 1.0f};
         bool               normals_visible = true;
         mrpt::img::TColorf normals_color{1.0f, 0.0f, 0.0f};
+
+        /** Colormap to use. Can be set to cmNone for uniform color */
+        mrpt::img::TColormap points_colormap = mrpt::img::cmHOT;
+        mrpt::img::TColormap planes_colormap = mrpt::img::cmHOT;
+
+        /** If colormap!=mrpt::img::cmNONE, use this coordinate
+         *  as color index: 0=x  1=y  2=z
+         */
+        uint8_t recolorizeByCoordinateIndex = 2;
     };
     TRenderOptions renderOptions;
 
