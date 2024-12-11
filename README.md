@@ -12,7 +12,7 @@
 | --- | ---
 | ROS 2 Iron (u22.04) | [![Version](https://img.shields.io/ros/v/iron/mola)](https://index.ros.org/search/?term=mola) |
 
-# mola
+# MOLA
 A Modular Optimization framework for Localization and mApping (MOLA).
 This repository contains the base open-sourced packages for the MOLA project. Other packages exist under the [MOLAorg](https://github.com/MOLAorg/) organization.
 
@@ -21,10 +21,10 @@ Refer to the [official documentation](https://docs.mola-slam.org/latest/) for bu
 ![kitti_demo_06](https://github.com/MOLAorg/mola/assets/5497818/76cf07e2-ab20-41a3-abc6-df5c5ba74b97)
 
 ## ROSCon Talk introducing MOLA
+Video ([Slides](https://docs.google.com/presentation/d/1Zg1saZCxlE49jZ4SxPBLaRh7WUYGmfC0fiKUunJg-dA/edit?usp=drivesdk)):
 
-[Slides](https://docs.google.com/presentation/d/1Zg1saZCxlE49jZ4SxPBLaRh7WUYGmfC0fiKUunJg-dA/edit?usp=drivesdk)
+[![MOLA ROSCon talk](https://img.youtube.com/vi/FkDnbfVyN2M/0.jpg)](https://www.youtube.com/watch?v=FkDnbfVyN2M)
 
-Video: TBD
 
 ## Individual package build status
 
