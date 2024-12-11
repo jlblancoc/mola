@@ -2,6 +2,11 @@
 Changelog for package mola_kernel
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* NavStateFilter interface: add API for merging GNSS observations
+* Contributors: Jose Luis Blanco-Claraco
+
 1.2.1 (2024-09-29)
 ------------------
 

@@ -3,6 +3,11 @@ Changelog for package mola_input_mulran_dataset
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
+Forthcoming
+-----------
+* Mulran: Publish IMU too
+* Contributors: Jose Luis Blanco-Claraco
+
 1.2.1 (2024-09-29)
 ------------------
 

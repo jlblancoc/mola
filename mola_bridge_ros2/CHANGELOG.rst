@@ -3,6 +3,11 @@ Changelog for package mola_bridge_ros2
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
+Forthcoming
+-----------
+* Support publishing IMU readings MOLA -> ROS2
+* Contributors: Jose Luis Blanco-Claraco
+
 1.2.1 (2024-09-29)
 ------------------
 * BUGFIX: Prevent potential race condition

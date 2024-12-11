@@ -2,6 +2,12 @@
 Changelog for package mola_demos
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Update ROS2 demos for Mulran replay
+* mola_viz: Show IMU data in the GUI too
+* Contributors: Jose Luis Blanco-Claraco
+
 1.2.1 (2024-09-29)
 ------------------
 

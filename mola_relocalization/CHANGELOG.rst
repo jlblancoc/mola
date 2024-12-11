@@ -3,6 +3,9 @@ Changelog for package mola_relocalization
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
+Forthcoming
+-----------
+
 1.2.1 (2024-09-29)
 ------------------
 
