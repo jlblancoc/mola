@@ -52,7 +52,7 @@ in either absolute path, or relative to the current YAML file being parsed.
       - type: CLASS_NAME1       # mandatory
         #...
         params:                 # Other module-specific parameters
-          $include{$(mola-dir module-name)/params/xxxx.yaml}
+          $include{$(ros2 pkg prefix mola_lidar_odometry)/share/xxx/xxxx.yaml}
         config:
           $include{params/xxxx.yaml}
 
@@ -69,3 +69,11 @@ Replace output of external process: ``$(cmd)``
 The pattern ``$(cmd arg1 arg2...)`` is replaced by the console output of running
 the given command with the given arguments. See for example its usage together
 with ``$include{xxx}`` above.
+
+Mathematical formulas : ``$f{xxx}``
+-----------------------------------------------
+The pattern ``$f{expr}`` can be used to indicate mathematical expressions. 
+The `ExprTk library <https://github.com/ArashPartow/exprtk>`_ is used
+(via `mrpt-expr <https://docs.mrpt.org/reference/latest/group_mrpt_expr_grp.html>`_),
+so refer to their documentation for built-in functions and syntax.
+User-defined variables can be used, depending on the context of the YAML file being parsed.
