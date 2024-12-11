@@ -10,13 +10,6 @@ jobs:
       DEBIAN_FRONTEND: noninteractive
     strategy:
       matrix:
-        # Github Actions requires a single row to be added to the build matrix.
-        # See https://help.github.com/en/articles/workflow-syntax-for-github-actions.
-#        ros_distribution:
-#          - humble
-#          - iron
-#          - rolling
-
         # Define the Docker image(s) associated with each ROS distribution.
         # The include syntax allows additional variables to be defined, like
         # docker_image in this case. See documentation:
@@ -29,11 +22,6 @@ jobs:
           # Humble Hawksbill (May 2022 - May 2027)
           - docker_image: ubuntu:jammy
             ros_distribution: humble
-            ros_version: 2
-
-          # Iron Irwini (May 2023 - November 2024)
-          - docker_image: ubuntu:jammy
-            ros_distribution: iron
             ros_version: 2
 
           # Jazzy (2024 - ??)
