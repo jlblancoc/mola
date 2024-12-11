@@ -285,6 +285,9 @@ Afterwards, visualizing :ref:`metric map files <mp2p_icp_basics>` (``*.mm``) can
 
 |
 
+
+.. _tutorial-pub-map-server-to-ros:
+
 5. Publish the map to ROS 2
 ----------------------------------------
 

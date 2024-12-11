@@ -31,24 +31,7 @@ which extends the standard `REP-105 <https://www.ros.org/reps/rep-0105.html>`_ w
    :width: 500
    :align: center
 
-These are the existing frames:
-
-- ``base_link``: The robot reference frame. For ground vehicles, normally placed at the
-  center of the rear axle.
-- ``odom``: The arbitrary origin for odometry measurements.
-- ``map``: The origin of the reference metric map used for localization.
-- ``enu``: For geo-referenced maps, the North (``y`` axis), East (``x`` axis), Up (``z`` axis) frame for which
-  we have reference geodetic coordinates (latitude and longitude). Different maps built in the same zone
-  will surely have different ``enu`` frames, since it is defined by collected GNSS measurements.
-- ``utm``: The origin of the `UTM zone <https://en.wikipedia.org/wiki/Universal_Transverse_Mercator_coordinate_system>`_
-  in which ``enu`` falls. Unlike ``enu``, it is **independent** of the trajectory followed while building the map.
-
-And this is who is responsible of publishing each transformation:
-
-- ``odom → base_link``: Odometry module. High-frequency, accurate in the short term, but drifts in the long term.
-- ``map → odom``: :ref:`Localization <localization>` module, which corrects the odometry drift.
-- ``enu → {map, utm}``: Published by ``mrpt_map_server`` (`github <https://github.com/mrpt-ros-pkg/mrpt_navigation/tree/ros2/mrpt_map_server/>`_),
-  if fed with a geo-referenced metric map (``.mm``) file.
+The existing frames are :ref:`explained here <mola_ros2_tf_frames>`.
 
 |
 

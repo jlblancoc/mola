@@ -16,8 +16,8 @@ MOLA
   localization
   geo-referencing
   use-cases
-  solutions
   ros2api
+  solutions
 
 .. toctree::
   :maxdepth: 2
