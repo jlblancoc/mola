@@ -247,7 +247,7 @@ and launch it using `mola-cli`. See existing ROS launch examples
 under `ros2-launch (mola_demos package) <https://github.com/MOLAorg/mola/tree/develop/mola_demos/ros2-launchs>`_,
 with corresponding MOLA cli launch files in the `mola-cli-launchs <https://github.com/MOLAorg/mola/tree/develop/mola_demos/mola-cli-launchs>`_ directory.
 
-.. dropdown:: Example: play back a KITTI dataset sequence to ROS 2
+.. dropdown:: Example #1: play back a KITTI dataset sequence to ROS 2
   :open:
 
   .. code-block:: bash
@@ -258,3 +258,9 @@ with corresponding MOLA cli launch files in the `mola-cli-launchs <https://githu
 
   .. figure:: https://mrpt.github.io/imgs/screenshot_mola_demo_kitti_replay_to_ros.jpg
     :width: 600
+
+.. dropdown:: Example #2: play back a Mulran dataset sequence to ROS 2
+  :open:
+
+  Refer to the :ref:`complete tutorial <tutorial-mulran-replay-to-ros2>`.
+
