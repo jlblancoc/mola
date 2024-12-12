@@ -11,14 +11,7 @@ or LiDAR-odometry module. At present, this applies to:
   MOLA modules and the ROS 2 system.
 - :ref:`mola_lidar_odometry`
 
-.. note::
-
-   It is recommended to start with the tutorial on how to :ref:`build a map <building-maps>`,
-   then check out :ref:`how to launch MOLA-LO for ROS 2 <mola_lo_ros>`.
-
 .. image:: https://mrpt.github.io/imgs/mola-lo-ros2-launch-demo-kitti.png
-
-
 
 ____________________________________________
 
@@ -31,7 +24,32 @@ ____________________________________________
 
 |
 
-1. Map loading / saving
+1. Launching MOLA-LO ROS 2 node
+--------------------------------------
+
+Basic usage:
+
+   .. code-block:: bash
+
+      # Basic usage (requires correct LiDAR sensor /tf):
+      ros2 launch mola_lidar_odometry ros2-lidar-odometry.launch.py \
+      lidar_topic_name:=/ouster/points
+
+      # Usage without sensor /tf:
+      ros2 launch mola_lidar_odometry ros2-lidar-odometry.launch.py \
+      lidar_topic_name:=/ouster/points \
+      ignore_lidar_pose_from_tf:=True
+
+.. note::
+
+   It is recommended to start with the tutorial on how to :ref:`build a map <building-maps>`,
+   then read :ref:`the docs <mola_lo_ros>` on the MOLA-LO ROS 2 launch file.
+
+|
+
+----
+
+2. Map loading / saving
 --------------------------------------
 During a live SLAM run, ``BridgeROS2`` will look for modules implementing
 :ref:`MapServer <doxid-classmola_1_1_map_server>` and will expose
@@ -43,13 +61,13 @@ these **ROS 2 services** to load or save the current map:
 
 .. dropdown:: Example ROS 2 cli service calls
 
-    To save the current map:
+   To save the current map:
 
    .. code-block:: bash
 
       ros2 service call /map_save mola_msgs/srv/MapSave "map_path: '/tmp/my_map_file_prefix'"
 
-    To load a map from disk:
+   To load a map from disk:
 
    .. code-block:: bash
 
@@ -70,7 +88,7 @@ the corresponding checkbox in the
 
 ----
 
-2. Re-localization
+3. Re-localization
 --------------------------------------
 Write me!
 
@@ -80,7 +98,7 @@ Write me!
 
 .. _mola_ros2_tf_frames:
 
-3. ``/tf`` frames
+4. Published ``/tf`` frames
 --------------------------------------
 These frames of reference exist when using MOLA :ref:`geo-referenced <geo-referencing>` maps:
 
@@ -116,7 +134,7 @@ And this is who is responsible of publishing each transformation:
 
 ----
 
-4. Map publishing
+5. Map publishing
 --------------------------------------
 There are two ways of publishing maps to ROS:
 
