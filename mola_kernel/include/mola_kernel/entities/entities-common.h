@@ -21,7 +21,13 @@
 
 namespace mola
 {
+/** \addtogroup mola_kernel_entities_grp Centralized map database entities
+ *  \ingroup mola_kernel_grp
+ *  @{ */
+
 /** Placeholder for generic entity of user-defined types */
 using EntityOther = std::shared_ptr<EntityBase>;
+
+/** @} */
 
 }  // namespace mola

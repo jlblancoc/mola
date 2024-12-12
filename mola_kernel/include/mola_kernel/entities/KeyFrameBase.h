@@ -25,7 +25,7 @@ namespace mola
  * This class is used as a base class for all world-model entities that can be
  * used as robot/vehicle keyframes.
  *
- * \ingroup mola_kernel_grp
+ * \ingroup mola_kernel_entities_grp
  */
 class KeyFrameBase
 {

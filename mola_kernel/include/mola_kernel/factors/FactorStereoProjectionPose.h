@@ -26,7 +26,7 @@ struct StereoObservation
 
 /** Smart factor for a set of stereo-camera observations of one point landmark.
  * The ID of the factor is the ID of the landmark.
- * \ingroup mola_kernel_grp
+ * \ingroup mola_kernel_factors_grp
  */
 class FactorStereoProjectionPose : public FactorBase
 {

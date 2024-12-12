@@ -21,7 +21,7 @@ namespace mola
 {
 /** Virtual visualization interface (see MolaViz)
  *
- * \ingroup mola_kernel_grp */
+ * \ingroup mola_kernel_interfaces_grp */
 class VizInterface
 {
    public:

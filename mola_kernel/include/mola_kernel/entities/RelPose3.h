@@ -18,7 +18,7 @@ namespace mola
 {
 /** A relative SE(3) pose (e.g. a sensor pose wrt the vehicle)
  *
- * \ingroup mola_kernel_grp
+ * \ingroup mola_kernel_entities_grp
  */
 class RelPose3 : public EntityRelativeBase
 {

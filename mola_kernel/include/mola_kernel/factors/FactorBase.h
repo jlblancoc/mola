@@ -17,8 +17,12 @@
 
 namespace mola
 {
+/** \addtogroup mola_kernel_factors_grp Centralized map database factors
+ *  \ingroup mola_kernel_grp
+ *  @{ */
+
 /** Defines a type of robust (m-Estimator) factor
- * \ingroup mola_kernel_grp
+ * \ingroup mola_kernel_factors_grp
  */
 enum class Robust : uint8_t
 {
@@ -32,7 +36,7 @@ enum class Robust : uint8_t
 
 /** Base class for all "factors" in the world model
  *
- * \ingroup mola_kernel_grp
+ * \ingroup mola_kernel_factors_grp
  */
 class FactorBase : public mrpt::serialization::CSerializable
 {
@@ -72,5 +76,7 @@ class FactorBase : public mrpt::serialization::CSerializable
     void baseSerializeTo(mrpt::serialization::CArchive& out) const;
     void baseSerializeFrom(mrpt::serialization::CArchive& in);
 };
+
+/** @}  */
 
 }  // namespace mola

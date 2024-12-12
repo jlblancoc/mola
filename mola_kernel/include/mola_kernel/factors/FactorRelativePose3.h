@@ -21,7 +21,7 @@ namespace mola
 {
 /**
  *
- * \ingroup mola_kernel_grp
+ * \ingroup mola_kernel_factors_grp
  */
 class FactorRelativePose3 : public FactorBase
 {

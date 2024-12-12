@@ -20,7 +20,7 @@ namespace mola
 class BackEndBase;
 
 /** Smart factor for a set of IMU measurements (acceleration & gyroscope).
- * \ingroup mola_kernel_grp
+ * \ingroup mola_kernel_factors_grp
  */
 class SmartFactorIMU : public FactorBase
 {

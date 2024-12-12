@@ -26,7 +26,7 @@ namespace mola
 {
 /** The state returned by NavStateFilter
  *
- * \ingroup mola_kernel_grp */
+ * \ingroup mola_kernel_interfaces_grp */
 struct NavState
 {
     NavState()  = default;
@@ -52,7 +52,7 @@ struct NavState
 /** Unified API for kinematic state filtering algorithms,
  *  fusing information from multiple odometry or twist sources.
  *
- * \ingroup mola_kernel_grp */
+ * \ingroup mola_kernel_interfaces_grp */
 class NavStateFilter : public mrpt::system::COutputLogger
 {
    public:

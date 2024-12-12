@@ -23,7 +23,7 @@ namespace mola
 {
 /** Virtual interface for SLAM/odometry methods publishing a map
  *
- * \ingroup mola_kernel_grp */
+ * \ingroup mola_kernel_interfaces_grp */
 class MapSourceBase
 {
    public:

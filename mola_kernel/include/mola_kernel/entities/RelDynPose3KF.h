@@ -21,7 +21,7 @@ namespace mola
 /** A relative "dynamic" pose: SE(3) pose + velocity vector.
  * Both the pose and the velocity vector are given in the frame of the base KF.
  * This entity is also a key-frame.
- * \ingroup mola_kernel_grp
+ * \ingroup mola_kernel_entities_grp
  */
 class RelDynPose3KF : public EntityRelativeBase, public KeyFrameBase
 {

@@ -23,13 +23,13 @@ namespace mola
 {
 /** Arbitrary annotated data, indexed by "label" or "variable name" and
  *capable of offline storage on disk when not used.
- * \ingroup mola_kernel_grp
+ * \ingroup mola_kernel_entities_grp
  */
 using annotations_data_t = std::map<std::string, LazyLoadResource>;
 
 /** Base class for all "entities" in the world model
  *
- * \ingroup mola_kernel_grp
+ * \ingroup mola_kernel_entities_grp
  */
 class EntityBase : public mrpt::serialization::CSerializable
 {

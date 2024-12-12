@@ -27,7 +27,7 @@ namespace mola
 using timestep_t = std::size_t;
 
 /** Virtual base for raw-observation data sources (sensors, dataset
- * parsers,...) \ingroup mola_kernel_grp */
+ * parsers,...) \ingroup mola_kernel_interfaces_grp */
 class RawDataSourceBase : public mola::ExecutableBase
 {
 #if MRPT_VERSION < 0x020e00

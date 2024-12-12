@@ -20,7 +20,7 @@ namespace mola
 /** A relative SE(3) keyframe, holding a relative SE(3) pose wrt to the base
  * frame.
  * This entity is also a key-frame.
- * \ingroup mola_kernel_grp
+ * \ingroup mola_kernel_entities_grp
  */
 class RelPose3KF : public EntityRelativeBase, public KeyFrameBase
 {

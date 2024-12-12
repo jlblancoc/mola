@@ -17,7 +17,7 @@
 namespace mola
 {
 /** Virtual interface for map server services offered by MOLA modules
- * \ingroup mola_kernel_grp */
+ * \ingroup mola_kernel_interfaces_grp */
 class MapServer
 {
    public:

@@ -18,7 +18,7 @@ namespace mola
 {
 /** A 3D point landmark.
  *
- * \ingroup mola_kernel_grp
+ * \ingroup mola_kernel_entities_grp
  */
 class LandmarkPoint3 : public EntityBase
 {

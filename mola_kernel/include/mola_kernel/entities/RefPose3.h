@@ -21,7 +21,7 @@ namespace mola
  * relative maps (submaps). Global SLAM frameworks should have only one entity
  * of this class, submapping approaches will have several instances.
  *
- * \ingroup mola_kernel_grp
+ * \ingroup mola_kernel_entities_grp
  */
 class RefPose3 : public EntityBase
 {

@@ -24,7 +24,7 @@ namespace mola
 using trajectory_t = mrpt::poses::CPose3DInterpolator;
 
 /** Virtual base for offline dataset sources
- * \ingroup mola_kernel_grp */
+ * \ingroup mola_kernel_interfaces_grp */
 class OfflineDatasetSource
 {
    public:

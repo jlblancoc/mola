@@ -26,11 +26,15 @@
 
 namespace mola
 {
+/** \addtogroup mola_kernel_interfaces_grp MOLA virtual interfaces
+ *  \ingroup mola_kernel_grp
+ *  @{ */
+
 /** Virtual interface for SLAM back-ends.
  * All calls to `onXXX()` methods are enqueued and executed in a separate
  * thread.
  *
- * \ingroup mola_kernel_grp */
+ * \ingroup mola_kernel_interfaces_grp */
 class BackEndBase : public ExecutableBase
 {
 #if MRPT_VERSION < 0x020e00
@@ -156,5 +160,7 @@ class BackEndBase : public ExecutableBase
     mrpt::WorkerThreadsPool slam_be_threadpool_{
         2, mrpt::WorkerThreadsPool::POLICY_FIFO, "slam_backend"};
 };
+
+/** @}  */
 
 }  // namespace mola

@@ -22,7 +22,7 @@ namespace mola
 /** Base class for filters: get observations via `onNewObservation()`, and
  * immediately send them to a worker thread that works on it, possibly
  * publishing the output via `sendObservationsToFrontEnds()`.
- * \ingroup mola_kernel_grp */
+ * \ingroup mola_kernel_interfaces_grp */
 class FilterBase : public RawDataSourceBase, RawDataConsumer
 {
 #if MRPT_VERSION < 0x020e00

@@ -19,7 +19,7 @@ namespace mola
 /** Abstract representation of a constant-velocity kinematic motion model factor
  * between two key frames.
  *
- * \ingroup mola_kernel_grp
+ * \ingroup mola_kernel_factors_grp
  */
 class FactorConstVelKinematics : public FactorBase
 {

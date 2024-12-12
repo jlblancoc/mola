@@ -16,7 +16,7 @@
 namespace mola
 {
 /** Virtual base for offline dataset sources to have a GUI within MolaViz
- * \ingroup mola_kernel_grp */
+ * \ingroup mola_kernel_interfaces_grp */
 class Dataset_UI
 {
    public:

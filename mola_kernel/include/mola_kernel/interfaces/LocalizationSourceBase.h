@@ -31,7 +31,7 @@ namespace mola
  * must call subscribeToLocalizationUpdates() providing a callback that returns
  * as fast as possible.
  *
- * \ingroup mola_kernel_grp */
+ * \ingroup mola_kernel_interfaces_grp */
 class LocalizationSourceBase
 {
    public:

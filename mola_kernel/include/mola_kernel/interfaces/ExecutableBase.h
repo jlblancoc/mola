@@ -31,7 +31,7 @@ using ProfilerEntry       = mrpt::system::CTimeLoggerEntry;
 using ProfilerSaverAtDtor = mrpt::system::CTimeLoggerSaveAtDtor;
 
 /** Base virtual class for all executable (nodelet-like) units inside a
- * SLAM system. \ingroup mola_kernel_grp */
+ * SLAM system. \ingroup mola_kernel_interfaces_grp */
 class ExecutableBase : public mrpt::system::COutputLogger,  // for logging
                        public mrpt::rtti::CObject,  // RTTI helpers
                        std::enable_shared_from_this<ExecutableBase>

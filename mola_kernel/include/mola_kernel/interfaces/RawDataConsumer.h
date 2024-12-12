@@ -20,7 +20,7 @@ namespace mola
 using CObservation = mrpt::obs::CObservation;
 
 /** Virtual base for raw-observation consumers
- * \ingroup mola_kernel_grp */
+ * \ingroup mola_kernel_interfaces_grp */
 class RawDataConsumer
 {
    public:

@@ -17,7 +17,7 @@ namespace mola
 {
 /** World optimizable entities which are relative to some keyframe.
  *
- * \ingroup mola_kernel_grp
+ * \ingroup mola_kernel_entities_grp
  */
 class EntityRelativeBase : public EntityBase
 {

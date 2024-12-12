@@ -31,7 +31,7 @@ namespace mola
  * (default=1 Hz), or
  * - Use your own logic to enqueue a task into a worker thread pool (preferred).
  *
- * \ingroup mola_kernel_grp */
+ * \ingroup mola_kernel_interfaces_grp */
 class FrontEndBase : public ExecutableBase, public RawDataConsumer
 {
 #if MRPT_VERSION < 0x020e00
