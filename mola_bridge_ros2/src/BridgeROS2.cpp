@@ -194,6 +194,7 @@ void BridgeROS2::initialize_rds(const Yaml& c)
     YAML_LOAD_OPT(params_, period_publish_new_localization, double);
     YAML_LOAD_OPT(params_, period_publish_new_map, double);
     YAML_LOAD_OPT(params_, publish_tf_from_robot_pose_observations, bool);
+    YAML_LOAD_OPT(params_, relocalize_from_topic, std::string);
 
     // Launch ROS node:
     rosNodeThread_ = std::thread(&BridgeROS2::ros_node_thread_main, this, cfgCopy);
