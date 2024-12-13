@@ -132,6 +132,16 @@ void BridgeROS2::ros_node_thread_main(Yaml cfg)
                 static_cast<unsigned int>(1e6 * params_.period_publish_static_tfs)),
             [this]() { publishStaticTFs(); });
 
+        //
+        if (!params_.relocalize_from_topic.empty())
+        {
+            subInitPose_ =
+                rosNode()->create_subscription<geometry_msgs::msg::PoseWithCovarianceStamped>(
+                    params_.relocalize_from_topic, rclcpp::SystemDefaultsQoS(),
+                    [this](const geometry_msgs::msg::PoseWithCovarianceStamped& o)
+                    { this->callbackOnRelocalizeTopic(o); });
+        }
+
         // Spin:
         rclcpp::spin(rosNode_);
 
@@ -1060,6 +1070,17 @@ void BridgeROS2::service_relocalize_near_pose(
     }
 
     response->accepted = true;
+}
+
+void BridgeROS2::callbackOnRelocalizeTopic(const geometry_msgs::msg::PoseWithCovarianceStamped& o)
+{
+    auto lck = mrpt::lockHelper(rosPubsMtx_);
+
+    for (auto m : molaSubs_.relocalization)
+    {
+        const mrpt::poses::CPose3DPDFGaussian p = mrpt::ros2bridge::fromROS(o.pose);
+        m->relocalize_near_pose_pdf(p);
+    }
 }
 
 void BridgeROS2::service_map_load(

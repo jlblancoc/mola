@@ -134,6 +134,8 @@ class BridgeROS2 : public RawDataSourceBase, public mola::RawDataConsumer
 
         bool publish_tf_from_robot_pose_observations = true;
 
+        std::string relocalize_from_topic = "/initialpose";  //!< Default in RViz
+
         /// If true, the original dataset timestamps will be used to publish.
         /// Otherwise, the wallclock time will be used.
         bool publish_in_sim_time = false;
@@ -182,6 +184,8 @@ class BridgeROS2 : public RawDataSourceBase, public mola::RawDataConsumer
 
     std::vector<rclcpp::Subscription<sensor_msgs::msg::NavSatFix>::SharedPtr> subsGNSS_;
 
+    rclcpp::Subscription<geometry_msgs::msg::PoseWithCovarianceStamped>::SharedPtr subInitPose_;
+
     void callbackOnPointCloud2(
         const sensor_msgs::msg::PointCloud2& o, const std::string& outSensorLabel,
         const std::optional<mrpt::poses::CPose3D>& fixedSensorPose);
@@ -199,6 +203,8 @@ class BridgeROS2 : public RawDataSourceBase, public mola::RawDataConsumer
         const std::optional<mrpt::poses::CPose3D>& fixedSensorPose);
 
     void callbackOnOdometry(const nav_msgs::msg::Odometry& o, const std::string& outSensorLabel);
+
+    void callbackOnRelocalizeTopic(const geometry_msgs::msg::PoseWithCovarianceStamped& o);
 
     bool waitForTransform(
         mrpt::poses::CPose3D& des, const std::string& target_frame, const std::string& source_frame,
