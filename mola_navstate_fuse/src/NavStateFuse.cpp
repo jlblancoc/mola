@@ -83,8 +83,10 @@ void NavStateFuse::fuse_pose(
 {
     mrpt::poses::CPose3D incrPose;
 
-    // numerical sanity:
-    for (int i = 0; i < 6; i++) ASSERT_GT_(pose.cov(i, i), .0);
+    // numerical sanity: variances>=0 (==0 allowed for some components only)
+    for (int i = 0; i < 6; i++) ASSERT_GE_(pose.cov(i, i), .0);
+    // and the sum of all strictly >0
+    ASSERT_GT_(pose.cov.trace(), .0);
 
     double dt = 0;
     if (state_.last_pose_obs_tim)
