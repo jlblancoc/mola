@@ -26,6 +26,9 @@ ____________________________________________
 
 |
 
+.. _localization-only_common:
+
+
 1. Common aspects
 --------------------------------------
 Independently of the localization algorithm, the problem of finding the *rough* localization
@@ -46,11 +49,23 @@ pose in the environment:
 
 2. Localization with LiDAR odometry
 --------------------------------------
-Write me!
+See the step-by-step instructions in :ref:`this tutorial <tutorial-mola-lo-map-and-localize>`.
+As a summary, you need to:
 
+* Launch MOLA-LO in localization-only mode.
+* Load a local map into it. In MOLA-LO, a local map comprises two files, a ``*.mm`` metric map and the keyframes in a ``*.simplemap`` file.
+  (In fact: keyframes are only required if you want to extend the map, i.e. multi-session mapping).
+* Request relocalization via a service call or via the topic ``/initialpose``.
+
+This video shows the steps in the tutorial:
+
+.. raw:: html
+
+    <div style="margin-top:10px;">
+      <iframe width="560" height="315" src="https://www.youtube.com/embed/xxxx" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+    </div>
 
 |
-
 
 ----
 
@@ -70,8 +85,8 @@ To localize with a particle filter (PF) you will need:
    We can use `mrpt_pointcloud_pipeline <https://github.com/mrpt-ros-pkg/mrpt_navigation/tree/ros2/mrpt_pointcloud_pipeline>`_
    for such task, as can be seen in the tutorial below.
 
-3.1. Tutorial
-================
+3.1. PF localization tutorial
+================================
 A complete demonstration has been put together on: https://github.com/MOLAorg/mola_warehouse_pf_tutorial
 
 .. raw:: html

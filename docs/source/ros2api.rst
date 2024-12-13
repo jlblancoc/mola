@@ -88,6 +88,8 @@ the corresponding checkbox in the
 
 ----
 
+.. _mola_ros2api_relocalization:
+
 3. Re-localization
 --------------------------------------
 Write me!
@@ -108,8 +110,7 @@ These frames of reference exist when using MOLA :ref:`geo-referenced <geo-refere
 
 .. note::
 
-   For non geo-referenced maps, the meaning of all frames are the same but ``utm`` and ``enu``
-   will not be present.
+   For non geo-referenced maps, all frames remain the same but ``utm`` and ``enu`` will not exist.
 
 These are the existing frames:
 

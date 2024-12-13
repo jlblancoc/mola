@@ -357,6 +357,7 @@ and then visualize them with the GUI app :ref:`icp-log-viewer <app_icp-log-viewe
 ----------------------------------------
 Once you have a map, here are some next steps:
 
+- :ref:`This tutorial <tutorial-mola-lo-map-and-localize>` on how to save/load maps and re-localize using MOLA-LO ROS 2 nodes.
 - loop closure (Write me!)
 - :ref:`geo-referencing`.
 - :ref:`Use for localization <localization-only>`.
