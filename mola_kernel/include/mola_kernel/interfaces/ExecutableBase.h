@@ -12,6 +12,7 @@
 #pragma once
 
 #include <mola_kernel/Yaml.h>
+#include <mrpt/containers/yaml.h>
 #include <mrpt/rtti/CObject.h>
 #include <mrpt/system/COutputLogger.h>
 #include <mrpt/system/CTimeLogger.h>
@@ -74,13 +75,23 @@ class ExecutableBase : public mrpt::system::COutputLogger,  // for logging
      * has been actually beeing invoked.
      */
     virtual void onQuit() {}
+
+    /** Called whenever parameter(s) changed and the module must know about it.
+     *  \name names_values Is a YAML map from `names` to `values`.
+     *  \sa exposeParameters()
+     */
+    virtual void onParameterUpdate(
+        [[maybe_unused]] const mrpt::containers::yaml& names_values)
+    {
+    }
+
     /** @} */
 
     /** @name Directory services
      *{ */
 
-    /** A name server function to search for other ExecutableBase objects in my
-     * running system. Empty during ctor, should be usable from
+    /** A name server function to search for other ExecutableBase objects in
+     * my running system. Empty during ctor, should be usable from
      * initialize_common() and initialize().
      * \note In a standard system, this is implemented by
      * MolaLauncherApp::nameServerImpl()
@@ -95,6 +106,37 @@ class ExecutableBase : public mrpt::system::COutputLogger,  // for logging
 
     void        setModuleInstanceName(const std::string& s);
     std::string getModuleInstanceName() const;
+    /** @} */
+
+    /** @name Module parameter handling
+     *
+     *{ */
+
+   protected:
+    /** Must be called by modules to declared the existence of runtime
+     * configurable parameters, as well as their present values.
+     * \name names_values Is a YAML map from `names` to `values`.
+     * \sa onParameterUpdate()
+     * \note New in MOLA v1.4.0
+     */
+    void exposeParameters(const mrpt::containers::yaml& names_values);
+
+   public:
+    /** Returns the current list of all known parameters and their values, in
+     * the same format than used in exposeParameters(). An empty YAML map will
+     * be returned if no parameter exists.
+     * \sa changeParameters()
+     * \note New in MOLA v1.4.0
+     */
+    mrpt::containers::yaml getModuleParameters() const;
+
+    /** Called by an external entity to change parameters of this module.
+     * \name names_values Is a YAML map from `names` to `values`.
+     * \sa getModuleParameters()
+     * \note New in MOLA v1.4.0
+     */
+    void changeParameters(const mrpt::containers::yaml& names_values);
+
     /** @} */
 
     /** Enabled from mola-cli with `--profiler-whole` to save full profile stats
@@ -123,6 +165,9 @@ class ExecutableBase : public mrpt::system::COutputLogger,  // for logging
     std::string module_instance_name{"unnamed"};
     bool        requested_system_shutdown_ = false;
     std::mutex  requested_system_shutdown_mtx_;
+
+    std::mutex             module_params_mtx_;
+    mrpt::containers::yaml module_params_;
 };
 
 // Impl:

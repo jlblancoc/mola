@@ -61,3 +61,51 @@ std::string ExecutableBase::getModuleInstanceName() const
 {
     return module_instance_name;
 }
+
+void ExecutableBase::exposeParameters(
+    const mrpt::containers::yaml& names_values)
+{
+    auto lck = mrpt::lockHelper(module_params_mtx_);
+
+    if (names_values.isNullNode() || names_values.empty()) return;
+
+    ASSERT_(names_values.isMap());
+
+    for (const auto& [k, v] : names_values.asMapRange())
+    {
+        const auto name      = k.as<std::string>();
+        module_params_[name] = v;
+
+        MRPT_LOG_DEBUG_STREAM(
+            "Exposing parameter: '" << k << "'='" << v.as<std::string>()
+                                    << "'");
+    }
+}
+
+mrpt::containers::yaml ExecutableBase::getModuleParameters() const
+{
+    auto lck = mrpt::lockHelper(module_params_mtx_);
+    return module_params_;
+}
+
+void ExecutableBase::changeParameters(
+    const mrpt::containers::yaml& names_values)
+{
+    auto lck = mrpt::lockHelper(module_params_mtx_);
+
+    if (names_values.isNullNode() || names_values.empty()) return;
+    ASSERT_(names_values.isMap());
+
+    for (const auto& [k, v] : names_values.asMapRange())
+    {
+        const auto name      = k.as<std::string>();
+        module_params_[name] = v;
+
+        MRPT_LOG_DEBUG_STREAM(
+            "Changing parameter: '" << k << "'='" << v.as<std::string>()
+                                    << "'");
+    }
+
+    // Notify module:
+    this->onParameterUpdate(names_values);
+}
