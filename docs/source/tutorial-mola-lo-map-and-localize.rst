@@ -35,7 +35,7 @@ In terminal #1, launch the simulator (or your custom launch for your real sensor
 
     ros2 launch mvsim demo_warehouse.launch.py \
       do_fake_localization:=False \
-      with_rviz:=False
+      use_rviz:=False
 
 |
 
@@ -61,4 +61,31 @@ In terminal #3, run:
 .. code-block:: bash
 
     ros2 service call /map_save mola_msgs/srv/MapSave "map_path: '/tmp/my_map'"
+
+
+Use a prebuilt map in localize-only mode
+-------------------------------------------
+
+Keeping terminal #1 open as explained above with the simulator running,
+go to terminal #2 and launch MOLA-LO in **non-mapping (localization only) mode** with:
+
+.. code-block:: bash
+
+    MOLA_MAPPING_ENABLED=false \
+    ros2 launch mola_lidar_odometry ros2-lidar-odometry.launch.py \
+      lidar_topic_name:=/lidar1_points
+
+.. note::
+
+  Remember replacing ``/lidar1_points`` with your actual PointCloud2 topic with raw LiDAR data.
+
+Next, in terminal #3, let's order MOLA-LO to **load our former map** from disk:
+
+.. code-block:: bash
+
+    ros2 service call /map_load mola_msgs/srv/MapLoad "map_path: '/tmp/my_map'"
+
+
+
+Re-localization modes: Write me!
 
