@@ -915,7 +915,9 @@ void BridgeROS2::doLookForNewMolaSubs()
         ASSERT_(rds);
 
         // Skip myself!
-        if (std::string(rds->GetRuntimeClass()->className) == "mola::BridgeROS2"s) continue;
+        if (std::string(rds->GetRuntimeClass()->className) ==
+            std::string(this->GetRuntimeClass()->className))
+            continue;
 
         if (molaSubs_.dataSources.count(rds) == 0)
         {
@@ -1036,6 +1038,18 @@ void BridgeROS2::doLookForNewMolaSubs()
         srvMapSave_ = rosNode_->create_service<mola_msgs::srv::MapSave>(
             "map_save", std::bind(&BridgeROS2::service_map_save, this, _1, _2));
     }
+
+    // Advertise runtime MOLA parameters:
+    if (!srvParamGet_ && rosNode_)
+    {
+        using namespace std::placeholders;
+
+        srvParamGet_ = rosNode_->create_service<mola_msgs::srv::MolaRuntimeParamGet>(
+            "mola_runtime_param_get", std::bind(&BridgeROS2::service_param_get, this, _1, _2));
+
+        srvParamSet_ = rosNode_->create_service<mola_msgs::srv::MolaRuntimeParamSet>(
+            "mola_runtime_param_set", std::bind(&BridgeROS2::service_param_set, this, _1, _2));
+    }
 }
 
 void BridgeROS2::service_relocalize_from_gnss(
@@ -1124,6 +1138,86 @@ void BridgeROS2::service_map_save(
 
     response->success       = r.success;
     response->error_message = r.error_message;
+}
+
+void BridgeROS2::service_param_get(
+    [[maybe_unused]] const std::shared_ptr<mola_msgs::srv::MolaRuntimeParamGet::Request> request,
+    std::shared_ptr<mola_msgs::srv::MolaRuntimeParamGet::Response>                       response)
+{
+    auto lck = mrpt::lockHelper(molaSubsMtx_);
+
+    mrpt::containers::yaml allParams = mrpt::containers::yaml::Map();
+
+    // Get all MOLA modules:
+    auto listMods = this->findService<mola::ExecutableBase>();
+    for (auto& m : listMods)
+    {
+        // Skip myself!
+        if (std::string(m->GetRuntimeClass()->className) ==
+            std::string(this->GetRuntimeClass()->className))
+            continue;
+
+        // Get params:
+        mrpt::containers::yaml params = m->getModuleParameters();
+        // add to YAML tree indexed by module name:
+        allParams[m->getModuleInstanceName()] = params;
+    }
+
+    std::stringstream                 ss;
+    mrpt::containers::YamlEmitOptions o;
+    o.emitHeader = false;
+    allParams.printAsYAML(ss, o);
+    response->parameters = ss.str();
+}
+
+void BridgeROS2::service_param_set(
+    const std::shared_ptr<mola_msgs::srv::MolaRuntimeParamSet::Request> request,
+    std::shared_ptr<mola_msgs::srv::MolaRuntimeParamSet::Response>      response)
+{
+    auto lck = mrpt::lockHelper(molaSubsMtx_);
+    try
+    {
+        mrpt::containers::yaml allParams;
+        {
+            std::stringstream ss(request->parameters);
+            allParams.loadFromStream(ss);
+            ASSERT_(allParams.isMap());
+        }
+
+        // Get all MOLA modules:
+        auto listMods = this->findService<mola::ExecutableBase>();
+        std::map<std::string, mola::ExecutableBase::Ptr> modsByName;
+        for (auto& m : listMods)
+        {
+            // Skip myself!
+            if (std::string(m->GetRuntimeClass()->className) ==
+                std::string(this->GetRuntimeClass()->className))
+                continue;
+            modsByName[m->getModuleInstanceName()] = m;
+        }
+
+        for (const auto& [k, v] : allParams.asMapRange())
+        {
+            const auto paramsModuleName = k.as<std::string>();
+            auto       itMod            = modsByName.find(paramsModuleName);
+            if (itMod == modsByName.end())
+                THROW_EXCEPTION_FMT(
+                    "Error: requested setting runtime parameter for non-existing MOLA module '%s'",
+                    paramsModuleName.c_str());
+
+            auto& m = itMod->second;
+            ASSERT_(m);
+            // Send change of parameters:
+            m->changeParameters(v);
+        }
+        // If we had no exceptions, it means we are ok.
+        response->success = true;
+    }
+    catch (const std::exception& e)
+    {
+        response->success       = false;
+        response->error_message = e.what();
+    }
 }
 
 rclcpp::Time BridgeROS2::myNow(const mrpt::Clock::time_point& observationStamp)

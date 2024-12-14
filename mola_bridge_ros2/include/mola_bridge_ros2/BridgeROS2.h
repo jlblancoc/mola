@@ -43,6 +43,8 @@
 // MOLA <-> ROS services:
 #include <mola_msgs/srv/map_load.hpp>
 #include <mola_msgs/srv/map_save.hpp>
+#include <mola_msgs/srv/mola_runtime_param_get.hpp>
+#include <mola_msgs/srv/mola_runtime_param_set.hpp>
 #include <mola_msgs/srv/relocalize_from_gnss.hpp>
 #include <mola_msgs/srv/relocalize_near_pose.hpp>
 
@@ -245,10 +247,12 @@ class BridgeROS2 : public RawDataSourceBase, public mola::RawDataConsumer
     std::mutex molaSubsMtx_;
 
     // ROS services:
-    rclcpp::Service<mola_msgs::srv::RelocalizeFromGNSS>::SharedPtr srvRelocGNNS_;
-    rclcpp::Service<mola_msgs::srv::RelocalizeNearPose>::SharedPtr srvRelocPose_;
-    rclcpp::Service<mola_msgs::srv::MapLoad>::SharedPtr            srvMapLoad_;
-    rclcpp::Service<mola_msgs::srv::MapSave>::SharedPtr            srvMapSave_;
+    rclcpp::Service<mola_msgs::srv::RelocalizeFromGNSS>::SharedPtr  srvRelocGNNS_;
+    rclcpp::Service<mola_msgs::srv::RelocalizeNearPose>::SharedPtr  srvRelocPose_;
+    rclcpp::Service<mola_msgs::srv::MapLoad>::SharedPtr             srvMapLoad_;
+    rclcpp::Service<mola_msgs::srv::MapSave>::SharedPtr             srvMapSave_;
+    rclcpp::Service<mola_msgs::srv::MolaRuntimeParamGet>::SharedPtr srvParamGet_;
+    rclcpp::Service<mola_msgs::srv::MolaRuntimeParamSet>::SharedPtr srvParamSet_;
 
     void service_relocalize_from_gnss(
         const std::shared_ptr<mola_msgs::srv::RelocalizeFromGNSS::Request> request,
@@ -265,6 +269,14 @@ class BridgeROS2 : public RawDataSourceBase, public mola::RawDataConsumer
     void service_map_save(
         const std::shared_ptr<mola_msgs::srv::MapSave::Request> request,
         std::shared_ptr<mola_msgs::srv::MapSave::Response>      response);
+
+    void service_param_get(
+        const std::shared_ptr<mola_msgs::srv::MolaRuntimeParamGet::Request> request,
+        std::shared_ptr<mola_msgs::srv::MolaRuntimeParamGet::Response>      response);
+
+    void service_param_set(
+        const std::shared_ptr<mola_msgs::srv::MolaRuntimeParamSet::Request> request,
+        std::shared_ptr<mola_msgs::srv::MolaRuntimeParamSet::Response>      response);
 
     void onNewLocalization(const mola::LocalizationSourceBase::LocalizationUpdate& l);
 
