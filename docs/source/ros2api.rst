@@ -131,9 +131,12 @@ And this is who is responsible of publishing each transformation:
 - ``enu → {map, utm}``: Published by ``mrpt_map_server`` (`github <https://github.com/mrpt-ros-pkg/mrpt_navigation/tree/ros2/mrpt_map_server/>`_),
   if fed with a geo-referenced metric map (``.mm``) file.
 
-
+|
 
 ----
+
+|
+
 
 5. Map publishing
 --------------------------------------
@@ -161,7 +164,28 @@ The metric map layer C++ class will determine the ROS topic type to use.
 
 |
 
+----
+
+|
+
+6. Runtime dynamic reconfiguration
+----------------------------------------
+Write me!
+
+   .. code-block:: bash
+
+      ros2 service call /mola_runtime_param_get mola_msgs/srv/MolaRuntimeParamGet
 
 
+   .. code-block:: bash
+
+      ros2 service call /mola_runtime_param_set mola_msgs/srv/MolaRuntimeParamSet \
+         "{parameters: \"mola::LidarOdometry:lidar_odom:\n  active: false\n\"}"
+
+
+   .. code-block:: bash
+
+      ros2 service call /mola_runtime_param_set mola_msgs/srv/MolaRuntimeParamSet \
+         "{parameters: \"mola::LidarOdometry:lidar_odom:\n  mapping_enabled: false\n\"}"
 
 
