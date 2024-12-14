@@ -54,6 +54,10 @@ class LocalizationSourceBase
 
         mrpt::math::TPose3D                        pose;
         std::optional<mrpt::math::CMatrixDouble66> cov;
+
+        /** Localization "quality": 0.0=worst, 1.0=best
+         *  \note Field added in MOLA v1.4.0 */
+        double quality = 1.0;
     };
 
     using localization_updates_callback_t =
