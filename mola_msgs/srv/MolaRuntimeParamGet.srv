@@ -1,0 +1,14 @@
+# This service requests all known runtime configurable parameters of running mola::ExecutableBase modules.
+
+# Request.
+# No data needed.
+---
+# Result: a multiline string in YAML format with all parameters, in this format:
+# ---
+# module1:
+#   var: value
+# module2:
+#   var: value
+# ...
+# ---
+string parameters

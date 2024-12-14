@@ -16,10 +16,12 @@ find_package(rosidl_default_generators REQUIRED)
 find_package(geometry_msgs REQUIRED)
 
 rosidl_generate_interfaces(${PROJECT_NAME}
-  "srv/RelocalizeFromGNSS.srv"
-  "srv/RelocalizeNearPose.srv"
   "srv/MapLoad.srv"
   "srv/MapSave.srv"
+  "srv/MolaRuntimeParamGet.srv"
+  "srv/MolaRuntimeParamSet.srv"
+  "srv/RelocalizeFromGNSS.srv"
+  "srv/RelocalizeNearPose.srv"
   DEPENDENCIES
   std_msgs
   geometry_msgs

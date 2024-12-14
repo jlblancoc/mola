@@ -1,0 +1,16 @@
+# This service requests changing one or more runtime configurable parameters of running mola::ExecutableBase modules.
+
+# Request: a multiline string in YAML format with all parameters that need to be changed, in this format:
+# ---
+# module1:
+#   var: value
+# module2:
+#   var: value
+# ...
+# ---
+string parameters
+---
+# Result. False if there was some problem changing the parameters.
+bool success
+# In case of no success, here is a human-readable error reason.
+string error_message
