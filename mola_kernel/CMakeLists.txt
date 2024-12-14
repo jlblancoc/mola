@@ -119,14 +119,13 @@ endif()
 file(READ package.xml contentPackageXML)
 string(REGEX MATCH "<version>([0-9\.]*)</version>" _ ${contentPackageXML})
 set(MOLA_VERSION ${CMAKE_MATCH_1})
-message(STATUS "MOLA version: ${MOLA_VERSION} (detected in package.xml)")
+message(STATUS "MOLA detected version (from package.xml): ${MOLA_VERSION}")
 string(REGEX MATCH "^([0-9]+)\\.([0-9]+)\\.([0-9]+)" _ ${MOLA_VERSION})
 set(MOLA_MAJOR_VERSION ${CMAKE_MATCH_1})
 set(MOLA_MINOR_VERSION ${CMAKE_MATCH_2})
 set(MOLA_PATCH_VERSION ${CMAKE_MATCH_3})
 #----
 
-message(STATUS "MOLA detected version (from package.xml): ${MOLA_VERSION}")
 
 target_compile_definitions(${PROJECT_NAME} PUBLIC MOLA_MAJOR_VERSION=${MOLA_MAJOR_VERSION})
 target_compile_definitions(${PROJECT_NAME} PUBLIC MOLA_MINOR_VERSION=${MOLA_MINOR_VERSION})
