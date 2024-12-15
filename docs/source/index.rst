@@ -34,7 +34,6 @@ MOLA
   :caption: mp2p_icp
 
   module-mp2p-icp
-  mp2p_icp_installing
   mp2p_icp_basics
   mp2p_icp_optimal-transformations
   mp2p_icp_applications
