@@ -168,24 +168,84 @@ The metric map layer C++ class will determine the ROS topic type to use.
 
 |
 
+.. _ros2api_runtime_params:
+
 6. Runtime dynamic reconfiguration
 ----------------------------------------
-Write me!
+MOLA modules may expose a subset of their parameters through an interface that allows
+runtime reconfiguration via ROS 2 service requests:
+
+6.1. Runtime parameters for ``mola_lidar_odometry``
+======================================================
+
+List all existing parameters:
 
    .. code-block:: bash
 
       ros2 service call /mola_runtime_param_get mola_msgs/srv/MolaRuntimeParamGet
 
+.. dropdown:: Example output
+  :open:
 
    .. code-block:: bash
 
+      requester: making request: mola_msgs.srv.MolaRuntimeParamGet_Request()
+
+      response:
+      mola_msgs.srv.MolaRuntimeParamGet_Response(parameters='mola::LidarOdometry:lidar_odom:\n  active: true\n  generate_simplemap: false\n  mapping_enabled: true\n')
+
+   Returned ``parameters`` as YAML:
+
+   .. code-block:: yaml
+
+      mola::LidarOdometry:lidar_odom:
+        active: true
+        generate_simplemap: false
+        mapping_enabled: true
+
+Documented parameters:
+
+- ``active``: Whether MOLA-LO should process incoming sensor data (``active: true``)
+  or ignore them (``active: false``).
+
+.. dropdown:: Copy & paste commands for ``active``
+
+   .. code-block:: bash
+
+      # active: true
+      ros2 service call /mola_runtime_param_set mola_msgs/srv/MolaRuntimeParamSet \
+         "{parameters: \"mola::LidarOdometry:lidar_odom:\n  active: true\n\"}"
+
+      # active: false
       ros2 service call /mola_runtime_param_set mola_msgs/srv/MolaRuntimeParamSet \
          "{parameters: \"mola::LidarOdometry:lidar_odom:\n  active: false\n\"}"
 
+- ``mapping_enabled``: Whether MOLA-LO should update the localmap (``true``) or just use
+  it in localization-only mode (``false``).
+
+.. dropdown:: Copy & paste commands for ``mapping_enabled``
 
    .. code-block:: bash
 
+      # mapping_enabled: true
+      ros2 service call /mola_runtime_param_set mola_msgs/srv/MolaRuntimeParamSet \
+         "{parameters: \"mola::LidarOdometry:lidar_odom:\n  mapping_enabled: true\n\"}"
+
+      # mapping_enabled: false
       ros2 service call /mola_runtime_param_set mola_msgs/srv/MolaRuntimeParamSet \
          "{parameters: \"mola::LidarOdometry:lidar_odom:\n  mapping_enabled: false\n\"}"
 
+- ``generate_simplemap``: Whether MOLA-LO should build the keyframes-based map (apart of the local metric map),
+  so you end up with a ``*.simplemap`` file.
 
+.. dropdown:: Copy & paste commands for ``generate_simplemap``
+
+   .. code-block:: bash
+
+      # generate_simplemap: true
+      ros2 service call /mola_runtime_param_set mola_msgs/srv/MolaRuntimeParamSet \
+         "{parameters: \"mola::LidarOdometry:lidar_odom:\n  generate_simplemap: true\n\"}"
+
+      # generate_simplemap: false
+      ros2 service call /mola_runtime_param_set mola_msgs/srv/MolaRuntimeParamSet \
+         "{parameters: \"mola::LidarOdometry:lidar_odom:\n  generate_simplemap: false\n\"}"
