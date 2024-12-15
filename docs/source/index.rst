@@ -181,21 +181,20 @@ How to install all MOLA modules:
 
     These are the **versions available** from ROS build farms for each main MOLA component:
 
-    +-------------------------+---------------+---------------------+---------------------+
-    | ROS distribution        |      MOLA     | mola_lidar_odometry |   mp2p_icp          |
-    +=========================+===============+=====================+=====================+
-    | ROS 2 Humble (u22.04)   |  |badgeHrel|  |   |badgeHrel_LO|    |   |badgeHrel_MP|    |
-    +-------------------------+---------------+---------------------+---------------------+
-    | ROS 2 Jazzy (u24.04)    |  |badgeJrel|  |   |badgeJrel_LO|    |   |badgeJrel_MP|    |
-    +-------------------------+---------------+---------------------+---------------------+
-    | ROS 2 Rolling (u24.04)  |  |badgeRrel|  |   |badgeRrel_LO|    |   |badgeRrel_MP|    |
-    +-------------------------+---------------+---------------------+---------------------+
+    +----------------------+--------------------+----------------+----------------+
+    | Repository           | ROS 2 Humble       | ROS 2 Jazzy    | ROS 2 Rolling  |
+    |                      |  (u22.04)          |   (u24.04)     |    (u24.04)    |
+    +======================+====================+================+================+
+    | MOLA                 | |badgeHrel|        | |badgeJrel|    | |badgeRrel|    |
+    +----------------------+--------------------+----------------+----------------+
+    | mola_lidar_odometry  | |badgeHrel_LO|     | |badgeJrel_LO| | |badgeRrel_LO| |
+    +----------------------+--------------------+----------------+----------------+
+    | mp2p_icp             | |badgeHrel_MP|     | |badgeJrel_MP| | |badgeRrel_MP| |
+    +----------------------+--------------------+----------------+----------------+
 
-    +-------------------------+---------------+---------------------+---------------------+
-    | EOL ROS distribution    |      MOLA     | mola_lidar_odometry |   mp2p_icp          |
-    +=========================+===============+=====================+=====================+
-    | ROS 2 Iron (u22.04)     |  |badgeIrel|  |   |badgeIrel_LO|    |   |badgeIrel_MP|    |
-    +-------------------------+---------------+---------------------+---------------------+
+    EOL ROS distribution:
+   
+     - ROS 2 Iron (u22.04): MOLA |badgeIrel|, mola_lidar_odometry |badgeIrel_LO|, mp2p_icp |badgeIrel_MP|
 
 
 .. dropdown:: Build from sources
