@@ -77,10 +77,22 @@ void BridgeROS2::ros_node_thread_main(Yaml cfg)
 
     try
     {
-        const int         argc    = 1;
-        char const* const argv[2] = {NODE_NAME, nullptr};
+        // build argc/argv for ROS:
+        std::vector<std::string> rosArgs = {NODE_NAME};
+        if (cfg.has("ros_args"))
+        {
+            ASSERT_(cfg["ros_args"].isSequence());
+            for (const auto& p : cfg["ros_args"].asSequenceRange())
+                rosArgs.push_back(p.as<std::string>());
+        }
 
-        // Initialize ROS:
+        // Convert to good old C (argc,argv):
+        std::vector<const char*> rosArgsC;
+        for (const auto& s : rosArgs) rosArgsC.push_back(s.c_str());
+
+        const int    argc = static_cast<int>(rosArgs.size());
+        const char** argv = rosArgsC.data();
+
         // Initialize ROS (only once):
         if (!rclcpp::ok()) { rclcpp::init(argc, argv); }
 
@@ -110,9 +122,7 @@ void BridgeROS2::ros_node_thread_main(Yaml cfg)
         auto ds_subscribe = cfg["subscribe"];
         if (!ds_subscribe.isSequence() || ds_subscribe.asSequence().empty())
         {
-            MRPT_LOG_INFO(
-                "No ROS2 topic found for subscription under YAML entry "
-                "`subscribe`.");
+            MRPT_LOG_INFO("No ROS2 topic found for subscription under YAML entry `subscribe`.");
         }
         else { internalAnalyzeTopicsToSubscribe(ds_subscribe); }
 

@@ -92,12 +92,6 @@ struct Cli
         "Paths "
         "can be added with the environment variable MOLA_MODULES_SHARED_PATH.",
         cmd};
-
-    TCLAP::SwitchArg arg_ros_args{
-        "", "ros-args",
-        "Dummy flag, defined just to allow the program invocation from ROS 2 "
-        "launch files.",
-        cmd};
 };
 
 namespace
@@ -124,8 +118,11 @@ void mola_install_signal_handler()
 
 // Default task for mola-cli: launching a SLAM system
 // -----------------------------------------------------
-int mola_cli_launch_slam(Cli& cli)
+int mola_cli_launch_slam(
+    Cli& cli, const std::optional<std::vector<std::string>>& rosArgs)
 {
+    using namespace std::string_literals;
+
     // Load YAML config file:
     if (!cli.arg_yaml_cfg.isSet())
     {
@@ -136,7 +133,19 @@ int mola_cli_launch_slam(Cli& cli)
     }
     const auto file_yml = cli.arg_yaml_cfg.getValue();
 
-    auto cfg = mola::load_yaml_file(file_yml);
+    // replace a special variable for ROS args:
+    mola::YAMLParseOptions po;
+
+    if (rosArgs)
+    {
+        std::string strRosArgs = "[";
+        for (const auto& s : *rosArgs) strRosArgs += " '"s + s + "', "s;
+        strRosArgs += "]";
+        po.variables["ROS_ARGS"] = strRosArgs;
+    }
+
+    // Load YAML from file:
+    auto cfg = mola::load_yaml_file(file_yml, po);
 
     mola::MolaLauncherApp app;
     theApp = &app;  // for the signal handler
@@ -255,8 +264,32 @@ int main(int argc, char** argv)
     {
         Cli cli;
 
+        // Handle special ROS arguments (if mola-cli is launched as a ROS node)
+        // before handling (argc,argv) to tclap:
+        std::optional<std::vector<std::string>> rosArgs;
+        std::vector<std::string>                otherArgs;
+        for (int i = 0; i < argc; i++)
+        {
+            const auto sArg = std::string(argv[i]);
+            if (sArg == "--ros-args" && !rosArgs)
+            {
+                rosArgs.emplace();
+                continue;
+            }
+            if (rosArgs)
+                rosArgs->push_back(sArg);
+            else
+                otherArgs.push_back(sArg);
+        }
+        // handle the case "--ros-args\n"
+        if (rosArgs && rosArgs->empty()) rosArgs.reset();
+
+        std::vector<const char*> argvBis;
+        for (const auto& s : otherArgs) argvBis.push_back(s.c_str());
+        const int argcBis = static_cast<int>(argvBis.size());
+
         // Parse arguments:
-        if (!cli.cmd.parse(argc, argv)) return 1;  // should exit.
+        if (!cli.cmd.parse(argcBis, argvBis.data())) return 1;  // should exit.
 
         mola_install_signal_handler();
 
@@ -274,7 +307,7 @@ int main(int argc, char** argv)
             return mola_cli_list_module_shared_dirs();
 
         // Default task:
-        return mola_cli_launch_slam(cli);
+        return mola_cli_launch_slam(cli, rosArgs);
 
         return 0;
     }
