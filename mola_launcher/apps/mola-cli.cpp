@@ -271,11 +271,8 @@ int main(int argc, char** argv)
         for (int i = 0; i < argc; i++)
         {
             const auto sArg = std::string(argv[i]);
-            if (sArg == "--ros-args" && !rosArgs)
-            {
-                rosArgs.emplace();
-                continue;
-            }
+            if (sArg == "--ros-args" && !rosArgs) rosArgs.emplace();
+
             if (rosArgs)
                 rosArgs->push_back(sArg);
             else
