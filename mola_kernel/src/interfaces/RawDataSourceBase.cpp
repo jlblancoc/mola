@@ -72,6 +72,9 @@ void RawDataSourceBase::initialize(const Yaml& cfg)
             const auto win_pos =
                 sensor.getOrDefault<std::string>("win_pos", "");
 
+            // Allow quickly disabling sections:
+            if (!sensor.getOrDefault("enabled", true)) continue;
+
             ASSERTMSG_(
                 sensor_preview_gui_.find(label) == sensor_preview_gui_.end(),
                 mrpt::format(

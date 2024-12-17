@@ -44,7 +44,7 @@ modules:
     # ------------------
   - type: mola::WheelOdometry
     name: wheel_odometry_fe
-    launch_ignore: true
+    enabled: false
     raw_data_source: dataset_input
     raw_sensor_label: ODOMETRY
     params:
@@ -59,7 +59,7 @@ modules:
     # ------------------
   - type: mola::LidarOdometry
     name: lidar_fe
-    launch_ignore: false
+    #enabled: true
     raw_data_source: dataset_input
     raw_sensor_label: SICK_FRONT_OBS
     params:
