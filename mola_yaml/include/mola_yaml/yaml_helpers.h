@@ -14,7 +14,7 @@
 #include <mola_yaml/macro_helpers.h>
 #include <mrpt/containers/yaml.h>
 
-#include <sstream>
+#include <map>
 #include <string>
 
 namespace mola
@@ -27,7 +27,10 @@ struct YAMLParseOptions
 {
     bool doIncludes{true};  //!< "$include{}"s
     bool doCmdRuns{true};  //!< "$()"s
-    bool doEnvVars{true};  //!< "${}"s
+    bool doEnvVars{true};  //!< "${}"s (from env vars and field "variables")
+
+    /** Custom variables for replacements like `${name}` => `value` */
+    std::map<std::string, std::string> variables;
 
     /** If not empty, base reference path which respect to "$include{}"s are
      * specified. Automatically filled in by load_yaml_file() */

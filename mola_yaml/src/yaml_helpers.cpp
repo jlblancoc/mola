@@ -37,7 +37,9 @@ namespace fs = std::filesystem;
 
 using mrpt::containers::yaml;
 
-static std::string::size_type findClosing(
+namespace
+{
+std::string::size_type findClosing(
     size_t pos, const std::string& s, const char searchEndChar,
     const char otherStartChar)
 {
@@ -59,8 +61,7 @@ static std::string::size_type findClosing(
 }
 
 // "foo|bar" -> {"foo","bar"}
-static std::tuple<std::string, std::string> splitVerticalBar(
-    const std::string& s)
+std::tuple<std::string, std::string> splitVerticalBar(const std::string& s)
 {
     const auto posBar = s.find("|");
     if (posBar == std::string::npos) return {s, {}};
@@ -68,7 +69,7 @@ static std::tuple<std::string, std::string> splitVerticalBar(
     return {s.substr(0, posBar), s.substr(posBar + 1)};
 }
 
-static std::string trimWSNL(const std::string& s)
+std::string trimWSNL(const std::string& s)
 {
     std::string str = s;
     mrpt::system::trim(str);
@@ -76,6 +77,8 @@ static std::string trimWSNL(const std::string& s)
     str.erase(std::remove(str.begin(), str.end(), '\n'), str.end());
     return str;
 }
+}  // namespace
+
 std::string mola::yaml_to_string(const mrpt::containers::yaml& cfg)
 {
     std::stringstream ss;
@@ -83,7 +86,9 @@ std::string mola::yaml_to_string(const mrpt::containers::yaml& cfg)
     return ss.str();
 }
 
-static std::string parseEnvVars(
+namespace
+{
+std::string parseVars(
     const std::string& text, const mola::YAMLParseOptions& opts)
 {
     MRPT_TRY_START
@@ -106,30 +111,43 @@ static std::string parseEnvVars(
 
     const auto [varname, defaultValue] = splitVerticalBar(varnameOrg);
 
+    // 1st try:  match to env vars
     std::string varvalue;
     const char* v = ::getenv(varname.c_str());
     if (v != nullptr)
+    {  // match:
         varvalue = std::string(v);
+    }
     else
     {
-        // Handle special variable names:
+        // 2nd try: handle special variable names:
         // ${CURRENT_YAML_FILE_PATH}
         if (varname == "CURRENT_YAML_FILE_PATH")
             varvalue = opts.includesBasePath;
-        else if (!defaultValue.empty()) { varvalue = defaultValue; }
         else
-        {
-            THROW_EXCEPTION_FMT(
-                "YAML parseEnvVars(): Undefined environment variable: ${%s}",
-                varname.c_str());
-        }
+            // 3rd try: custom user variables
+            if (auto it = opts.variables.find(varname);
+                it != opts.variables.end())
+            {
+                varvalue = it->second;
+            }
+            else
+                // 4th: default:
+                if (!defaultValue.empty()) { varvalue = defaultValue; }
+                else
+                {
+                    THROW_EXCEPTION_FMT(
+                        "YAML parseEnvVars(): Undefined environment variable: "
+                        "${%s}",
+                        varname.c_str());
+                }
     }
 
-    return parseEnvVars(pre + varvalue + post.substr(post_end + 1), opts);
+    return parseVars(pre + varvalue + post.substr(post_end + 1), opts);
     MRPT_TRY_END
 }
 
-static std::string parseCmdRuns(
+std::string parseCmdRuns(
     const std::string& text, const mola::YAMLParseOptions& opts)
 {
     MRPT_TRY_START
@@ -167,7 +185,7 @@ static std::string parseCmdRuns(
     MRPT_TRY_END
 }
 
-static void recursiveParseNodeForIncludes(
+void recursiveParseNodeForIncludes(
     yaml::node_t& n, const mola::YAMLParseOptions& opts)
 {
     if (n.isScalar())
@@ -241,7 +259,7 @@ static void recursiveParseNodeForIncludes(
     }
 }
 
-static std::string parseIncludes(
+std::string parseIncludes(
     const std::string& text, const mola::YAMLParseOptions& opts)
 {
     MRPT_TRY_START
@@ -254,6 +272,8 @@ static std::string parseIncludes(
 
     MRPT_TRY_END
 }
+
+}  // namespace
 
 mrpt::containers::yaml mola::parse_yaml(
     const mrpt::containers::yaml& input, const mola::YAMLParseOptions& opts)
@@ -274,7 +294,7 @@ std::string mola::parse_yaml(
     if (opts.doCmdRuns) s = parseCmdRuns(s, opts);
 
     // 3) Parse "${}"s
-    if (opts.doEnvVars) s = parseEnvVars(s, opts);
+    if (opts.doEnvVars) s = parseVars(s, opts);
 
     return s;
 }

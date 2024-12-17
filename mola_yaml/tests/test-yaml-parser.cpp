@@ -18,7 +18,9 @@
 
 using namespace std::string_literals;
 
-static void test_yaml2string()
+namespace
+{
+void test_yaml2string()
 {
     {
         const auto data = mrpt::containers::yaml::Map({{"A", 1.0}, {"B", 3}});
@@ -43,9 +45,10 @@ c:
   - c
 d:
   va: 'z'
+e: '${foo|default1}'
 )###";
 
-static void test_parseSimple()
+void test_parseSimple()
 {
     {
         const auto y = mrpt::containers::yaml::FromText(txt1);
@@ -57,7 +60,35 @@ static void test_parseSimple()
     }
 }
 
-static void test_parseIncludes()
+void test_parseCustomVars()
+{
+    {
+        const auto y = mola::parse_yaml(mrpt::containers::yaml::FromText(txt1));
+        ASSERT_(y.isMap());
+        ASSERT_EQUAL_(y["e"].as<std::string>(), "default1");
+    }
+    {
+        mola::YAMLParseOptions opts;
+        opts.doEnvVars = false;
+
+        const auto y =
+            mola::parse_yaml(mrpt::containers::yaml::FromText(txt1), opts);
+        ASSERT_(y.isMap());
+        ASSERT_EQUAL_(y["e"].as<std::string>(), "${foo|default1}");
+    }
+    {
+        mola::YAMLParseOptions opts;
+        const std::string      se = "Something Else";
+        opts.variables["foo"]     = se;
+
+        const auto y =
+            mola::parse_yaml(mrpt::containers::yaml::FromText(txt1), opts);
+        ASSERT_(y.isMap());
+        ASSERT_EQUAL_(y["e"].as<std::string>(), se);
+    }
+}
+
+void test_parseIncludes()
 {
     {
         const auto file = MOLA_MODULE_SOURCE_DIR + "/test_include1.yaml"s;
@@ -97,6 +128,8 @@ static void test_parseIncludes()
     }
 }
 
+}  // namespace
+
 MRPT_TODO("Possible bug: #$include{} shouldn't be parsed")
 MRPT_TODO("bug: #${var} shouldn't be parsed")
 
@@ -107,7 +140,7 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char** argv)
         test_yaml2string();
         test_parseSimple();
         test_parseIncludes();
-        // test_parseEnvSimple();
+        test_parseCustomVars();
 
         std::cout << "Test successful." << std::endl;
     }
