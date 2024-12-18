@@ -2,6 +2,11 @@
 Changelog for package mola_navstate_fuse
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Allow zero variances for some pose components
+* Contributors: Jose Luis Blanco-Claraco
+
 1.3.0 (2024-12-11)
 ------------------
 * Start integrating GNSS observation. Added a new CLI program mola-navstate-cli for testing state fusion

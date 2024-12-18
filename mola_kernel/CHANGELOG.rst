@@ -2,6 +2,15 @@
 Changelog for package mola_kernel
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* MOLA system yaml files: added "enabled" optional property for modules and rds visualizers
+* Add field for localization quality
+* cmake: remove duplicated info message
+* ExecutableBase: Add support for runtime-configurable parameter API
+* mola-kernel Doxygen docs: add groups
+* Contributors: Jose Luis Blanco-Claraco
+
 1.3.0 (2024-12-11)
 ------------------
 * NavStateFilter interface: add API for merging GNSS observations

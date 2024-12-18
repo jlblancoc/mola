@@ -3,6 +3,15 @@ Changelog for package mola_bridge_ros2
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
+Forthcoming
+-----------
+* Publish localization quality topic
+* Forward --ros-args to BridgeROS2
+* expose services for runtime parameters
+* Load relocalize_from_topic from yaml file
+* ros2bridge: handle /initialpose topic -> relocalize service
+* Contributors: Jose Luis Blanco-Claraco
+
 1.3.0 (2024-12-11)
 ------------------
 * Support publishing IMU readings MOLA -> ROS2

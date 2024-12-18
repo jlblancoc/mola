@@ -2,6 +2,11 @@
 Changelog for package mola_demos
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* MOLA system yaml files: added "enabled" optional property for modules and rds visualizers
+* Contributors: Jose Luis Blanco-Claraco
+
 1.3.0 (2024-12-11)
 ------------------
 * Update ROS2 demos for Mulran replay

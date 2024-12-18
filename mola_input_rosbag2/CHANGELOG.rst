@@ -3,6 +3,9 @@ Changelog for package mola_input_rosbag2
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
+Forthcoming
+-----------
+
 1.3.0 (2024-12-11)
 ------------------
 * Fix typo in warning message

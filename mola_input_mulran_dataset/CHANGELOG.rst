@@ -3,6 +3,9 @@ Changelog for package mola_input_mulran_dataset
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
+Forthcoming
+-----------
+
 1.3.0 (2024-12-11)
 ------------------
 * Mulran: Publish IMU too
