@@ -2,8 +2,8 @@
 Changelog for package mola_navstate_fuse
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.4.0 (2024-12-18)
+------------------
 * Allow zero variances for some pose components
 * Contributors: Jose Luis Blanco-Claraco
 

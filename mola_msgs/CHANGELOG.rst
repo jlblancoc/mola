@@ -2,8 +2,8 @@
 Changelog for package mola_msgs
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.4.0 (2024-12-18)
+------------------
 * Add new Parameters interface ROS 2 service definitions
 * Contributors: Jose Luis Blanco-Claraco
 

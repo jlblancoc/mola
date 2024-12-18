@@ -3,8 +3,8 @@ Changelog for package mola_bridge_ros2
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
-Forthcoming
------------
+1.4.0 (2024-12-18)
+------------------
 * Publish localization quality topic
 * Forward --ros-args to BridgeROS2
 * expose services for runtime parameters
