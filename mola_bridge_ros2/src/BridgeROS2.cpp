@@ -44,6 +44,7 @@
 // ROS 2:
 #include <nav_msgs/msg/odometry.hpp>
 #include <rclcpp/node.hpp>
+#include <std_msgs/msg/float32.hpp>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
 
 using namespace mola;
@@ -1272,23 +1273,32 @@ void BridgeROS2::timerPubLocalization()
 
     // 1/2: Publish to /tf:
     const std::string locLabel = (l->method.empty() ? "slam"s : l->method) + "/pose"s;
+    const std::string locQualityLabel =
+        (l->method.empty() ? "slam"s : l->method) + "/pose_quality"s;
 
     auto lck = mrpt::lockHelper(rosPubsMtx_);
 
     // Create the publisher the first time an observation arrives:
     const bool is_1st_pub = rosPubs_.pub_sensors.find(locLabel) == rosPubs_.pub_sensors.end();
     auto&      pub        = rosPubs_.pub_sensors[locLabel];
+    auto&      pubQuality = rosPubs_.pub_sensors[locQualityLabel];
 
     if (is_1st_pub)
     {
         pub = rosNode()->create_publisher<nav_msgs::msg::Odometry>(
             locLabel, rclcpp::SystemDefaultsQoS());
+        pubQuality = rosNode()->create_publisher<std_msgs::msg::Float32>(
+            locQualityLabel, rclcpp::SystemDefaultsQoS());
     }
     lck.unlock();
 
     rclcpp::Publisher<nav_msgs::msg::Odometry>::SharedPtr pubOdo =
         std::dynamic_pointer_cast<rclcpp::Publisher<nav_msgs::msg::Odometry>>(pub);
     ASSERT_(pubOdo);
+
+    rclcpp::Publisher<std_msgs::msg::Float32>::SharedPtr pubOdoQuality =
+        std::dynamic_pointer_cast<rclcpp::Publisher<std_msgs::msg::Float32>>(pubQuality);
+    ASSERT_(pubOdoQuality);
 
     // Send TF:
     tf2::Transform transform = mrpt::ros2bridge::toROS_tfTransform(l->pose);
@@ -1315,6 +1325,13 @@ void BridgeROS2::timerPubLocalization()
         msg.pose = mrpt::ros2bridge::toROS_Pose(posePdf);
 
         pubOdo->publish(msg);
+    }
+
+    // And always publish quality:
+    {
+        std_msgs::msg::Float32 msg;
+        msg.data = l->quality;
+        pubOdoQuality->publish(msg);
     }
 }
 
