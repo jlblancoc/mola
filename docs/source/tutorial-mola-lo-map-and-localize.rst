@@ -136,10 +136,8 @@ the robot needs to operate so it can localize correctly.
 |
 
 
-
-
-3. Load a prebuilt map in localize-only mode
----------------------------------------------
+3. Load a prebuilt map in localization-only mode
+--------------------------------------------------
 
 ..  note::
 
@@ -163,12 +161,19 @@ Again, we will use **three terminals**:
       .. code-block:: bash
 
           MOLA_MAPPING_ENABLED=false \
+          MOLA_START_ACTIVE=false \
           ros2 launch mola_lidar_odometry ros2-lidar-odometry.launch.py \
             lidar_topic_name:=/lidar1_points
 
       .. note::
 
         Remember replacing ``/lidar1_points`` with your actual PointCloud2 topic with raw LiDAR data.
+
+      Explanation:
+
+      - ``MOLA_MAPPING_ENABLED=false`` disables map updates, so the loaded map will remain static.
+      - ``MOLA_START_ACTIVE=false`` is recommended so LO does not attempt to match incoming sensor
+        data until a relocalization method or rough initial localization is set (see next section below).
 
     .. tab-item:: #3: Load the map
 
@@ -198,6 +203,7 @@ Again, we will use **three terminals**:
     .. code-block:: bash
 
         MOLA_MAPPING_ENABLED=false \
+        MOLA_START_ACTIVE=false \
         MOLA_LOAD_MM=/tmp/my_map.mm \
         MOLA_LOAD_SM=/tmp/my_map.simplemap \
         ros2 launch mola_lidar_odometry ros2-lidar-odometry.launch.py \
@@ -231,6 +237,8 @@ relocalization via ROS 2 API.
       Just use the RViz2's button ``2D pose estimate`` or FoxGlove's "Pose Estimate"
       to pick a pose and MOLA-LO will try to re-localize the vehicle in the given area.
 
+      .. image:: https://mrpt.github.io/imgs/mola-lo-relocalization-from-fox-glove.jpg
+
     .. tab-item:: Re-localize with a service
 
       There is also a ROS 2 service for programmatically request a relocalization, and
@@ -239,6 +247,19 @@ relocalization via ROS 2 API.
       - Service default name: ``/relocalize_near_pose``
       - Service interface: `mola_msgs::srv::RelocalizeNearPose <https://docs.ros.org/en/rolling/p/mola_msgs/interfaces/srv/RelocalizeNearPose.html>`_
 
+|
+
+Once MOLA-LO knows how to handle initialization, we can activate it, either from the GUI (click the "active" checkbox)
+or via this command (see all other similar commands):
+
+   .. code-block:: bash
+
+      # active: true
+      ros2 service call /mola_runtime_param_set mola_msgs/srv/MolaRuntimeParamSet \
+         "{parameters: \"mola::LidarOdometry:lidar_odom:\n  active: true\n\"}"
+
+Then, the module will start to produce localization estimates via ``/tf``, ``Odometry`` messages,
+together with a localization quality metric (see all :ref:`published topics <ros2api_topics>`).
 
 |
 

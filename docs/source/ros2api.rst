@@ -126,8 +126,19 @@ And this is who is responsible of publishing each transformation:
 
 |
 
+.. _ros2api_topics:
 
-5. Map publishing
+5. Published topics
+--------------------------------------
+Write me!
+
+|
+
+----
+
+|
+
+6. Map publishing
 --------------------------------------
 There are two ways of publishing maps to ROS:
 
@@ -159,12 +170,12 @@ The metric map layer C++ class will determine the ROS topic type to use.
 
 .. _ros2api_runtime_params:
 
-6. Runtime dynamic reconfiguration
+7. Runtime dynamic reconfiguration
 ----------------------------------------
 MOLA modules may expose a subset of their parameters through an interface that allows
 runtime reconfiguration via ROS 2 service requests:
 
-6.1. Runtime parameters for ``mola_lidar_odometry``
+7.1. Runtime parameters for ``mola_lidar_odometry``
 ======================================================
 
 List all existing parameters:
