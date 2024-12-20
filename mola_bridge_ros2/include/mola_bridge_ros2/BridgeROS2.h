@@ -211,8 +211,8 @@ class BridgeROS2 : public RawDataSourceBase, public mola::RawDataConsumer
     bool waitForTransform(
         mrpt::poses::CPose3D& des, const std::string& target_frame, const std::string& source_frame,
         bool printErrors);
-
-    void publishOdometry();
+    
+    void importRosOdometryToMOLA();
 
     /// Returns either the wallclock "now" (params_.use_sim_time = false)
     /// or the equivalent of the passed argument in ROS 2 format otherwise.

@@ -221,7 +221,7 @@ void BridgeROS2::spinOnce()
     ProfilerEntry tleg(profiler_, "spinOnce");
 
     // Publish odometry?
-    publishOdometry();
+    importRosOdometryToMOLA();
 
     // Check for new mola data sources?
     if (mrpt::Clock::nowDouble() - lastTimeCheckMolaSubs_ > params_.period_check_new_mola_subs)
@@ -351,7 +351,7 @@ void BridgeROS2::callbackOnOdometry(
     MRPT_END
 }
 
-void BridgeROS2::publishOdometry()
+void BridgeROS2::importRosOdometryToMOLA()
 {
     if (!params_.forward_ros_tf_as_mola_odometry_observations) return;
 
