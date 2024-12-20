@@ -131,6 +131,13 @@ class BridgeROS2 : public RawDataSourceBase, public mola::RawDataConsumer
         /// tf frame name for odometry's frame of reference:
         std::string reference_frame = "map";
 
+        /// Direct mode (false):
+        ///   reference_frame ("map") -> base_link ("base_link")
+        ///
+        ///  Indirect mode (true), following ROS REP 105 https://ros.org/reps/rep-0105.html
+        ///   map -> odom  (such as "map -> odom -> base_link" = "map -> base_link")
+        bool publish_localization_following_rep105 = true;
+
         bool forward_ros_tf_as_mola_odometry_observations = false;
         bool publish_odometry_msgs_from_slam              = true;
 
@@ -211,7 +218,7 @@ class BridgeROS2 : public RawDataSourceBase, public mola::RawDataConsumer
     bool waitForTransform(
         mrpt::poses::CPose3D& des, const std::string& target_frame, const std::string& source_frame,
         bool printErrors);
-    
+
     void importRosOdometryToMOLA();
 
     /// Returns either the wallclock "now" (params_.use_sim_time = false)
