@@ -799,6 +799,7 @@ void BridgeROS2::internalOn(const mrpt::obs::CObservationRobotPose& obs)
         nav_msgs::msg::Odometry msg;
         msg.header.stamp    = myNow(obs.timestamp);
         msg.header.frame_id = params_.reference_frame;
+        msg.child_frame_id  = params_.base_link_frame;
 
         msg.pose = mrpt::ros2bridge::toROS_Pose(obs.pose);
 
@@ -1316,6 +1317,7 @@ void BridgeROS2::timerPubLocalization()
         // Convert observation MRPT -> ROS
         nav_msgs::msg::Odometry msg;
         msg.header.stamp    = myNow(l->timestamp);
+        msg.child_frame_id  = params_.base_link_frame;
         msg.header.frame_id = params_.reference_frame;
 
         mrpt::poses::CPose3DPDFGaussian posePdf;
