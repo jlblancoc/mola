@@ -84,11 +84,61 @@ Open **three terminals**, and run these commands in each one:
         Watch the response to check that ``success`` is ``true``. Your map is now
         stored as file(s) named ``/tmp/my_map*``.
 
+|
+
+2. Optional: Build down-sampled, globally consistent map
+----------------------------------------------------------
+
+The map saved in the former step comprises two files:
+
+- A **key-frame (view-based) map** (``*.simplemap``): a set of SE(3) poses annotated with metadata and raw sensor observations.
+- The metric **local map** used by the specific LO pipeline; e.g. for the ``lidar3d-default`` :ref:`pipeline <mola_3d_default_pipeline>`,
+  it is a voxel-based point cloud of the current area, which may include an area of more than 100 meters around the latest robot pose, but if you mapped a larger area, it would be an incomplete representation of the whole map.
+
+The key-frame map is the more versatile one since it allows for running further map filtering,
+loop closure, downsampling, etc. while the metric local map is just what LO needs for **local** alignment of
+incoming scans.
+
+If your map is "small" in comparison to the sensor range (e.g. a few hundreds of meters length for 3D LiDARs outdoors),
+the local map would contain the whole scenario and you are good to go with it as is, so you can skip to next section.
+
+.. dropdown:: Visually inspect the generated ``*.mm`` file
+  :icon: code-review
+
+  You can check how the final metric map looks like using:
+
+  .. code-block:: bash
+
+    mm-viewer -l libmola_metric_maps.so  /path/to/your/map.mm
+
+  Where the ``-l`` flag is used to load the additional metric map classes defined in ``mola_metric_maps``, and
+  used in the ``lidar3d-default`` :ref:`pipeline <mola_3d_default_pipeline>`.
+
+
+However, if the map is much larger, you need to **generate a new local metric map** that includes the whole area where
+the robot needs to operate so it can localize correctly.
+
+.. dropdown:: How to generate a new local metric map
+  :icon: checklist
+
+  Discard the local metric map file (``*.mm``) and let's start processing the key-frame map (``*.simplemap``).
+
+  First, if your map is so large that it needs to close loops (e.g. several building blocks, a large part of a campus, etc.)
+  the :ref:`loop closure module <solutions>` would be needed to post-process the ``*.simplemap`` file.
+
+  Next, either if you already have closed loops or you do not need them, follow :ref:`these instructions <building-maps_step_mm>`,
+  taking into account that there must exist an output metric map **layer** named as expected by the LO pipeline (e.g. :ref:`lidar3d-default <mola_3d_default_pipeline>`).
+
+  TO-DO: Write complete example files and commands!
+
+
 
 |
 
 
-2. Load a prebuilt map in localize-only mode
+
+
+3. Load a prebuilt map in localize-only mode
 ---------------------------------------------
 
 ..  note::
@@ -128,10 +178,13 @@ Again, we will use **three terminals**:
 
             ros2 service call /map_load mola_msgs/srv/MapLoad "map_path: '/tmp/my_map'"
 
-
+        If you want to load a post-processed metric map (just the ``*.mm`` file), use the full
+        path to the map file, without the extension. Read more on how to generate metric maps
+        from key-frame maps (``*.simplemap``) :ref:`here <building-maps_step_mm>`.
 
         Note that it is also possible to directly launch MOLA-LO with a map loaded from disk
-        from the beginning, but it implies passing the two 
+        from the beginning, but it implies passing one or both maps (``*.mm`` and ``*.simplemap``)
+        by command line as environment variables.
 
 |
 
@@ -151,13 +204,14 @@ Again, we will use **three terminals**:
           lidar_topic_name:=/lidar1_points
 
     Of course, the ROS 2 service offers a greater flexibility to switch
-    between maps at run-time.
+    between maps at run-time. You can drop ``MOLA_LOAD_SM`` if you do not need
+    to extend the map (multi-session mapping).
 
 
 |
 
 
-3. Invoke relocalization
+4. Invoke relocalization
 ---------------------------------------------
 
 As explained :ref:`here <localization-only_common>`, initial localization is a hard problem on its own
@@ -184,4 +238,7 @@ relocalization via ROS 2 API.
 
       - Service default name: ``/relocalize_near_pose``
       - Service interface: `mola_msgs::srv::RelocalizeNearPose <https://docs.ros.org/en/rolling/p/mola_msgs/interfaces/srv/RelocalizeNearPose.html>`_
+
+
+|
 
