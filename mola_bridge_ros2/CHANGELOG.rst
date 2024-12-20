@@ -3,6 +3,13 @@ Changelog for package mola_bridge_ros2
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
+Forthcoming
+-----------
+* BridgeROS2: add option (now enabled by default) to publish /tfs following REP105 order
+* BUG FIX: Published odometry msg lacked target frame_id
+* Rename method for better reflecting its goal
+* Contributors: Jose Luis Blanco-Claraco
+
 1.4.0 (2024-12-18)
 ------------------
 * Publish localization quality topic

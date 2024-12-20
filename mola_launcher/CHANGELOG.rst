@@ -2,6 +2,9 @@
 Changelog for package mola_launcher
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 1.4.0 (2024-12-18)
 ------------------
 * Fix missing --ros-args too
