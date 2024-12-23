@@ -750,12 +750,14 @@ void MolaViz::dataset_ui_update()
 mrpt::gui::CDisplayWindowGUI::Ptr MolaViz::create_and_add_window(
     const window_name_t& name)
 {
+    using namespace std::string_literals;
+
     MRPT_LOG_DEBUG_FMT("Creating new window `%s`", name.c_str());
 
     mrpt::gui::CDisplayWindowGUI_Params cp;
     cp.maximized   = true;
-    windows_[name] = {
-        mrpt::gui::CDisplayWindowGUI::Create(name, 1000, 800, cp)};
+    windows_[name] = {mrpt::gui::CDisplayWindowGUI::Create(
+        "MOLAViz - "s + name, 1000, 800, cp)};
 
     // create empty list of subwindows too:
     subWindows_[name];
