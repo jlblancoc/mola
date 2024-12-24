@@ -24,8 +24,6 @@
   <depend>mola_kernel</depend>
   <depend>mola_launcher</depend>
   <depend>mola_metric_maps</depend>
-  <depend>mola_navstate_fg</depend>
-  <depend>mola_navstate_fuse</depend>
   <depend>mola_pose_list</depend>
   <depend>mola_relocalization</depend>
   <depend>mola_traj_tools</depend>
