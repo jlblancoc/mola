@@ -190,9 +190,9 @@ void RawDataSourceBase::sendObservationsToFrontEnds(
                     auto fut = viz->create_subwindow(sv->sensor_label);
                     sv->win  = fut.get();
 
-                    sv->win->setLayout(new nanogui::GridLayout(
-                        nanogui::Orientation::Vertical, 1,
-                        nanogui::Alignment::Fill, 2, 2));
+                    auto futLayout = viz->subwindow_grid_layout(
+                        sv->sensor_label, true /*vertical?*/, 1 /*col count*/);
+                    futLayout.get();
 
                     // Replace and resize, if user provided "win_pos":
                     if (sv->win && !sv->win_pos.empty())
@@ -202,8 +202,8 @@ void RawDataSourceBase::sendObservationsToFrontEnds(
                         // parse: "x y w h"
                         if ((ss >> x) && (ss >> y) && (ss >> w) && (ss >> h))
                         {
-                            sv->win->setPosition({x, y});
-                            sv->win->setSize({w, h});
+                            auto futMove = viz->subwindow_move_resize(
+                                sv->sensor_label, {x, y}, {w, h});
                         }
                     }
                 }

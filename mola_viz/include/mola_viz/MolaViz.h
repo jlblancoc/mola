@@ -68,6 +68,17 @@ class MolaViz : public ExecutableBase, public VizInterface
         const std::string& subWindowTitle,
         const std::string& parentWindow = DEFAULT_WINDOW_NAME) override;
 
+    std::future<void> subwindow_grid_layout(
+        const std::string& subWindowTitle, const bool orientationVertical,
+        int                resolution,
+        const std::string& parentWindow = DEFAULT_WINDOW_NAME) override;
+
+    std::future<void> subwindow_move_resize(
+        const std::string&                subWindowTitle,
+        const mrpt::math::TPoint2D_<int>& location,
+        const mrpt::math::TPoint2D_<int>& size,
+        const std::string& parentWindow = DEFAULT_WINDOW_NAME) override;
+
     /** Updates the contents of a subwindow from a given object, typically a
      * mrpt::obs::CObservation, but custom handlers can be installed for
      * arbitrary classes.

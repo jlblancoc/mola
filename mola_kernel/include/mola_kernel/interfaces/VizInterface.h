@@ -11,11 +11,19 @@
  */
 #pragma once
 
-#include <mrpt/gui/CDisplayWindowGUI.h>  // nanogui
+#include <mrpt/math/TPoint2D.h>
 #include <mrpt/math/TPoint3D.h>
+#include <mrpt/rtti/CObject.h>
 
 #include <future>
 #include <memory>
+
+// Fwrd decl to avoid pushing gui dependencies to all clients of mola-kernel
+// Was: #include <mrpt/gui/CDisplayWindowGUI.h>  // nanogui
+// clang-format off
+namespace nanogui { class Window; }
+namespace mrpt::opengl { class CSetOfObjects; }
+// clang-format on
 
 namespace mola
 {
@@ -36,6 +44,16 @@ class VizInterface
 
     virtual std::future<nanogui::Window*> create_subwindow(
         const std::string& title, const std::string& parentWindow = "main") = 0;
+
+    virtual std::future<void> subwindow_grid_layout(
+        const std::string& subWindowTitle, const bool orientationVertical,
+        int resolution, const std::string& parentWindow = "main") = 0;
+
+    virtual std::future<void> subwindow_move_resize(
+        const std::string&                subWindowTitle,
+        const mrpt::math::TPoint2D_<int>& location,
+        const mrpt::math::TPoint2D_<int>& size,
+        const std::string&                parentWindow = "main") = 0;
 
     virtual std::future<bool> subwindow_update_visualization(
         const mrpt::rtti::CObject::Ptr& obj, const std::string& subWindowTitle,

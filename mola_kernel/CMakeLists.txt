@@ -98,13 +98,11 @@ mola_add_library(
   SOURCES ${LIB_SRCS} ${LIB_PUBLIC_HDRS}
   PUBLIC_LINK_LIBRARIES
     mrpt::obs
-    mrpt::gui
     mrpt::topography
     mola::mola_yaml
 #  PRIVATE_LINK_LIBRARIES
   CMAKE_DEPENDENCIES
     mrpt-obs
-    mrpt-gui
     mrpt-topography
     mola_yaml
 )
