@@ -2,6 +2,14 @@
 Changelog for package mola_kernel
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* NavStateFilter Interface now also inherits from ExecutableBase for convenience
+* MinimalModuleContainer ctor should not be explicit
+* Add mola::MinimalModuleContainer
+* Drop dependency on mrpt-gui in kernel by abstracting MolaViz subwindow layout operations
+* Contributors: Jose Luis Blanco-Claraco
+
 1.4.1 (2024-12-20)
 ------------------
 

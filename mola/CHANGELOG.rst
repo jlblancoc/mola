@@ -2,6 +2,11 @@
 Changelog for package mola
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Move state estimation packages out of this repo to its own: https://github.com/MOLAorg/mola_state_estimation
+* Contributors: Jose Luis Blanco-Claraco
+
 1.4.1 (2024-12-20)
 ------------------
 
