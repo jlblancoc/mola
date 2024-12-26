@@ -33,8 +33,7 @@ class MinimalModuleContainer
     MinimalModuleContainer() = default;
     ~MinimalModuleContainer();
 
-    explicit MinimalModuleContainer(
-        const std::vector<mola::ExecutableBase::Ptr>& mods)
+    MinimalModuleContainer(const std::vector<mola::ExecutableBase::Ptr>& mods)
         : modules_(mods)
     {
         for (auto& m : modules_)
