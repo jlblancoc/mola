@@ -2,8 +2,8 @@
 Changelog for package mola_kernel
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.5.0 (2024-12-26)
+------------------
 * NavStateFilter Interface now also inherits from ExecutableBase for convenience
 * MinimalModuleContainer ctor should not be explicit
 * Add mola::MinimalModuleContainer
