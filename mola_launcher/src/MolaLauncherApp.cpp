@@ -288,7 +288,7 @@ void MolaLauncherApp::setup(
                 // overwrite:
                 info.yaml_cfg_block = mola::load_yaml_file(absPathParamsFile);
 
-                // apend other entries:
+                // append other entries:
                 for (const auto& [k, v] : old.asMap())
                     info.yaml_cfg_block[k.as<std::string>()] = v;
             }
