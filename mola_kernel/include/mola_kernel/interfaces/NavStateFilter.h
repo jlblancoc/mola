@@ -16,6 +16,7 @@
 #include <mrpt/core/Clock.h>
 #include <mrpt/math/TTwist3D.h>
 #include <mrpt/obs/obs_frwds.h>
+#include <mrpt/poses/CPose3DInterpolator.h>
 #include <mrpt/poses/CPose3DPDFGaussian.h>
 #include <mrpt/poses/CPose3DPDFGaussianInf.h>
 #include <mrpt/system/COutputLogger.h>
@@ -105,6 +106,20 @@ class NavStateFilter : public mola::ExecutableBase
     virtual std::optional<NavState> estimated_navstate(
         const mrpt::Clock::time_point& timestamp,
         const std::string&             frame_id) = 0;
+
+    /** (Optional virtual method) Returns the estimated trajectory (sequence of
+     * timestamped poses) between two time points, in the given frame_id.
+     *  \return std::nullopt if not implemented or not able to compute for the
+     *          requested time interval.
+     */
+    virtual std::optional<mrpt::poses::CPose3DInterpolator>
+        estimated_trajectory(
+            [[maybe_unused]] const mrpt::Clock::time_point& start_time,
+            [[maybe_unused]] const mrpt::Clock::time_point& end_time,
+            [[maybe_unused]] const std::string&             frame_id)
+    {
+        return {};  // Default: none
+    }
 
     /** Must be invoked with the mp2p_icp metric map geo-referencing information
      *  of the map in order to have GNSS observations correctly fused.
