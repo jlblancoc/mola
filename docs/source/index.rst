@@ -33,7 +33,7 @@ MOLA
   :hidden:
   :caption: State estimation
 
-  mola_sta_est_index
+  mola_state_estimators
 
 .. toctree::
   :maxdepth: 2
