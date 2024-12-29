@@ -2,8 +2,8 @@
 Changelog for package mola
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.5.1 (2024-12-29)
+------------------
 * Update docs on how to install the state estimators packages
 * Contributors: Jose Luis Blanco-Claraco
 

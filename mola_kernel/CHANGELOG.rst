@@ -2,8 +2,8 @@
 Changelog for package mola_kernel
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.5.1 (2024-12-29)
+------------------
 * NavStateFilter API: add estimated_trajectory()
 * Contributors: Jose Luis Blanco-Claraco
 
