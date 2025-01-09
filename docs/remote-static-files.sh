@@ -10,3 +10,4 @@ set -e
 # fi
 
 cp -v ../../mola_lidar_odometry/docs/imgs/* html/imgs/
+cp -v ../../mola_state_estimation/docs/imgs/* html/imgs/

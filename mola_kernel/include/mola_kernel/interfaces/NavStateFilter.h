@@ -70,7 +70,8 @@ class NavStateFilter : public mola::ExecutableBase
     // initialize(): inherited from ExecutableBase. Must be implemented to load
     // parameters, etc.
 
-    /** Integrates new SE(3) pose estimation of the vehicle wrt frame_id
+    /** Integrates new SE(3) pose estimation of the vehicle wrt a given
+     * frame_id.
      */
     virtual void fuse_pose(
         const mrpt::Clock::time_point&         timestamp,
