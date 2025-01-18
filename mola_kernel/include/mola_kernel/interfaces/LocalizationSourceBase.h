@@ -1,4 +1,4 @@
-﻿/* -------------------------------------------------------------------------
+/* -------------------------------------------------------------------------
  *   A Modular Optimization framework for Localization and mApping  (MOLA)
  * Copyright (C) 2018-2024 Jose Luis Blanco, University of Almeria
  * See LICENSE for license information.
@@ -47,6 +47,9 @@ class LocalizationSourceBase
 
         /** Vehicle/robot pose is given wrt this frame of reference */
         std::string reference_frame = "map";
+
+        /** Vehicle/robot pose frame */
+        std::string child_frame = "base_link";
 
         /** The source of the localization (e.g. "slam", "lidar_odometry",
          * "wheel_odometry", etc.) */
