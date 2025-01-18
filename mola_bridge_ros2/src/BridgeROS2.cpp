@@ -181,7 +181,7 @@ void BridgeROS2::initialize_rds(const Yaml& c)
 
     MRPT_LOG_DEBUG_STREAM("Initializing with these params:\n" << cfgCopy);
 
-    // params of the ROS2->MOLA part:
+    // params for ROS2->MOLA:
     YAML_LOAD_OPT(params_, base_link_frame, std::string);
     YAML_LOAD_OPT(params_, odom_frame, std::string);
     YAML_LOAD_OPT(params_, base_footprint_frame, std::string);
@@ -199,7 +199,7 @@ void BridgeROS2::initialize_rds(const Yaml& c)
         params_.base_footprint_to_base_link_tf = mrpt::math::TPose3D::FromString(s);
     }
 
-    // params of the MOLA-ROS2 part:
+    // params for MOLA->ROS2:
     YAML_LOAD_OPT(params_, base_link_frame, std::string);
     YAML_LOAD_OPT(params_, reference_frame, std::string);
     YAML_LOAD_OPT(params_, publish_odometry_msgs_from_slam, bool);
@@ -1271,8 +1271,9 @@ void BridgeROS2::timerPubLocalization()
 
     MRPT_LOG_DEBUG_STREAM(
         "New localization available from '"
-        << l->method << "' frame: '" << l->reference_frame << "' t="
-        << mrpt::system::dateTimeLocalToString(l->timestamp) << " pose=" << l->pose.asString());
+        << l->method << "' ref.frame: '" << l->reference_frame << "' child_frame: '"
+        << l->child_frame << "'  <<  t=" << mrpt::system::dateTimeLocalToString(l->timestamp)
+        << " pose=" << l->pose.asString());
 
     // 1/2: Publish to /tf:
     const std::string locLabel = (l->method.empty() ? "slam"s : l->method) + "/pose"s;
@@ -1314,8 +1315,8 @@ void BridgeROS2::timerPubLocalization()
     {
         // Recompute:
         mrpt::poses::CPose3D T_base_to_odom;
-        bool                 base_to_odom_ok = this->waitForTransform(
-                            T_base_to_odom, params_.odom_frame, params_.base_link_frame, true);
+        bool                 base_to_odom_ok =
+            this->waitForTransform(T_base_to_odom, params_.odom_frame, l->child_frame, true);
         // Note: this wait above typ takes ~50 us
 
         if (!base_to_odom_ok)
@@ -1333,14 +1334,14 @@ void BridgeROS2::timerPubLocalization()
 
             tfStmp.transform       = tf2::toMsg(baseOnMap_tf * odomOnBase_tf);
             tfStmp.child_frame_id  = params_.odom_frame;
-            tfStmp.header.frame_id = params_.reference_frame;
+            tfStmp.header.frame_id = l->reference_frame;
         }
     }
     else
     {
         tfStmp.transform       = tf2::toMsg(transform);
-        tfStmp.child_frame_id  = params_.base_link_frame;
-        tfStmp.header.frame_id = params_.reference_frame;
+        tfStmp.child_frame_id  = l->child_frame;
+        tfStmp.header.frame_id = l->reference_frame;
     }
     tf_bc_->sendTransform(tfStmp);
 
@@ -1350,8 +1351,8 @@ void BridgeROS2::timerPubLocalization()
         // Convert observation MRPT -> ROS
         nav_msgs::msg::Odometry msg;
         msg.header.stamp    = myNow(l->timestamp);
-        msg.child_frame_id  = params_.base_link_frame;
-        msg.header.frame_id = params_.reference_frame;
+        msg.child_frame_id  = l->child_frame;
+        msg.header.frame_id = l->reference_frame;
 
         mrpt::poses::CPose3DPDFGaussian posePdf;
         posePdf.mean = mrpt::poses::CPose3D(l->pose);

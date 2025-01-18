@@ -129,10 +129,14 @@ class BridgeROS2 : public RawDataSourceBase, public mola::RawDataConsumer
         std::string odom_frame = "odom";
 
         /// tf frame name for odometry's frame of reference:
+        /// Note that this frame is NOT used for calls from LocalizationSources,
+        /// which follows what explained below for publish_localization_following_rep105
         std::string reference_frame = "map";
 
         /// Direct mode (false):
         ///   reference_frame ("map") -> base_link ("base_link")
+        ///
+        /// reference_frame comes from the localization source module, it is not configured here.
         ///
         ///  Indirect mode (true), following ROS REP 105 https://ros.org/reps/rep-0105.html
         ///   map -> odom  (such as "map -> odom -> base_link" = "map -> base_link")
