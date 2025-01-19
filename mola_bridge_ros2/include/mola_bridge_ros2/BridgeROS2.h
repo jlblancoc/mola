@@ -294,7 +294,7 @@ class BridgeROS2 : public RawDataSourceBase, public mola::RawDataConsumer
     void onNewMap(const mola::MapSourceBase::MapUpdate& m);
 
     std::mutex                                                         lastLocMapMtx_;
-    std::optional<mola::LocalizationSourceBase::LocalizationUpdate>    lastLoc_;
+    std::vector<mola::LocalizationSourceBase::LocalizationUpdate>      lastLocUpdates_;
     std::map<std::string /*map_name*/, mola::MapSourceBase::MapUpdate> lastMaps_;
 
     void timerPubLocalization();
