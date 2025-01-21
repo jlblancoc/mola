@@ -2,6 +2,13 @@
 Changelog for package mola_kernel
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Fix published /tf's: those from LocalizationSources now can explicitly define their parent and child frames
+* LocalizationSources now can explicitly define both, their reference and child frames for each estimated pose
+* docs: add state estimation images
+* Contributors: Jose Luis Blanco-Claraco
+
 1.5.1 (2024-12-29)
 ------------------
 * NavStateFilter API: add estimated_trajectory()

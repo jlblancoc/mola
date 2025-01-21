@@ -2,6 +2,9 @@
 Changelog for package mola_launcher
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 1.5.1 (2024-12-29)
 ------------------
 * Fix comment typo

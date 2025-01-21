@@ -3,6 +3,14 @@ Changelog for package mola_bridge_ros2
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
+Forthcoming
+-----------
+* Publish gridmaps too
+* ros2 bridge: rep105 only for map->base_link tfs
+* BridgeROS2: support forwarding more than one localization message per timer call
+* Fix published /tf's: those from LocalizationSources now can explicitly define their parent and child frames
+* Contributors: Jose Luis Blanco-Claraco
+
 1.5.1 (2024-12-29)
 ------------------
 
