@@ -160,9 +160,9 @@ Again, we will use **three terminals**:
 
       .. code-block:: bash
 
-          MOLA_MAPPING_ENABLED=false \
-          MOLA_START_ACTIVE=false \
           ros2 launch mola_lidar_odometry ros2-lidar-odometry.launch.py \
+            start_active:=False \
+            start_mapping_enabled:=False \
             lidar_topic_name:=/lidar1_points
 
       .. note::
@@ -171,8 +171,8 @@ Again, we will use **three terminals**:
 
       Explanation:
 
-      - ``MOLA_MAPPING_ENABLED=false`` disables map updates, so the loaded map will remain static.
-      - ``MOLA_START_ACTIVE=false`` is recommended so LO does not attempt to match incoming sensor
+      - ``start_mapping_enabled:=False`` disables map updates, so the loaded map will remain static.
+      - ``start_active:=False`` is recommended so LO does not attempt to match incoming sensor
         data until a relocalization method or rough initial localization is set (see next section below).
 
     .. tab-item:: #3: Load the map
@@ -184,7 +184,8 @@ Again, we will use **three terminals**:
             ros2 service call /map_load mola_msgs/srv/MapLoad "map_path: '/tmp/my_map'"
 
         If you want to load a post-processed metric map (just the ``*.mm`` file), use the full
-        path to the map file, without the extension. Read more on how to generate metric maps
+        path to the map file, **without the ``*.mm`` extension**.
+        Read more on how to generate metric maps
         from key-frame maps (``*.simplemap``) :ref:`here <building-maps_step_mm>`.
 
         Note that it is also possible to directly launch MOLA-LO with a map loaded from disk
@@ -202,11 +203,11 @@ Again, we will use **three terminals**:
 
     .. code-block:: bash
 
-        MOLA_MAPPING_ENABLED=false \
-        MOLA_START_ACTIVE=false \
         MOLA_LOAD_MM=/tmp/my_map.mm \
         MOLA_LOAD_SM=/tmp/my_map.simplemap \
         ros2 launch mola_lidar_odometry ros2-lidar-odometry.launch.py \
+          start_active:=False \
+          start_mapping_enabled:=False \
           lidar_topic_name:=/lidar1_points
 
     Of course, the ROS 2 service offers a greater flexibility to switch
