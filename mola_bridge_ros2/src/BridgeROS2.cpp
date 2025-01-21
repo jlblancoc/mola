@@ -23,6 +23,7 @@
 #include <mola_yaml/yaml_helpers.h>
 #include <mrpt/containers/yaml.h>
 #include <mrpt/core/initializer.h>
+#include <mrpt/maps/COccupancyGridMap2D.h>
 #include <mrpt/maps/CPointsMapXYZI.h>
 #include <mrpt/maps/CPointsMapXYZIRT.h>
 #include <mrpt/maps/CSimplePointsMap.h>
@@ -36,12 +37,14 @@
 #include <mrpt/ros2bridge/image.h>
 #include <mrpt/ros2bridge/imu.h>
 #include <mrpt/ros2bridge/laser_scan.h>
+#include <mrpt/ros2bridge/map.h>
 #include <mrpt/ros2bridge/point_cloud2.h>
 #include <mrpt/ros2bridge/pose.h>
 #include <mrpt/ros2bridge/time.h>
 #include <mrpt/system/filesystem.h>
 
 // ROS 2:
+#include <nav_msgs/msg/occupancy_grid.hpp>
 #include <nav_msgs/msg/odometry.hpp>
 #include <rclcpp/node.hpp>
 #include <std_msgs/msg/float32.hpp>
@@ -1398,19 +1401,28 @@ void BridgeROS2::timerPubMap()
     {
         const std::string mapTopic = (mu.method.empty() ? "slam"s : mu.method) + "/"s + layerName;
 
-        // Reuse code for point cloud observations: build a "fake" observation:
-        mrpt::obs::CObservationPointCloud obs;
-        obs.sensorLabel = mapTopic;
-        obs.pointcloud  = std::dynamic_pointer_cast<mrpt::maps::CPointsMap>(mu.map);
-        if (!obs.pointcloud)
+        // Is it a point cloud?
+        if (const auto mapPts = std::dynamic_pointer_cast<mrpt::maps::CPointsMap>(mu.map); mapPts)
         {
-            MRPT_LOG_WARN_STREAM(
-                "Do not know how to publish map layer '"
-                << layerName << "' of type '" << mu.map->GetRuntimeClass()->className << "'");
-            continue;
+            mrpt::obs::CObservationPointCloud obs;
+            obs.sensorLabel = mapTopic;
+            obs.pointcloud  = mapPts;
+            // Reuse code for point cloud observations: build a "fake" observation:
+            internalOn(obs, false /*no tf*/, mu.reference_frame);
         }
-
-        internalOn(obs, false /*no tf*/, mu.reference_frame);
+        else
+            // Is it a grid map?
+            if (auto grid = std::dynamic_pointer_cast<mrpt::maps::COccupancyGridMap2D>(mu.map);
+                grid)
+            {
+                internalPublishGridMap(*grid, mapTopic, mu.reference_frame);
+            }
+            else
+            {
+                MRPT_LOG_WARN_STREAM(
+                    "Do not know how to publish map layer '"
+                    << layerName << "' of type '" << mu.map->GetRuntimeClass()->className << "'");
+            }
     }
 }
 
@@ -1507,5 +1519,52 @@ void BridgeROS2::publishStaticTFs()
 
         tf_static_bc_->sendTransform(tfStmp);
         // tf_bc_->sendTransform(tfStmp);
+    }
+}
+
+void BridgeROS2::internalPublishGridMap(
+    const mrpt::maps::COccupancyGridMap2D& m, const std::string& sMapTopicName,
+    const std::string& sReferenceFrame)
+{
+    using namespace std::string_literals;
+
+    auto lck = mrpt::lockHelper(rosPubsMtx_);
+
+    const std::string grid_topic          = sMapTopicName + "_gridmap"s;
+    const std::string grid_metadata_topic = sMapTopicName + "_gridmap_metadata"s;
+
+    // Create the publisher the first time an observation arrives:
+    const bool is_1st_pub = rosPubs_.pub_sensors.find(grid_topic) == rosPubs_.pub_sensors.end();
+    auto&      pub        = rosPubs_.pub_sensors[grid_topic];
+    auto&      pubM       = rosPubs_.pub_sensors[grid_metadata_topic];
+
+    if (is_1st_pub)
+    {
+        // REP-2003: https://ros.org/reps/rep-2003.html#id5
+        // - Maps:  reliable transient-local
+        auto qos = rclcpp::QoS(rclcpp::KeepLast(1)).transient_local().reliable();
+
+        pub  = rosNode()->create_publisher<nav_msgs::msg::OccupancyGrid>(grid_topic, qos);
+        pubM = rosNode()->create_publisher<nav_msgs::msg::MapMetaData>(grid_metadata_topic, qos);
+    }
+    lck.unlock();
+
+    rclcpp::Publisher<nav_msgs::msg::OccupancyGrid>::SharedPtr pubGrid =
+        std::dynamic_pointer_cast<rclcpp::Publisher<nav_msgs::msg::OccupancyGrid>>(pub);
+    ASSERT_(pubGrid);
+
+    rclcpp::Publisher<nav_msgs::msg::MapMetaData>::SharedPtr pubMeta =
+        std::dynamic_pointer_cast<rclcpp::Publisher<nav_msgs::msg::MapMetaData>>(pubMeta);
+    ASSERT_(pubMeta);
+
+    std_msgs::msg::Header msg_header;
+    msg_header.stamp    = rosNode_->get_clock()->now();
+    msg_header.frame_id = sReferenceFrame;
+
+    {
+        nav_msgs::msg::OccupancyGrid gridMsg;
+        mrpt::ros2bridge::toROS(m, gridMsg, msg_header);
+        pubGrid->publish(gridMsg);
+        pubMeta->publish(gridMsg.info);
     }
 }

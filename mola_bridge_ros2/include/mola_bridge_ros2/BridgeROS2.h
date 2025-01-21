@@ -21,6 +21,7 @@
 #include <mola_kernel/interfaces/Relocalization.h>
 
 // MRPT:
+#include <mrpt/maps/COccupancyGridMap2D.h>
 #include <mrpt/obs/CObservationGPS.h>
 #include <mrpt/obs/CObservationIMU.h>
 #include <mrpt/obs/CObservationImage.h>
@@ -313,6 +314,10 @@ class BridgeROS2 : public RawDataSourceBase, public mola::RawDataConsumer
     void internalOn(
         const mrpt::obs::CObservationPointCloud& obs, bool isSensorTopic,
         const std::string& sSensorFrameId);
+
+    void internalPublishGridMap(
+        const mrpt::maps::COccupancyGridMap2D& m, const std::string& sMapTopicName,
+        const std::string& sReferenceFrame);
 
     void internalAnalyzeTopicsToSubscribe(const mrpt::containers::yaml& ds_subscribe);
 
