@@ -1313,7 +1313,11 @@ void BridgeROS2::timerPubLocalization()
 
         geometry_msgs::msg::TransformStamped tfStmp;
         tfStmp.header.stamp = myNow(l.timestamp);
-        if (params_.publish_localization_following_rep105)
+
+        // Follow REP105 only if we are publishing "map" -> "base_link" poses.
+        if (params_.publish_localization_following_rep105 &&
+            l.child_frame == params_.base_link_frame &&
+            l.reference_frame == params_.reference_frame)
         {
             // Recompute:
             mrpt::poses::CPose3D T_base_to_odom;
