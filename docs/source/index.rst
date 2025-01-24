@@ -184,6 +184,8 @@ How to install all MOLA modules:
          ros-$ROS_DISTRO-mola-state-estimation \
          ros-$ROS_DISTRO-mola-lidar-odometry
 
+    .. code-block:: bash
+
         # (OPTIONAL) Install example small datasets to run demos/unit tests:
         sudo apt install ros-$ROS_DISTRO-mola-test-datasets
 
@@ -194,6 +196,8 @@ How to install all MOLA modules:
         # For example, let's launch the mm map viewer. 
         # If a GUI app is opened, it means installation was successful.
         mm-viewer
+
+    .. code-block:: bash
 
         # You can also test the mola LO cli interface:
         mola-lidar-odometry-cli --help
