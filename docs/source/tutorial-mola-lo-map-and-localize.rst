@@ -53,6 +53,11 @@ Open **three terminals**, and run these commands in each one:
             do_fake_localization:=False \
             use_rviz:=False
 
+      **Note:** If you choose to enable RViz at this point instead (``use_rviz:=True``), it
+      will start emitting warnings about "Message filter dropping message", and LiDAR
+      will not be visible in its GUI. It's OK. That is because we still did not launch MOLA-LO
+      and `tf` is missing the transform `map -> odom`.
+
 
     .. tab-item:: #2: MOLA-LO
 
@@ -60,9 +65,9 @@ Open **three terminals**, and run these commands in each one:
 
         .. code-block:: bash
 
-            MOLA_GENERATE_SIMPLEMAP=true \
             ros2 launch mola_lidar_odometry ros2-lidar-odometry.launch.py \
-              lidar_topic_name:=/lidar1_points
+              lidar_topic_name:=/lidar1_points \
+              generate_simplemap:=True
 
         .. note::
 
