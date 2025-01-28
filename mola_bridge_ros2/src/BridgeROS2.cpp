@@ -1561,7 +1561,7 @@ void BridgeROS2::internalPublishGridMap(
     ASSERT_(pubGrid);
 
     rclcpp::Publisher<nav_msgs::msg::MapMetaData>::SharedPtr pubMeta =
-        std::dynamic_pointer_cast<rclcpp::Publisher<nav_msgs::msg::MapMetaData>>(pubMeta);
+        std::dynamic_pointer_cast<rclcpp::Publisher<nav_msgs::msg::MapMetaData>>(pubM);
     ASSERT_(pubMeta);
 
     std_msgs::msg::Header msg_header;
