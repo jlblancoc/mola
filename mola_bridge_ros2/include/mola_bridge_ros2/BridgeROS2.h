@@ -322,6 +322,14 @@ class BridgeROS2 : public RawDataSourceBase, public mola::RawDataConsumer
     void internalAnalyzeTopicsToSubscribe(const mrpt::containers::yaml& ds_subscribe);
 
     void publishStaticTFs();
+
+    void                  redirectMolaModuleOutputToROSConsole(mola::ExecutableBase::Ptr& module);
+    std::set<std::string> already_handled_modules_;
+    std::vector<std::weak_ptr<mola::ExecutableBase>>      already_handled_consoles_;
+    std::optional<mrpt::system::output_logger_callback_t> mrpt2ros_log_cb_;
+
+    // Undo redirectMolaModuleOutputToROSConsole(), before the node is destructed
+    void unredirectMolaModuleOutput();
 };
 
 }  // namespace mola
