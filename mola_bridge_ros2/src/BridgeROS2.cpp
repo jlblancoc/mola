@@ -159,9 +159,6 @@ void BridgeROS2::ros_node_thread_main(Yaml cfg)
         // Spin:
         rclcpp::spin(rosNode_);
 
-        // Unregister MRPT -> ROS console callbacks:
-        unredirectMolaModuleOutput();
-
         rclcpp::shutdown();
     }
     catch (const std::exception& e)
@@ -927,10 +924,6 @@ void BridgeROS2::doLookForNewMolaSubs()
 
     auto lck = mrpt::lockHelper(molaSubsMtx_);
 
-    // All of them: redirect output to ros console:
-    auto listAll = this->findService<mola::ExecutableBase>();
-    for (auto& module : listAll) redirectMolaModuleOutputToROSConsole(module);
-
     // RawDataSourceBase:
     auto listRDS = this->findService<mola::RawDataSourceBase>();
     for (auto& module : listRDS)
@@ -1574,64 +1567,4 @@ void BridgeROS2::internalPublishGridMap(
         pubGrid->publish(gridMsg);
         pubMeta->publish(gridMsg.info);
     }
-}
-
-void BridgeROS2::redirectMolaModuleOutputToROSConsole(mola::ExecutableBase::Ptr& module)
-{
-    ASSERT_(module);
-
-    if (already_handled_modules_.count(module->getModuleInstanceName()) != 0)
-        return;  // already done
-
-    already_handled_modules_.insert(module->getModuleInstanceName());  // mark as done
-    already_handled_consoles_.push_back(module);
-
-    // Redirect MRPT logger to ROS logger:
-    module->logging_enable_console_output = false;  // No console, go thru ROS
-
-    if (!mrpt2ros_log_cb_)
-    {
-        auto node        = rosNode();
-        mrpt2ros_log_cb_ = [node](
-                               std::string_view msg, const mrpt::system::VerbosityLevel level,
-                               [[maybe_unused]] std::string_view              loggerName,
-                               [[maybe_unused]] const mrpt::Clock::time_point timestamp)
-        {
-            switch (level)
-            {
-                case mrpt::system::LVL_DEBUG:
-                    RCLCPP_DEBUG_STREAM(node->get_logger(), msg);
-                    break;
-                case mrpt::system::LVL_INFO:
-                    RCLCPP_INFO_STREAM(node->get_logger(), msg);
-                    break;
-                case mrpt::system::LVL_WARN:
-                    RCLCPP_WARN_STREAM(node->get_logger(), msg);
-                    break;
-                case mrpt::system::LVL_ERROR:
-                    RCLCPP_ERROR_STREAM(node->get_logger(), msg);
-                    break;
-                default:
-                    break;
-            };
-        };
-    }
-
-    module->logRegisterCallback(*mrpt2ros_log_cb_);
-}
-
-void BridgeROS2::unredirectMolaModuleOutput()
-{
-    if (!mrpt2ros_log_cb_) return;
-
-    for (const auto& weakPtrToModule : already_handled_consoles_)
-    {
-        auto mod = weakPtrToModule.lock();
-        if (!mod) continue;
-
-        mod->setVerbosityLevelForCallbacks(mrpt::system::LVL_ERROR);
-        mod->logging_enable_console_output = true;
-        // mod->logDeregisterCallback(*mrpt2ros_log_cb_);
-    }
-    already_handled_consoles_.clear();
 }
