@@ -12,6 +12,7 @@
 #pragma once
 
 // MOLA virtual interfaces:
+#include <mola_kernel/Georeferencing.h>
 #include <mola_kernel/interfaces/ExecutableBase.h>
 #include <mola_kernel/interfaces/LocalizationSourceBase.h>
 #include <mola_kernel/interfaces/MapServer.h>
@@ -161,6 +162,10 @@ class BridgeROS2 : public RawDataSourceBase, public mola::RawDataConsumer
         double period_check_new_mola_subs = 1.0;  // [s]
 
         int wait_for_tf_timeout_milliseconds = 100;
+
+        std::string georef_map_reference_frame = "map";
+        std::string georef_map_utm_frame       = "utm";
+        std::string georef_map_enu_frame       = "enu";
     };
 
     Params params_;
@@ -322,6 +327,8 @@ class BridgeROS2 : public RawDataSourceBase, public mola::RawDataConsumer
     void internalAnalyzeTopicsToSubscribe(const mrpt::containers::yaml& ds_subscribe);
 
     void publishStaticTFs();
+    void publishMetricMapGeoreferencingData(
+        const mola::Georeferencing& g, const std::string& georefTopic);
 };
 
 }  // namespace mola

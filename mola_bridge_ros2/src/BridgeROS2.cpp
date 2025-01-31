@@ -20,6 +20,7 @@
 
 // MOLA/MRPT:
 #include <mola_kernel/pretty_print_exception.h>
+#include <mola_kernel/version.h>
 #include <mola_yaml/yaml_helpers.h>
 #include <mrpt/containers/yaml.h>
 #include <mrpt/core/initializer.h>
@@ -42,6 +43,10 @@
 #include <mrpt/ros2bridge/pose.h>
 #include <mrpt/ros2bridge/time.h>
 #include <mrpt/system/filesystem.h>
+#include <mrpt/topography/conversions.h>
+
+// Other mrpt pkgs:
+#include <mrpt_nav_interfaces/msg/georeferencing_metadata.hpp>
 
 // ROS 2:
 #include <nav_msgs/msg/occupancy_grid.hpp>
@@ -191,6 +196,10 @@ void BridgeROS2::initialize_rds(const Yaml& c)
 
     YAML_LOAD_OPT(params_, forward_ros_tf_as_mola_odometry_observations, bool);
     YAML_LOAD_OPT(params_, wait_for_tf_timeout_milliseconds, int);
+
+    YAML_LOAD_OPT(params_, georef_map_reference_frame, std::string);
+    YAML_LOAD_OPT(params_, georef_map_utm_frame, std::string);
+    YAML_LOAD_OPT(params_, georef_map_enu_frame, std::string);
 
     YAML_LOAD_OPT(params_, publish_localization_following_rep105, bool);
 
@@ -689,10 +698,10 @@ void BridgeROS2::internalOn(
         // REP-2003: https://ros.org/reps/rep-2003.html#id5
         // - Sensors: SystemDefaultsQoS()
         // - Maps:  reliable transient-local
-        auto qos = isSensorTopic ? rclcpp::SystemDefaultsQoS()
-                                 : rclcpp::QoS(rclcpp::KeepLast(1)).transient_local().reliable();
+        auto mapQos = isSensorTopic ? rclcpp::SystemDefaultsQoS()
+                                    : rclcpp::QoS(rclcpp::KeepLast(1)).transient_local().reliable();
 
-        pubPts = rosNode()->create_publisher<sensor_msgs::msg::PointCloud2>(lbPoints, qos);
+        pubPts = rosNode()->create_publisher<sensor_msgs::msg::PointCloud2>(lbPoints, mapQos);
     }
     lck.unlock();
 
@@ -1410,20 +1419,116 @@ void BridgeROS2::timerPubMap()
             // Reuse code for point cloud observations: build a "fake" observation:
             internalOn(obs, false /*no tf*/, mu.reference_frame);
         }
-        else
-            // Is it a grid map?
-            if (auto grid = std::dynamic_pointer_cast<mrpt::maps::COccupancyGridMap2D>(mu.map);
-                grid)
-            {
-                internalPublishGridMap(*grid, mapTopic, mu.reference_frame);
-            }
-            else
-            {
-                MRPT_LOG_WARN_STREAM(
-                    "Do not know how to publish map layer '"
-                    << layerName << "' of type '" << mu.map->GetRuntimeClass()->className << "'");
-            }
+        // Is it a grid map?
+        else if (auto grid = std::dynamic_pointer_cast<mrpt::maps::COccupancyGridMap2D>(mu.map);
+                 grid)
+        {
+            internalPublishGridMap(*grid, mapTopic, mu.reference_frame);
+        }
+        // Not empty?
+        else if (mu.map)
+        {
+            MRPT_LOG_WARN_STREAM(
+                "Do not know how to publish map layer '"
+                << layerName << "' of type '" << mu.map->GetRuntimeClass()->className << "'");
+        }
+
+        // If we have georef info, publish it:
+        if (mu.georeferencing.has_value())
+        {
+            const std::string georefTopic =
+                (mu.method.empty() ? "slam"s : mu.method) + "/geo_ref_metadata"s;
+            publishMetricMapGeoreferencingData(*mu.georeferencing, georefTopic);
+        }
     }
+}
+
+void BridgeROS2::publishMetricMapGeoreferencingData(
+    const mola::Georeferencing& g, const std::string& georefTopic)
+{
+    MRPT_LOG_INFO_STREAM(
+        "Publishing map georeferencing metadata: T_enu_to_map="
+        << g.T_enu_to_map.asString()  //
+        << " geo_coord.lat=" << g.geo_coord.lat.getAsString()  //
+        << " geo_coord.lon=" << g.geo_coord.lon.getAsString()  //
+        << " geo_coord.height=" << g.geo_coord.height  //
+    );
+
+    // Publish several georeference items:
+    // 1) /tf's  ENU->MAP, ENU->UTM
+    // 2) msg: mrpt_nav_interfaces::msg::GeoreferencingMetadata
+
+    // 1.a) ENU -> MAP
+    {
+        LocalizationSourceBase::LocalizationUpdate lu;
+
+        const auto& T_enu_to_map = g.T_enu_to_map.mean;
+
+        lu.method          = "map_server";
+        lu.reference_frame = params_.georef_map_enu_frame;  // "enu"
+        lu.child_frame     = params_.georef_map_reference_frame;  // "map"
+        lu.timestamp       = mrpt::Clock::now();  // Anything better?
+        lu.pose            = T_enu_to_map.asTPose();
+
+        onNewLocalization(lu);
+    }
+
+    // 1.b) ENU -> UTM
+    mrpt::poses::CPose3D T_enu_to_utm;
+    int                  utmZone = 0;
+    char                 utmBand = 0;
+    {
+        LocalizationSourceBase::LocalizationUpdate lu;
+        mrpt::topography::TUTMCoords               utmCoordsOfENU;
+        mrpt::topography::GeodeticToUTM(g.geo_coord, utmCoordsOfENU, utmZone, utmBand);
+
+        // T_enu_to_utm = - utmCoordsOfENU  (without rotation, both are "ENU")
+        T_enu_to_utm = mrpt::poses::CPose3D::FromTranslation(-utmCoordsOfENU);
+
+        lu.method          = "map_server";
+        lu.reference_frame = params_.georef_map_enu_frame;  // "enu"
+        lu.child_frame     = params_.georef_map_utm_frame;  // "utm"
+        lu.timestamp       = mrpt::Clock::now();  // Anything better?
+        lu.pose            = T_enu_to_utm.asTPose();
+
+        onNewLocalization(lu);
+    }
+
+    // 2) g.geo_coord => georefTopic
+    auto lck = mrpt::lockHelper(rosPubsMtx_);
+
+    // Create the publisher the first time an observation arrives:
+    const bool is_1st_pub = rosPubs_.pub_sensors.find(georefTopic) == rosPubs_.pub_sensors.end();
+    auto&      pub        = rosPubs_.pub_sensors[georefTopic];
+
+    if (is_1st_pub)
+    {
+        // Publish georef info as transient local:
+        auto mapQos = rclcpp::QoS(rclcpp::KeepLast(1)).transient_local().reliable();
+
+        pub = rosNode()->create_publisher<mrpt_nav_interfaces::msg::GeoreferencingMetadata>(
+            georefTopic, mapQos);
+    }
+    lck.unlock();
+
+    auto pubGeoRef = std::dynamic_pointer_cast<
+        rclcpp::Publisher<mrpt_nav_interfaces::msg::GeoreferencingMetadata>>(pub);
+    ASSERT_(pubGeoRef);
+
+    mrpt_nav_interfaces::msg::GeoreferencingMetadata geoRefMsg;
+    geoRefMsg.valid = true;
+
+    geoRefMsg.t_enu_to_map = mrpt::ros2bridge::toROS_Pose(g.T_enu_to_map);
+    geoRefMsg.t_enu_to_utm = mrpt::ros2bridge::toROS_Pose(T_enu_to_utm);
+
+    geoRefMsg.latitude  = g.geo_coord.lat.decimal_value;
+    geoRefMsg.longitude = g.geo_coord.lon.decimal_value;
+    geoRefMsg.height    = g.geo_coord.height;
+
+    geoRefMsg.utm_zone = utmZone;
+    geoRefMsg.utm_band = mrpt::format("%c", utmBand);
+
+    pubGeoRef->publish(geoRefMsg);
 }
 
 void BridgeROS2::internalAnalyzeTopicsToSubscribe(const mrpt::containers::yaml& ds_subscribe)
@@ -1505,21 +1610,19 @@ void BridgeROS2::internalAnalyzeTopicsToSubscribe(const mrpt::containers::yaml& 
 
 void BridgeROS2::publishStaticTFs()
 {
-    if (!params_.base_footprint_frame.empty())
-    {
-        const tf2::Transform transform =
-            mrpt::ros2bridge::toROS_tfTransform(params_.base_footprint_to_base_link_tf);
+    if (params_.base_footprint_frame.empty()) return;
 
-        geometry_msgs::msg::TransformStamped tfStmp;
+    const tf2::Transform transform =
+        mrpt::ros2bridge::toROS_tfTransform(params_.base_footprint_to_base_link_tf);
 
-        tfStmp.transform       = tf2::toMsg(transform);
-        tfStmp.child_frame_id  = params_.base_link_frame;
-        tfStmp.header.frame_id = params_.base_footprint_frame;
-        tfStmp.header.stamp    = myNow(mrpt::Clock::now());
+    geometry_msgs::msg::TransformStamped tfStmp;
 
-        tf_static_bc_->sendTransform(tfStmp);
-        // tf_bc_->sendTransform(tfStmp);
-    }
+    tfStmp.transform       = tf2::toMsg(transform);
+    tfStmp.child_frame_id  = params_.base_link_frame;
+    tfStmp.header.frame_id = params_.base_footprint_frame;
+    tfStmp.header.stamp    = myNow(mrpt::Clock::now());
+
+    tf_static_bc_->sendTransform(tfStmp);
 }
 
 void BridgeROS2::internalPublishGridMap(

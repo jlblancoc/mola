@@ -41,6 +41,7 @@ mola_find_package_or_return(tf2_geometry_msgs REQUIRED)
 
 # MOLA ROS2 services:
 mola_find_package_or_return(mola_msgs REQUIRED)
+mola_find_package_or_return(mrpt_nav_interfaces REQUIRED)
 
 # -----------------------
 # define lib:
@@ -67,6 +68,7 @@ ament_target_dependencies(${PROJECT_NAME} PUBLIC
   sensor_msgs
   tf2
   tf2_geometry_msgs
+  mrpt_nav_interfaces
   mola_msgs
 )
 
