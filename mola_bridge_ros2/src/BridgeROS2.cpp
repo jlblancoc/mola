@@ -1460,17 +1460,16 @@ void BridgeROS2::publishMetricMapGeoreferencingData(
 
     // 1.a) ENU -> MAP
     {
-        LocalizationSourceBase::LocalizationUpdate lu;
-
         const auto& T_enu_to_map = g.T_enu_to_map.mean;
 
-        lu.method          = "map_server";
-        lu.reference_frame = params_.georef_map_enu_frame;  // "enu"
-        lu.child_frame     = params_.georef_map_reference_frame;  // "map"
-        lu.timestamp       = mrpt::Clock::now();  // Anything better?
-        lu.pose            = T_enu_to_map.asTPose();
+        geometry_msgs::msg::TransformStamped tfStmp;
 
-        onNewLocalization(lu);
+        tfStmp.transform = tf2::toMsg(mrpt::ros2bridge::toROS_tfTransform(T_enu_to_map.asTPose()));
+        tfStmp.child_frame_id  = params_.georef_map_reference_frame;  // "map"
+        tfStmp.header.frame_id = params_.georef_map_enu_frame;  // "enu"
+        tfStmp.header.stamp    = myNow(mrpt::Clock::now());
+
+        tf_static_bc_->sendTransform(tfStmp);
     }
 
     // 1.b) ENU -> UTM
@@ -1478,20 +1477,20 @@ void BridgeROS2::publishMetricMapGeoreferencingData(
     int                  utmZone = 0;
     char                 utmBand = 0;
     {
-        LocalizationSourceBase::LocalizationUpdate lu;
-        mrpt::topography::TUTMCoords               utmCoordsOfENU;
+        mrpt::topography::TUTMCoords utmCoordsOfENU;
         mrpt::topography::GeodeticToUTM(g.geo_coord, utmCoordsOfENU, utmZone, utmBand);
 
         // T_enu_to_utm = - utmCoordsOfENU  (without rotation, both are "ENU")
         T_enu_to_utm = mrpt::poses::CPose3D::FromTranslation(-utmCoordsOfENU);
 
-        lu.method          = "map_server";
-        lu.reference_frame = params_.georef_map_enu_frame;  // "enu"
-        lu.child_frame     = params_.georef_map_utm_frame;  // "utm"
-        lu.timestamp       = mrpt::Clock::now();  // Anything better?
-        lu.pose            = T_enu_to_utm.asTPose();
+        geometry_msgs::msg::TransformStamped tfStmp;
 
-        onNewLocalization(lu);
+        tfStmp.transform = tf2::toMsg(mrpt::ros2bridge::toROS_tfTransform(T_enu_to_utm.asTPose()));
+        tfStmp.child_frame_id  = params_.georef_map_utm_frame;  // "utm"
+        tfStmp.header.frame_id = params_.georef_map_enu_frame;  // "enu"
+        tfStmp.header.stamp    = myNow(mrpt::Clock::now());
+
+        tf_static_bc_->sendTransform(tfStmp);
     }
 
     // 2) g.geo_coord => georefTopic
