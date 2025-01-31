@@ -64,6 +64,7 @@ set(LIB_PUBLIC_HDRS
   include/mola_kernel/entities/RelPose3KF.h
   include/mola_kernel/Entity.h
   include/mola_kernel/Factor.h
+  include/mola_kernel/Georeferencing.h
   include/mola_kernel/factors/FactorBase.h
   include/mola_kernel/factors/FactorConstVelKinematics.h
   include/mola_kernel/factors/FactorRelativePose3.h

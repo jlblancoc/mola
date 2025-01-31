@@ -11,6 +11,7 @@
  */
 #pragma once
 
+#include <mola_kernel/Georeferencing.h>
 #include <mrpt/maps/CMetricMap.h>
 
 #include <functional>
@@ -21,7 +22,8 @@
 
 namespace mola
 {
-/** Virtual interface for SLAM/odometry methods publishing a map
+/** Virtual interface for SLAM/odometry methods publishing a map and/or
+ * georeferencing information.
  *
  * \ingroup mola_kernel_interfaces_grp */
 class MapSourceBase
@@ -47,7 +49,14 @@ class MapSourceBase
         /** Map layer/submap name */
         std::string map_name = "local_map";
 
+        /** Might be null if georeferencing is provided, but both can be also
+         * populated. */
         mrpt::maps::CMetricMap::Ptr map;
+
+        /** If the map is georeferenced, its metadata
+         *  \note Added in MOLA 1.7.0
+         */
+        std::optional<Georeferencing> georeferencing;
     };
 
     using map_updates_callback_t = std::function<void(const MapUpdate&)>;
