@@ -88,9 +88,23 @@ std::string mola::yaml_to_string(const mrpt::containers::yaml& cfg)
 
 namespace
 {
+
+bool line_pos_is_commented_out(const std::string& text, size_t pos)
+{
+    for (;;)
+    {
+        if (text[pos] == '#') return true;
+        if (!pos || text[pos] == '\n' || text[pos] == '\r') break;
+        pos--;
+    }
+    return false;
+}
+
 std::string parseVars(
     const std::string& text, const mola::YAMLParseOptions& opts)
 {
+    using namespace std::string_literals;
+
     MRPT_TRY_START
 
     const auto start = text.find("${");
@@ -110,6 +124,12 @@ std::string parseVars(
     const auto varnameOrg = post.substr(0, post_end);
 
     const auto [varname, defaultValue] = splitVerticalBar(varnameOrg);
+
+    if (line_pos_is_commented_out(text, start))
+    {
+        return parseVars(
+            pre + "$ {"s + varname + "}"s + post.substr(post_end + 1), opts);
+    }
 
     // 1st try:  match to env vars
     std::string varvalue;

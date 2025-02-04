@@ -48,6 +48,16 @@ d:
 e: '${foo|default1}'
 )###";
 
+const std::string txt2 = R"###(# sample yaml
+a: 3
+f: '${zoo}'
+)###";
+
+const std::string txt3 = R"###(# sample yaml
+a: 3
+b: 3  #f: '${zoo}'
+)###";
+
 void test_parseSimple()
 {
     {
@@ -85,6 +95,36 @@ void test_parseCustomVars()
             mola::parse_yaml(mrpt::containers::yaml::FromText(txt1), opts);
         ASSERT_(y.isMap());
         ASSERT_EQUAL_(y["e"].as<std::string>(), se);
+    }
+
+    // catch undefined variables:
+    {
+        bool did_throw = false;
+        try
+        {
+            const auto y =
+                mola::parse_yaml(mrpt::containers::yaml::FromText(txt2));
+        }
+        catch (const std::exception&)
+        {
+            did_throw = true;
+        }
+        ASSERT_(did_throw);
+    }
+
+    // do not throw if they are commented out:
+    {
+        bool did_throw = false;
+        try
+        {
+            const auto y =
+                mola::parse_yaml(mrpt::containers::yaml::FromText(txt3));
+        }
+        catch (const std::exception&)
+        {
+            did_throw = true;
+        }
+        ASSERT_(!did_throw);
     }
 }
 
@@ -129,9 +169,6 @@ void test_parseIncludes()
 }
 
 }  // namespace
-
-MRPT_TODO("Possible bug: #$include{} shouldn't be parsed")
-MRPT_TODO("bug: #${var} shouldn't be parsed")
 
 int main([[maybe_unused]] int argc, [[maybe_unused]] char** argv)
 {
