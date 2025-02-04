@@ -115,7 +115,8 @@ class BridgeROS2 : public RawDataSourceBase, public mola::RawDataConsumer
 
     struct Params
     {
-        /// tf frame name with respect to sensor poses are measured:
+        /// tf frame name with respect to sensor poses are measured, and also used for publishing
+        /// SLAM/localization results (read below).
         std::string base_link_frame = "base_link";
 
         /// If not empty, the node will broadcast a static /tf from base_link to
@@ -127,26 +128,41 @@ class BridgeROS2 : public RawDataSourceBase, public mola::RawDataConsumer
         /// YAML format: "[x y z yaw pitch roll]" (meters & degrees)
         mrpt::math::TPose3D base_footprint_to_base_link_tf = {0, 0, 0, 0, 0, 0};
 
-        /// tf frame name for odometry's frame of reference:
+        /// Used for:
+        /// (a) importing odometry to MOLA if ``forward_ros_tf_as_mola_odometry_observations=true``
+        /// (b) querying ``${odom_frame} => ${base_link_frame}`` when
+        ///     ``publish_localization_following_rep105=true``.
         std::string odom_frame = "odom";
 
-        /// tf frame name for odometry's frame of reference:
-        /// Note that this frame is NOT used for calls from LocalizationSources,
-        /// which follows what explained below for publish_localization_following_rep105
+        /// tf frame used for:
+        /// (a) See ``publish_tf_from_robot_pose_observations``
+        /// (b) To follow REP105 (``publish_localization_following_rep105``), this must match
+        ///     the frame used as reference in the LocalizationSource (e.g. mola_lidar_odometry)
         std::string reference_frame = "map";
 
-        /// Direct mode (false):
-        ///   reference_frame ("map") -> base_link ("base_link")
+        /// How to publish localization to /tf:
+        /// - ``false``(direct mode): reference_frame ("map") -> base_link ("base_link")
+        ///   Note that reference_frame in this case comes from the localization source module
+        ///   (e.g. mola_lida_odometry), it is not configured here.
         ///
-        /// reference_frame comes from the localization source module, it is not configured here.
-        ///
-        ///  Indirect mode (true), following ROS REP 105 https://ros.org/reps/rep-0105.html
-        ///   map -> odom  (such as "map -> odom -> base_link" = "map -> base_link")
+        ///  - ``true`` (indirect mode), following ROS [REP
+        ///  105](https://ros.org/reps/rep-0105.html):
+        ///   ``map -> odom``  (such as "map -> odom -> base_link" = "map -> base_link")
         bool publish_localization_following_rep105 = true;
 
+        /// If enabled, during spinOnce(), the tf ``${odom_frame} => ${base_link_frame}`` will
+        /// be queried and forwarded as an `CObservationOdometry` reading to the MOLA subsystem:
         bool forward_ros_tf_as_mola_odometry_observations = false;
-        bool publish_odometry_msgs_from_slam              = true;
 
+        /// If enabled, SLAM/Localization results will be published as nav_msgs/Odometry messages.
+        bool publish_odometry_msgs_from_slam = true;
+
+        /// If enabled, SLAM/Localization results will be published as tf messages, for frames
+        /// according to explained above for `publish_localization_following_rep105`.
+        bool publish_tf_from_slam = true;
+
+        /// If enabled, robot pose observations (typically, ground truth from datasets), will be
+        /// forwarded to ROS as /tf messages: ``${reference_frame} => ${base_link}``
         bool publish_tf_from_robot_pose_observations = true;
 
         std::string relocalize_from_topic = "/initialpose";  //!< Default in RViz
