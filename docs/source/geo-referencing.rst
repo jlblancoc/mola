@@ -163,3 +163,16 @@ for example in KML format suitable for visualization in Google Earth.
 ----------------------------------------
 Write me!
 
+|
+
+5. View GPS readings on a georeferenced map
+--------------------------------------------
+Once you have published a georeferenced map (via `mrpt_map_server` or directly from `mola_lidar_odometry`),
+you can visualize in RViz or FoxGlove the localization from the GNSS sensor and its covariance uncertainty
+by installing `mola_gnss_to_markers <https://github.com/MOLAorg/mola_gnss_to_markers>`_ and then:
+
+
+.. code-block:: bash
+
+   ros2 launch mola_gnss_to_markers mola_gnss_to_markers_launch.py
+
