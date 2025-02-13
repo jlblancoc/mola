@@ -3,6 +3,9 @@ Changelog for package mola_input_paris_luco_dataset
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
+Forthcoming
+-----------
+
 1.6.0 (2025-01-21)
 ------------------
 

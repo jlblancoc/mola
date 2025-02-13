@@ -2,6 +2,11 @@
 Changelog for package mola_kernel
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* mola_kernel: Add Georeferencing structure and add it to map updates
+* Contributors: Jose Luis Blanco-Claraco
+
 1.6.0 (2025-01-21)
 ------------------
 * Fix published /tf's: those from LocalizationSources now can explicitly define their parent and child frames

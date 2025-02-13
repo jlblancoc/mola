@@ -3,6 +3,19 @@ Changelog for package mola_bridge_ros2
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
+Forthcoming
+-----------
+* Add new option: publish_tf_from_slam; add better docs on the meaning of all parameters
+* Publish georef /tf as /tf_static
+* ROS2 bridge now publishes georeferenced map metadata as /tf's and as mrpt_nav_interfaces/GeoreferencingMetadata
+* Revert "Feature: all MOLA modules got its MRPT logger to ROS console for easier debugging"
+  This reverts commit 8a84611d85022f37b80d8bdcb7acaa1910669fc1.
+* FIX: wrong variable in former commit
+* Merge pull request `#75 <https://github.com/MOLAorg/mola/issues/75>`_ from MOLAorg/feature/mrpt-to-ros-console
+  Feature: all MOLA modules got its MRPT logger to ROS console for easier debugging
+* Feature: all MOLA modules got its MRPT logger to ROS console for easier debugging
+* Contributors: Jose Luis Blanco-Claraco
+
 1.6.0 (2025-01-21)
 ------------------
 * Publish gridmaps too
