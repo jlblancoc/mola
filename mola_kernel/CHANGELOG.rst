@@ -2,8 +2,8 @@
 Changelog for package mola_kernel
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.6.1 (2025-02-13)
+------------------
 * mola_kernel: Add Georeferencing structure and add it to map updates
 * Contributors: Jose Luis Blanco-Claraco
 

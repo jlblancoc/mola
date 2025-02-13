@@ -3,8 +3,8 @@ Changelog for package mola_bridge_ros2
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
-Forthcoming
------------
+1.6.1 (2025-02-13)
+------------------
 * Add new option: publish_tf_from_slam; add better docs on the meaning of all parameters
 * Publish georef /tf as /tf_static
 * ROS2 bridge now publishes georeferenced map metadata as /tf's and as mrpt_nav_interfaces/GeoreferencingMetadata
