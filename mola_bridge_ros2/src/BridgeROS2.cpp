@@ -181,7 +181,7 @@ void BridgeROS2::initialize_rds(const Yaml& c)
 
     // Mandatory parameters:
     ENSURE_YAML_ENTRY_EXISTS(c, "params");
-    auto cfg = c["params"];
+    const auto cfg = c["params"];
 
     std::stringstream ss;
     cfg.printAsYAML(ss);
@@ -205,10 +205,15 @@ void BridgeROS2::initialize_rds(const Yaml& c)
 
     if (cfg.has("base_footprint_to_base_link_tf"))
     {
-        const auto s = cfg["base_footprint_to_base_link_tf"].as<std::string>();
+        ASSERT_(cfg["base_footprint_to_base_link_tf"].isSequence());
+        ASSERT_EQUAL_(cfg["base_footprint_to_base_link_tf"].asSequenceRange().size(), 6UL);
 
         // Format: "[x y z yaw pitch roll]" (meters & degrees)
-        params_.base_footprint_to_base_link_tf = mrpt::math::TPose3D::FromString(s);
+        auto poseSeq = cfg["base_footprint_to_base_link_tf"].toStdVector<double>();
+        ASSERT_EQUAL_(poseSeq.size(), 6UL);
+        for (int i = 0; i < 3; i++) poseSeq[3 + i] = mrpt::DEG2RAD(poseSeq[3 + i]);
+
+        params_.base_footprint_to_base_link_tf = mrpt::math::TPose3D::FromVector(poseSeq);
     }
 
     // params for MOLA->ROS2:
