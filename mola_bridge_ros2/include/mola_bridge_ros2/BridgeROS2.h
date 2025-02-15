@@ -119,8 +119,8 @@ class BridgeROS2 : public RawDataSourceBase, public mola::RawDataConsumer
         /// SLAM/localization results (read below).
         std::string base_link_frame = "base_link";
 
-        /// If not empty, the node will broadcast a static /tf from base_link to
-        /// base_footprint with the TF base_footprint_to_base_link_tf at start
+        /// If not empty, the node will broadcast a static /tf from base_footprint to
+        /// base_link with the TF base_footprint_to_base_link_tf at start
         /// up.
         /// Normally: "base_footprint"
         std::string base_footprint_frame;  // Disabled by default

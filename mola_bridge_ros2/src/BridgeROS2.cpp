@@ -1622,13 +1622,13 @@ void BridgeROS2::publishStaticTFs()
     if (params_.base_footprint_frame.empty()) return;
 
     const tf2::Transform transform =
-        mrpt::ros2bridge::toROS_tfTransform(params_.base_footprint_to_base_link_tf);
+        mrpt::ros2bridge::toROS_tfTransform(-params_.base_footprint_to_base_link_tf);
 
     geometry_msgs::msg::TransformStamped tfStmp;
 
     tfStmp.transform       = tf2::toMsg(transform);
-    tfStmp.child_frame_id  = params_.base_link_frame;
-    tfStmp.header.frame_id = params_.base_footprint_frame;
+    tfStmp.child_frame_id  = params_.base_footprint_frame;
+    tfStmp.header.frame_id = params_.base_link_frame;
     tfStmp.header.stamp    = myNow(mrpt::Clock::now());
 
     tf_static_bc_->sendTransform(tfStmp);
