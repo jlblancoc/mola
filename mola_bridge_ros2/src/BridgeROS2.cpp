@@ -219,8 +219,13 @@ void BridgeROS2::initialize_rds(const Yaml& c)
     // params for MOLA->ROS2:
     YAML_LOAD_OPT(params_, base_link_frame, std::string);
     YAML_LOAD_OPT(params_, reference_frame, std::string);
+
     YAML_LOAD_OPT(params_, publish_odometry_msgs_from_slam, bool);
+    YAML_LOAD_OPT(params_, publish_odometry_msgs_from_slam_source, std::string);
+
     YAML_LOAD_OPT(params_, publish_tf_from_slam, bool);
+    YAML_LOAD_OPT(params_, publish_tf_from_slam_source, std::string);
+
     YAML_LOAD_OPT(params_, publish_in_sim_time, bool);
     YAML_LOAD_OPT(params_, period_publish_new_localization, double);
     YAML_LOAD_OPT(params_, period_publish_new_map, double);
@@ -1327,7 +1332,8 @@ void BridgeROS2::timerPubLocalization()
         // Send TF with localization result
         // 1) Direct mode:    reference_frame ("map") -> base_link ("base_link")
         // 2) Indirect mode:  map -> odom  (such as "map -> odom -> base_link" = "map -> base_link")
-        if (params_.publish_tf_from_slam)
+        if (params_.publish_tf_from_slam && (params_.publish_tf_from_slam_source.empty() ||
+                                             params_.publish_tf_from_slam_source == l.method))
         {
             tf2::Transform transform = mrpt::ros2bridge::toROS_tfTransform(l.pose);
 
@@ -1375,7 +1381,9 @@ void BridgeROS2::timerPubLocalization()
         }
 
         // 2/2: Publish Odometry msg:
-        if (params_.publish_odometry_msgs_from_slam)
+        if (params_.publish_odometry_msgs_from_slam &&
+            (params_.publish_odometry_msgs_from_slam_source.empty() ||
+             params_.publish_odometry_msgs_from_slam_source == l.method))
         {
             // Convert observation MRPT -> ROS
             nav_msgs::msg::Odometry msg;

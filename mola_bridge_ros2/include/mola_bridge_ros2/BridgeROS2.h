@@ -157,9 +157,15 @@ class BridgeROS2 : public RawDataSourceBase, public mola::RawDataConsumer
         /// If enabled, SLAM/Localization results will be published as nav_msgs/Odometry messages.
         bool publish_odometry_msgs_from_slam = true;
 
+        // Which source will be forwarded (empty=any)
+        std::string publish_odometry_msgs_from_slam_source = {};
+
         /// If enabled, SLAM/Localization results will be published as tf messages, for frames
         /// according to explained above for `publish_localization_following_rep105`.
         bool publish_tf_from_slam = true;
+
+        // Which source will be forwarded (empty=any)
+        std::string publish_tf_from_slam_source = {};
 
         /// If enabled, robot pose observations (typically, ground truth from datasets), will be
         /// forwarded to ROS as /tf messages: ``${reference_frame} => ${base_link}``
