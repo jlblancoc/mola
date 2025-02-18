@@ -292,11 +292,11 @@ How to install all MOLA modules:
 How to cite MOLA
 ==================
 
-The ``mola_lidar_odometry`` system was presented in :cite:`blanco2024mola_lo`:
+The ``mola_lidar_odometry`` system was presented in :cite:`blanco2025mola_lo` ([ArXiV](https://arxiv.org/abs/2407.20465)):
 
-  J.L. Blanco,
-  `A flexible framework for accurate LiDAR odometry, map manipulation, and localization`_, in
-  ArXiV, 2024.
+  Blanco-Claraco JL. A flexible framework for accurate LiDAR odometry, map manipulation, and localization.
+  The International Journal of Robotics Research. 2025;0(0).
+  doi:10.1177/02783649251316881
 
 .. _A flexible framework for accurate LiDAR odometry, map manipulation, and localization: https://arxiv.org/abs/2407.20465
 

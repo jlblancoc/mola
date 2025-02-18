@@ -4,7 +4,7 @@
 Localization
 ======================
 Localization differs from SLAM in that the map or world model is **not updated** while
-it is being used to keep a robot or vehicle accurately localized within a pre-mapped environment :cite:`blanco2024mola_lo`.
+it is being used to keep a robot or vehicle accurately localized within a pre-mapped environment :cite:`blanco2025mola_lo`.
 
 Once :ref:`a map is built <building-maps>`, the result is a simple-map and/or a metric map (``*.mm``), optionally :ref:`georeferenced <geo-referencing>`.
 This map can then be used to enable autonomous navigation ("Go from A to B"), for which localization is a fundamental

@@ -5,7 +5,7 @@ Georeferencing
 ======================
 Georeferencing trajectories and metric maps is implemented in the :ref:`mola_sm_loop_closure <mola_licenses>` package.
 
-The concept of using simple-maps as intermediary map format together with the layered metric map format (see :cite:`blanco2024mola_lo`)
+The concept of using simple-maps as intermediary map format together with the layered metric map format (see :cite:`blanco2025mola_lo`)
 enables embedding georeferenced coordinates to any kind of map typically used in robotics: grid maps, voxel maps, point clouds, etc.
 
 |
@@ -41,7 +41,7 @@ First, build a simple-map from a dataset or a live robot as described in :ref:`b
 Make sure of having a GPS (GNSS) sensor source emitting observations, and that they were captured
 by MOLA-LO (see :ref:`the corresponding variable <mola_lo_pipeline_sensor_inputs>` in the LO pipeline).
 
-Then, build the corresponding metric map by applying a metric map generation pipeline (see :cite:`blanco2024mola_lo`
+Then, build the corresponding metric map by applying a metric map generation pipeline (see :cite:`blanco2025mola_lo`
 or :ref:`this step  <building-maps_step_mm>` in the tutorial: 
 
 .. code-block:: bash

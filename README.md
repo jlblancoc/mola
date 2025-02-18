@@ -56,17 +56,20 @@ Note: Rows within each cell are for ``amd64`` and ``arm64`` architectures.
 
 ## Citations
 
-The latest publications on MOLA are ([PDF](https://arxiv.org/abs/2407.20465)).
+The latest publications on MOLA are ([ArXiV](https://arxiv.org/abs/2407.20465)).
 
 ```bibtex
-@misc{blanco2024mola,
-      title={A flexible framework for accurate LiDAR odometry, map manipulation, and localization},
-      author={José Luis Blanco-Claraco},
-      year={2024},
-      eprint={2407.20465},
-      archivePrefix={arXiv},
-      primaryClass={cs.RO},
-      url={https://arxiv.org/abs/2407.20465},
+@article{blanco2025mola_lo,
+    author = {Jose Luis Blanco-Claraco},
+    title ={A flexible framework for accurate LiDAR odometry, map manipulation, and localization},
+    journal = {The International Journal of Robotics Research},
+    volume = {0},
+    number = {0},
+    pages = {02783649251316881},
+    year = {2025},
+    doi = {10.1177/02783649251316881},
+    URL = { https://doi.org/10.1177/02783649251316881},
+    eprint = {https://doi.org/10.1177/02783649251316881},
 }
 ```
 
