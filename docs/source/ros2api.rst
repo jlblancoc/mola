@@ -10,6 +10,7 @@ or LiDAR-odometry module. At present, this applies to:
   This module acts as a wrapper of ``mola-kernel`` virtual interfaces implemented in other
   MOLA modules and the ROS 2 system.
 - :ref:`mola_lidar_odometry`
+- :ref:`mola_sta_est_index`
 
 .. image:: https://mrpt.github.io/imgs/mola-lo-ros2-launch-demo-kitti.png
 
@@ -37,6 +38,8 @@ ____________________________________________
 |
 
 ----
+
+.. _map_loading_saving:
 
 2. Map loading / saving
 --------------------------------------
@@ -91,21 +94,81 @@ Write me!
 
 4. Published ``/tf`` frames
 --------------------------------------
-These frames of reference exist when using MOLA :ref:`geo-referenced <geo-referencing>` maps:
+The frames of reference (`frame_id`s) at work when using MOLA depend on
+your system configuration:
 
-.. figure:: https://mrpt.github.io/imgs/mola_mrpt_ros_geo_referenced_utm_frames.png
-   :width: 500
-   :align: center
+- Using just ``mola_lidar_odometry``: Two situations here depending on the ROS :ref:`launch argument <ros2_node_lo_docs>` ``publish_localization_following_rep105``:
+
+  - (A) Strictly following `ROS REP-105 <https://www.ros.org/reps/rep-0105.html>`_ in systems with wheels (encoders-based) high-frequency odometry, or
+  - (B) Not following ``REP-105`` (e.g. if you do not have wheels odometry).
+
+- (C) Using :ref:`state estimation data fusion <mola_sta_est_index>` (this case does **not** follow ``REP-105``), and
+
+And orthogonal to both above, whether the map is :ref:`geo-referenced <geo-referencing>` or not.
+
+The diagrams below show the cases of following or not following `ROS REP-105 <https://www.ros.org/reps/rep-0105.html>`_
+for the different situations listed above:
+
+.. tab-set::
+
+   .. tab-item:: (A) LO+REP105
+      :selected:
+
+      For cases with ground robots with wheel-based odometry:
+
+      .. figure:: https://mrpt.github.io/imgs/mola_mrpt_ros_geo_referenced_utm_frames.png
+         :width: 500
+         :align: center
+
+      This is who is responsible of publishing each transformation:
+
+      - ``odom → base_link``: Wheel odometry module. High-frequency, relatively accurate in the short term, but drifts in the long term.
+      - ``map → odom``: :ref:`Localization <localization>` module, which corrects the odometry drift.
+      - ``enu → {map, utm}``: Published by ``mrpt_map_server`` (`github <https://github.com/mrpt-ros-pkg/mrpt_navigation/tree/ros2/mrpt_map_server/>`_)
+        or ``mola_lidar_odometry`` :ref:`map loading service <map_loading_saving>` if fed with a geo-referenced metric map (``.mm``) file.
+
+   .. tab-item:: (B) LO, no REP105
+
+      When using just a LiDAR as single sensor.
+
+      .. figure:: https://mrpt.github.io/imgs/mola_mrpt_ros_frames_no_rep105.png
+         :width: 500
+         :align: center
+
+      This is who is responsible of publishing each transformation:
+
+      - ``map → base_link``: :ref:`Localization <localization>` module.
+      - ``enu → {map, utm}``: Published by ``mrpt_map_server`` (`github <https://github.com/mrpt-ros-pkg/mrpt_navigation/tree/ros2/mrpt_map_server/>`_)
+        or ``mola_lidar_odometry`` :ref:`map loading service <map_loading_saving>` if fed with a geo-referenced metric map (``.mm``) file.
+
+   .. tab-item:: (C) Data fusion
+
+         When using :ref:`state estimation data fusion <mola_sta_est_index>`: applicable if having just one LiDAR sensor,
+         or LiDAR + wheel odometry, or several odometry sources, optionally GNNS (GPS) and IMU, etc.
+
+      .. figure:: https://mrpt.github.io/imgs/mola_mrpt_ros_frames_fusion.png
+         :width: 500
+         :align: center
+
+      This is who is responsible of publishing each transformation:
+
+      - ``odom_{i} → base_link``: One or more odometry sources.
+      - ``map → base_link``: Published by :ref:`state estimation data fusion <mola_sta_est_index>`.
+      - ``enu → {map, utm}``: Published by ``mrpt_map_server`` (`github <https://github.com/mrpt-ros-pkg/mrpt_navigation/tree/ros2/mrpt_map_server/>`_)
+        or ``mola_lidar_odometry`` :ref:`map loading service <map_loading_saving>` if fed with a geo-referenced metric map (``.mm``) file.
 
 .. note::
 
    For non geo-referenced maps, all frames remain the same but ``utm`` and ``enu`` will not exist.
 
-These are the existing frames:
+Definition of the frames above:
 
 - ``base_link``: The robot reference frame. For ground vehicles, normally placed at the
   center of the rear axle.
-- ``odom``: The arbitrary origin for odometry measurements.
+- ``base_footprint`` (optional): The projection of ``base_link`` on the ground plane. In MOLA, this frame is
+  published by BridgeROS2 as a child of ``base_link``.
+- ``odom``, ``odom_1``,... ``odom_n``: The arbitrary origin for odometry measurements.
+  There may be different odometry sources: wheels, LiDAR odometry, visual odometry, etc.
 - ``map``: The origin of the reference metric map used for localization.
 - ``enu``: For geo-referenced maps, the North (``y`` axis), East (``x`` axis), Up (``z`` axis) frame for which
   we have reference geodetic coordinates (latitude and longitude). Different maps built in the same zone
@@ -113,12 +176,6 @@ These are the existing frames:
 - ``utm``: The origin of the `UTM zone <https://en.wikipedia.org/wiki/Universal_Transverse_Mercator_coordinate_system>`_
   in which ``enu`` falls. Unlike ``enu``, it is **independent** of the trajectory followed while building the map.
 
-And this is who is responsible of publishing each transformation:
-
-- ``odom → base_link``: Odometry module. High-frequency, accurate in the short term, but drifts in the long term.
-- ``map → odom``: :ref:`Localization <localization>` module, which corrects the odometry drift.
-- ``enu → {map, utm}``: Published by ``mrpt_map_server`` (`github <https://github.com/mrpt-ros-pkg/mrpt_navigation/tree/ros2/mrpt_map_server/>`_),
-  if fed with a geo-referenced metric map (``.mm``) file.
 
 |
 
