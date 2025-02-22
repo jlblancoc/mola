@@ -2,6 +2,11 @@
 Changelog for package mola_kernel
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* ExecutableBase inteface: added diagnostics API
+* Contributors: Jose Luis Blanco Claraco
+
 1.6.1 (2025-02-13)
 ------------------
 * mola_kernel: Add Georeferencing structure and add it to map updates

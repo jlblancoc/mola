@@ -3,6 +3,14 @@ Changelog for package mola_bridge_ros2
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
+Forthcoming
+-----------
+* Implement publish Diagnostics per mola module & ROS2 publishers refactored (code clean up)
+* BridgeROS2: add source filter for forwarding localization updates to ROS2
+* ROS2: base_footprint_frame /tf is broadcasted now as base_link -> base_footprint to avoid /tf warnings (better as a child than as a second parent in the tf tree)
+* FIX: In parsing base_footprint_to_base_link_tf
+* Contributors: Jose Luis Blanco Claraco, Jose Luis Blanco-Claraco
+
 1.6.1 (2025-02-13)
 ------------------
 * Add new option: publish_tf_from_slam; add better docs on the meaning of all parameters
