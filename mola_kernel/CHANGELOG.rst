@@ -2,8 +2,8 @@
 Changelog for package mola_kernel
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.6.2 (2025-02-22)
+------------------
 * ExecutableBase inteface: added diagnostics API
 * Contributors: Jose Luis Blanco Claraco
 
