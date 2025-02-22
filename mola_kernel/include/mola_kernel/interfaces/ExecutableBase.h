@@ -18,6 +18,7 @@
 #include <mrpt/system/CTimeLogger.h>
 #include <mrpt/version.h>
 
+#include <any>
 #include <functional>
 #include <memory>
 #include <mutex>
@@ -154,12 +155,32 @@ class ExecutableBase : public mrpt::system::COutputLogger,  // for logging
         return requested_system_shutdown_;
     }
 
+    /** Diagnostics message: a human-readabale label, and "any" content. */
+    struct DiagnosticsOutput
+    {
+        DiagnosticsOutput() = default;
+
+        mrpt::Clock::time_point timestamp;
+        std::string             label;
+        std::any                value;
+    };
+
+    [[nodiscard]] auto module_move_out_diagnostics_messages()
+        -> std::vector<DiagnosticsOutput>;
+
    protected:
     void requestShutdown()
     {
         auto lck = mrpt::lockHelper(requested_system_shutdown_mtx_);
         requested_system_shutdown_ = true;
     }
+
+    void module_publish_diagnostics(const DiagnosticsOutput& msg);
+
+    [[nodiscard]] bool module_is_time_to_publish_diagnostics() const;
+
+    /** Period (seconds) to publish loop diagnostics. Zero means disabled. */
+    double module_diagnostics_period_sec_ = 1.0;
 
    private:
     std::string module_instance_name{"unnamed"};
@@ -168,6 +189,10 @@ class ExecutableBase : public mrpt::system::COutputLogger,  // for logging
 
     std::mutex             module_params_mtx_;
     mrpt::containers::yaml module_params_;
+
+    std::mutex                     module_diagnostics_out_queue_mtx_;
+    std::vector<DiagnosticsOutput> module_diagnostics_out_queue_;
+    double                         module_diagnostics_last_clockwall_stamp_ = 0;
 };
 
 // Impl:

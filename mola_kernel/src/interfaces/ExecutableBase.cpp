@@ -109,3 +109,28 @@ void ExecutableBase::changeParameters(
     // Notify module:
     this->onParameterUpdate(names_values);
 }
+
+void ExecutableBase::module_publish_diagnostics(const DiagnosticsOutput& msg)
+{
+    auto lck = mrpt::lockHelper(module_diagnostics_out_queue_mtx_);
+    module_diagnostics_out_queue_.push_back(msg);
+    module_diagnostics_last_clockwall_stamp_ = mrpt::Clock::nowDouble();
+}
+
+bool ExecutableBase::module_is_time_to_publish_diagnostics() const
+{
+    if (module_diagnostics_period_sec_ <= 0) return false;
+
+    const double dt =
+        mrpt::Clock::nowDouble() - module_diagnostics_last_clockwall_stamp_;
+    return dt >= module_diagnostics_period_sec_;
+}
+
+std::vector<ExecutableBase::DiagnosticsOutput>
+    ExecutableBase::module_move_out_diagnostics_messages()
+{
+    auto lck    = mrpt::lockHelper(requested_system_shutdown_mtx_);
+    auto myCopy = std::move(module_diagnostics_out_queue_);
+    module_diagnostics_out_queue_.clear();
+    return myCopy;
+}
