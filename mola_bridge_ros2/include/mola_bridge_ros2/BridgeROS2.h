@@ -260,7 +260,7 @@ class BridgeROS2 : public RawDataSourceBase, public mola::RawDataConsumer
 
     /// Generic Map <topic> => publisher
     std::map<std::string, rclcpp::PublisherBase::SharedPtr> rosPubs_;
-    std::mutex                                              rosPubsMtx_;
+    std::recursive_mutex                                    rosPubsMtx_;
 
     /// Gets or creates (upon first use) a publisher for a given type:
     template <typename MSG_TYPE>
