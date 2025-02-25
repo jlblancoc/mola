@@ -980,13 +980,13 @@ void BridgeROS2::doLookForNewMolaSubs()
     // Advertise relocalization ROS 2 service now if not done already:
     auto lckNode = mrpt::lockHelper(rosNodeMtx_);
 
-    if (!molaSubs_.relocalization.empty() && !srvRelocGNNS_ && rosNode_)
+    if (!molaSubs_.relocalization.empty() && !srvRelocSE_ && rosNode_)
     {
         using namespace std::placeholders;
 
-        srvRelocGNNS_ = rosNode_->create_service<mola_msgs::srv::RelocalizeFromGNSS>(
-            "relocalize_from_gnss",
-            std::bind(&BridgeROS2::service_relocalize_from_gnss, this, _1, _2));
+        srvRelocSE_ = rosNode_->create_service<mola_msgs::srv::RelocalizeFromStateEstimator>(
+            "relocalize_from_state_estimator",
+            std::bind(&BridgeROS2::service_relocalize_from_se, this, _1, _2));
 
         srvRelocPose_ = rosNode_->create_service<mola_msgs::srv::RelocalizeNearPose>(
             "relocalize_near_pose",
@@ -1043,9 +1043,10 @@ void BridgeROS2::doLookForNewMolaSubs()
     }
 }
 
-void BridgeROS2::service_relocalize_from_gnss(
-    [[maybe_unused]] const std::shared_ptr<mola_msgs::srv::RelocalizeFromGNSS::Request> request,
-    std::shared_ptr<mola_msgs::srv::RelocalizeFromGNSS::Response>                       response)
+void BridgeROS2::service_relocalize_from_se(
+    [[maybe_unused]] const std::shared_ptr<mola_msgs::srv::RelocalizeFromStateEstimator::Request>
+                                                                            request,
+    std::shared_ptr<mola_msgs::srv::RelocalizeFromStateEstimator::Response> response)
 {
     auto lck = mrpt::lockHelper(rosPubsMtx_);
     if (molaSubs_.relocalization.empty())

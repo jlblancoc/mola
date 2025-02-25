@@ -47,7 +47,7 @@
 #include <mola_msgs/srv/map_save.hpp>
 #include <mola_msgs/srv/mola_runtime_param_get.hpp>
 #include <mola_msgs/srv/mola_runtime_param_set.hpp>
-#include <mola_msgs/srv/relocalize_from_gnss.hpp>
+#include <mola_msgs/srv/relocalize_from_state_estimator.hpp>
 #include <mola_msgs/srv/relocalize_near_pose.hpp>
 
 namespace mola
@@ -295,16 +295,16 @@ class BridgeROS2 : public RawDataSourceBase, public mola::RawDataConsumer
     std::mutex molaSubsMtx_;
 
     // ROS services:
-    rclcpp::Service<mola_msgs::srv::RelocalizeFromGNSS>::SharedPtr  srvRelocGNNS_;
-    rclcpp::Service<mola_msgs::srv::RelocalizeNearPose>::SharedPtr  srvRelocPose_;
-    rclcpp::Service<mola_msgs::srv::MapLoad>::SharedPtr             srvMapLoad_;
-    rclcpp::Service<mola_msgs::srv::MapSave>::SharedPtr             srvMapSave_;
-    rclcpp::Service<mola_msgs::srv::MolaRuntimeParamGet>::SharedPtr srvParamGet_;
-    rclcpp::Service<mola_msgs::srv::MolaRuntimeParamSet>::SharedPtr srvParamSet_;
+    rclcpp::Service<mola_msgs::srv::RelocalizeFromStateEstimator>::SharedPtr srvRelocSE_;
+    rclcpp::Service<mola_msgs::srv::RelocalizeNearPose>::SharedPtr           srvRelocPose_;
+    rclcpp::Service<mola_msgs::srv::MapLoad>::SharedPtr                      srvMapLoad_;
+    rclcpp::Service<mola_msgs::srv::MapSave>::SharedPtr                      srvMapSave_;
+    rclcpp::Service<mola_msgs::srv::MolaRuntimeParamGet>::SharedPtr          srvParamGet_;
+    rclcpp::Service<mola_msgs::srv::MolaRuntimeParamSet>::SharedPtr          srvParamSet_;
 
-    void service_relocalize_from_gnss(
-        const std::shared_ptr<mola_msgs::srv::RelocalizeFromGNSS::Request> request,
-        std::shared_ptr<mola_msgs::srv::RelocalizeFromGNSS::Response>      response);
+    void service_relocalize_from_se(
+        const std::shared_ptr<mola_msgs::srv::RelocalizeFromStateEstimator::Request> request,
+        std::shared_ptr<mola_msgs::srv::RelocalizeFromStateEstimator::Response>      response);
 
     void service_relocalize_near_pose(
         const std::shared_ptr<mola_msgs::srv::RelocalizeNearPose::Request> request,

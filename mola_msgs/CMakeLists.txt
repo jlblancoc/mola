@@ -20,7 +20,7 @@ rosidl_generate_interfaces(${PROJECT_NAME}
   "srv/MapSave.srv"
   "srv/MolaRuntimeParamGet.srv"
   "srv/MolaRuntimeParamSet.srv"
-  "srv/RelocalizeFromGNSS.srv"
+  "srv/RelocalizeFromStateEstimator.srv"
   "srv/RelocalizeNearPose.srv"
   DEPENDENCIES
   std_msgs

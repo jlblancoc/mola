@@ -84,7 +84,59 @@ the corresponding checkbox in the
 
 3. Re-localization
 --------------------------------------
-Write me!
+There are two ROS services that can be used to enforce the MOLA subsystem to relocalize, for example,
+to address the problem of initial localization:
+
+
+3.1. Specify the new localization and its initial uncertainty
+=================================================================
+
+The service ``/relocalize_near_pose`` (``mola_msgs/srv/RelocalizeNearPose``) can be
+used to directly request a relocalization in a given area (a pose with uncertainty):
+
+   .. code-block:: bash
+
+      ros2 service call /relocalize_near_pose mola_msgs/srv/RelocalizeNearPose "{
+      pose: {
+         header: {
+            stamp: {sec: 0, nanosec: 0},
+            frame_id: 'map'
+         },
+         pose: {
+            pose: {
+            position: {x: 1.0, y: 2.0, z: 0.0},
+            orientation: {x: 0.0, y: 0.0, z: 0.0, w: 1.0}
+            },
+            covariance: [1.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+                        0.0, 1.0, 0.0, 0.0, 0.0, 0.0,
+                        0.0, 0.0, 1.0, 0.0, 0.0, 0.0,
+                        0.0, 0.0, 0.0, 1.0, 0.0, 0.0,
+                        0.0, 0.0, 0.0, 0.0, 1.0, 0.0,
+                        0.0, 0.0, 0.0, 0.0, 0.0, 1.0]
+         }
+      }
+      }"
+
+
+3.2. Request automatic relocalization from GNSS (GPS)
+=================================================================
+
+In geo-referenced maps, it is possible to request MOLA-LO to use incoming GPS readings to
+bootstrap LiDAR-based localization. 
+
+.. note::
+   
+   This method requires the use of the :ref:`smoother state estimator <mola_sta_est_index>`.
+
+Request a relocalization now with:
+
+   .. code-block:: bash
+
+      ros2 service call /relocalize_from_state_estimator  mola_msgs/srv/RelocalizeFromStateEstimator "{}"
+
+
+Depending on the parameters, it may take some time for the re-localization to take effect.
+
 
 |
 
